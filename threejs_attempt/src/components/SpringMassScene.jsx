@@ -13,35 +13,64 @@ const springCoils = 14;
 const smoothStep = (t) => t * t * (3 - 2 * t);
 const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
 
-function describeMotionPhase(displacement, velocity) {
-  const displacementThreshold = 0.055;
-  const velocityThreshold = 0.06;
-
-  if (Math.abs(displacement) <= displacementThreshold && Math.abs(velocity) > velocityThreshold) {
-    return {
-      title: "Equilibrium Crossing",
-      detail: "x is near x_eq, so restoring force is minimal and speed is near maximum."
-    };
+function getSegmentIntro(segmentIndex) {
+  if (segmentIndex === 1) {
+    return [
+      "Segment 1/4: Mean -> +A",
+      "Block starts at x_eq with maximum speed.",
+      "Spring stretches and slows the block."
+    ];
   }
-
-  if (Math.abs(velocity) <= velocityThreshold && Math.abs(displacement) > displacementThreshold) {
-    return {
-      title: "Turning Point",
-      detail: "Speed is near zero at max stretch/compression; the spring force pulls it back."
-    };
+  if (segmentIndex === 2) {
+    return [
+      "Segment 2/4: +A -> Mean",
+      "Force pulls back toward x_eq.",
+      "Speed rises while returning."
+    ];
   }
-
-  if (displacement * velocity < 0) {
-    return {
-      title: "Returning Toward Mean",
-      detail: "Block moves toward x_eq while spring force points toward x_eq as well."
-    };
+  if (segmentIndex === 3) {
+    return [
+      "Segment 3/4: Mean -> -A",
+      "Block passes x_eq and compresses spring.",
+      "Restoring force builds opposite to motion."
+    ];
   }
+  return [
+    "Segment 4/4: -A -> Mean",
+    "Spring pushes block back toward x_eq.",
+    "Cycle ends at mean with max speed again."
+  ];
+}
 
-  return {
-    title: "Moving Away From Mean",
-    detail: "Block still moves outward, but restoring force opposes the motion and slows it."
-  };
+function getCheckpointExplanation(checkpointCount) {
+  const quarter = ((checkpointCount - 1) % 4) + 1;
+
+  if (quarter === 1) {
+    return [
+      "Pause at T/4: Maximum Stretch (+A)",
+      "Block reached far-right turning point.",
+      "v = 0 and spring force is maximum toward x_eq."
+    ];
+  }
+  if (quarter === 2) {
+    return [
+      "Pause at T/2: Mean Position",
+      "Block crossed x_eq moving left at max speed.",
+      "Here spring force is near zero momentarily."
+    ];
+  }
+  if (quarter === 3) {
+    return [
+      "Pause at 3T/4: Maximum Compression (-A)",
+      "Block reached far-left turning point.",
+      "v = 0 and spring force is maximum toward x_eq."
+    ];
+  }
+  return [
+    "Pause at T: Mean Position",
+    "One full oscillation is complete.",
+    "Block crosses x_eq moving right at max speed."
+  ];
 }
 
 function createUnitSpringGeometry() {
@@ -155,6 +184,80 @@ function createTextLabelSprite(text) {
   return sprite;
 }
 
+function createNarrationSprite(lines) {
+  const canvas = document.createElement("canvas");
+  canvas.width = 2048;
+  canvas.height = 512;
+  const context = canvas.getContext("2d");
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.colorSpace = THREE.SRGBColorSpace;
+  texture.minFilter = THREE.LinearFilter;
+  texture.magFilter = THREE.LinearFilter;
+  texture.generateMipmaps = false;
+
+  const material = new THREE.SpriteMaterial({
+    map: texture,
+    transparent: true,
+    sizeAttenuation: false,
+    depthTest: false,
+    depthWrite: false
+  });
+
+  const sprite = new THREE.Sprite(material);
+  sprite.userData.canvas = canvas;
+  sprite.userData.context = context;
+  sprite.userData.texture = texture;
+  sprite.renderOrder = 22;
+  updateNarrationSprite(sprite, lines);
+  return sprite;
+}
+
+function updateNarrationSprite(sprite, lines) {
+  const canvas = sprite.userData.canvas;
+  const context = sprite.userData.context;
+  const texture = sprite.userData.texture;
+  if (!context || !Array.isArray(lines) || lines.length === 0) {
+    return;
+  }
+
+  const fontSize = 34;
+  const paddingX = 30;
+  const paddingY = 20;
+  const lineGap = 7;
+  context.font = `700 ${fontSize}px "Segoe UI", "Trebuchet MS", sans-serif`;
+
+  context.font = `700 ${fontSize}px "Segoe UI", "Trebuchet MS", sans-serif`;
+  context.clearRect(0, 0, canvas.width, canvas.height);
+  context.strokeStyle = "rgba(15, 23, 42, 0.8)";
+  context.lineWidth = 5;
+  context.lineJoin = "round";
+  context.fillStyle = "#f8fbff";
+  context.shadowColor = "rgba(13, 20, 35, 0.65)";
+  context.shadowBlur = 4;
+  context.shadowOffsetX = 0;
+  context.shadowOffsetY = 2;
+  context.textBaseline = "top";
+
+  const maxTextWidth = lines.reduce((maxWidth, line) => {
+    return Math.max(maxWidth, context.measureText(line).width);
+  }, 0);
+  const startX = Math.max((canvas.width - maxTextWidth) * 0.5, paddingX);
+
+  let y = paddingY;
+  lines.forEach((line) => {
+    context.strokeText(line, startX, y);
+    context.fillText(line, startX, y);
+    y += fontSize + lineGap;
+  });
+  context.shadowBlur = 0;
+  context.shadowOffsetX = 0;
+  context.shadowOffsetY = 0;
+
+  texture.needsUpdate = true;
+  const scale = 0.001;
+  sprite.scale.set(canvas.width * scale, canvas.height * scale, 1);
+}
+
 function createLeaderLine() {
   const geometry = new THREE.BufferGeometry();
   geometry.setAttribute("position", new THREE.BufferAttribute(new Float32Array(9), 3));
@@ -164,6 +267,7 @@ function createLeaderLine() {
     depthWrite: false
   });
   const line = new THREE.Line(geometry, material);
+  line.frustumCulled = false;
   line.renderOrder = 19;
   return line;
 }
@@ -180,7 +284,6 @@ function updateLeaderLine(line, a, b, c) {
   positions[7] = c.y;
   positions[8] = c.z;
   line.geometry.attributes.position.needsUpdate = true;
-  line.geometry.computeBoundingSphere();
 }
 
 function configureArrowOverlay(arrow) {
@@ -207,16 +310,13 @@ export default function SpringMassScene({ mass, springConstant, amplitude }) {
 
     const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 120);
     camera.position.set(8.5, 4.8, 10.5);
+    scene.add(camera);
 
     const renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     container.appendChild(renderer.domElement);
-
-    const hudPanel = document.createElement("div");
-    hudPanel.className = "sim-hud";
-    container.appendChild(hudPanel);
 
     const controls = new OrbitControls(camera, renderer.domElement);
     controls.enableDamping = true;
@@ -279,7 +379,7 @@ export default function SpringMassScene({ mass, springConstant, amplitude }) {
       new THREE.BoxGeometry(blockWidth, 1, 1),
       new THREE.MeshStandardMaterial({ color: "#ff8c42", roughness: 0.45, metalness: 0.22 })
     );
-    block.position.set(equilibriumX + amplitude, 0.5, 0);
+    block.position.set(equilibriumX, 0.5, 0);
     block.castShadow = true;
     block.receiveShadow = true;
     scene.add(block);
@@ -362,6 +462,11 @@ export default function SpringMassScene({ mass, springConstant, amplitude }) {
     velocityLabel.scale.multiplyScalar(0.58);
     scene.add(velocityLabel);
 
+    const narrationSprite = createNarrationSprite(getSegmentIntro(1));
+    narrationSprite.center.set(0.5, 0.5);
+    narrationSprite.position.set(0, 1.1, -6.6);
+    camera.add(narrationSprite);
+
     const axisHelper = new THREE.AxesHelper(2.6);
     axisHelper.position.set(-5.6, 0.01, -2.2);
     scene.add(axisHelper);
@@ -379,39 +484,34 @@ export default function SpringMassScene({ mass, springConstant, amplitude }) {
     const resizeObserver = new ResizeObserver(setRendererSize);
     resizeObserver.observe(container);
 
-    let positionX = equilibriumX + amplitude;
-    let velocityX = 0;
-    let accelerationX = -(springConstant / mass) * (positionX - equilibriumX);
+    const omega = Math.sqrt(springConstant / mass);
+    const quarterStep = Math.PI / 2;
+    const pauseDuration = 1.85;
+
+    let theta = 0;
+    let nextCheckpointTheta = quarterStep;
+    let checkpointCount = 0;
+    let pausedFor = 0;
+    let isPaused = false;
+
+    let positionX = equilibriumX + amplitude * Math.sin(theta);
+    let velocityX = amplitude * omega * Math.cos(theta);
     let previousTime = performance.now() / 1000;
-    let hudElapsed = 0;
+    let narrationKey = "";
     let animationFrameId = 0;
 
     const lineA = new THREE.Vector3();
     const lineB = new THREE.Vector3();
     const lineC = new THREE.Vector3();
     const arrowDirection = new THREE.Vector3();
-
-    const updateHud = (state) => {
-      const { displacement, forceX, acceleration, kinetic, potential, total, phase } = state;
-      hudPanel.innerHTML = `
-        <div class="sim-hud-title">Live Physics</div>
-        <div class="sim-hud-grid">
-          <div>x - x_eq</div><div>${displacement.toFixed(3)} m</div>
-          <div>velocity v</div><div>${velocityX.toFixed(3)} m/s</div>
-          <div>force F_s</div><div>${forceX.toFixed(3)} N</div>
-          <div>acceleration a</div><div>${acceleration.toFixed(3)} m/s^2</div>
-          <div>E_kinetic</div><div>${kinetic.toFixed(3)} J</div>
-          <div>E_potential</div><div>${potential.toFixed(3)} J</div>
-          <div>E_total</div><div>${total.toFixed(3)} J</div>
-        </div>
-        <div class="sim-hud-phase-title">${phase.title}</div>
-        <div class="sim-hud-phase-body">${phase.detail}</div>
-        <div class="sim-hud-legend">
-          <span class="sim-dot sim-dot-force"></span> Red arrow: restoring force
-          <span class="sim-dot sim-dot-velocity"></span> Blue arrow: velocity
-        </div>
-      `;
+    const setNarration = (key, lines) => {
+      if (key !== narrationKey) {
+        updateNarrationSprite(narrationSprite, lines);
+        narrationKey = key;
+      }
     };
+
+    setNarration("segment-1", getSegmentIntro(1));
 
     const updateVisuals = () => {
       block.position.x = positionX;
@@ -442,7 +542,6 @@ export default function SpringMassScene({ mass, springConstant, amplitude }) {
 
       const displacement = positionX - equilibriumX;
       const forceX = -springConstant * displacement;
-      const acceleration = forceX / mass;
 
       const forceMagnitude = Math.abs(forceX);
       if (forceMagnitude > 0.02) {
@@ -484,29 +583,35 @@ export default function SpringMassScene({ mass, springConstant, amplitude }) {
         velocityLabel.visible = false;
       }
 
-      const kinetic = 0.5 * mass * velocityX * velocityX;
-      const potential = 0.5 * springConstant * displacement * displacement;
-      const total = kinetic + potential;
-      const phase = describeMotionPhase(displacement, velocityX);
-
-      return { displacement, forceX, acceleration, kinetic, potential, total, phase };
     };
-    const initialState = updateVisuals();
-    updateHud(initialState);
+    updateVisuals();
 
-    const integrate = (deltaTime) => {
+    const stepSimulation = (deltaTime) => {
       const dt = Math.min(deltaTime, 0.05);
-      const subStep = 1 / 180;
-      let remaining = dt;
 
-      while (remaining > 0) {
-        const h = Math.min(subStep, remaining);
-        positionX += velocityX * h + 0.5 * accelerationX * h * h;
-        const nextAcceleration = -(springConstant / mass) * (positionX - equilibriumX);
-        velocityX += 0.5 * (accelerationX + nextAcceleration) * h;
-        accelerationX = nextAcceleration;
-        remaining -= h;
+      if (isPaused) {
+        pausedFor += dt;
+        if (pausedFor >= pauseDuration) {
+          isPaused = false;
+          pausedFor = 0;
+          const nextSegment = (checkpointCount % 4) + 1;
+          setNarration(`segment-${checkpointCount + 1}`, getSegmentIntro(nextSegment));
+        }
+        return;
       }
+
+      theta += omega * dt;
+      if (theta >= nextCheckpointTheta) {
+        theta = nextCheckpointTheta;
+        checkpointCount += 1;
+        nextCheckpointTheta += quarterStep;
+        isPaused = true;
+        pausedFor = 0;
+        setNarration(`pause-${checkpointCount}`, getCheckpointExplanation(checkpointCount));
+      }
+
+      positionX = equilibriumX + amplitude * Math.sin(theta);
+      velocityX = amplitude * omega * Math.cos(theta);
     };
 
     const animate = () => {
@@ -514,13 +619,8 @@ export default function SpringMassScene({ mass, springConstant, amplitude }) {
       const dt = now - previousTime;
       previousTime = now;
 
-      integrate(dt);
-      const state = updateVisuals();
-      hudElapsed += dt;
-      if (hudElapsed >= 0.06) {
-        updateHud(state);
-        hudElapsed = 0;
-      }
+      stepSimulation(dt);
+      updateVisuals();
       controls.update();
       renderer.render(scene, camera);
 
@@ -534,9 +634,6 @@ export default function SpringMassScene({ mass, springConstant, amplitude }) {
       controls.dispose();
       disposeObject3D(scene);
       renderer.dispose();
-      if (container.contains(hudPanel)) {
-        container.removeChild(hudPanel);
-      }
       container.removeChild(renderer.domElement);
     };
   }, [mass, springConstant, amplitude]);
