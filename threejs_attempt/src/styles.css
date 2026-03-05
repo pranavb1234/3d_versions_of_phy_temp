@@ -69,6 +69,44 @@ body {
   font-size: 0.94rem;
 }
 
+.sim-toggle {
+  margin-top: 0.28rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.42rem 0.5rem;
+  border-radius: 10px;
+  border: 1px solid #9bb0c4;
+  background: rgba(246, 250, 255, 0.86);
+  color: #1d2a3d;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.sim-toggle-btn {
+  border: 0;
+  border-radius: 999px;
+  font-weight: 700;
+  font-size: 0.82rem;
+  padding: 0.35rem 0.82rem;
+  cursor: pointer;
+  transition: filter 120ms ease;
+}
+
+.sim-toggle-btn:hover {
+  filter: brightness(0.96);
+}
+
+.sim-toggle-btn.playing {
+  background: #a61b52;
+  color: #ffffff;
+}
+
+.sim-toggle-btn.paused {
+  background: #1f5eb1;
+  color: #ffffff;
+}
+
 .controls-panel label {
   margin-top: 0.25rem;
   font-size: 0.9rem;

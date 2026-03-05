@@ -13,35 +13,6 @@ const springCoils = 14;
 const smoothStep = (t) => t * t * (3 - 2 * t);
 const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
 
-function getSegmentIntro(segmentIndex) {
-  if (segmentIndex === 1) {
-    return [
-      "Segment 1/4: Mean -> +A",
-      "Block starts at x_eq with maximum speed.",
-      "Spring stretches and slows the block."
-    ];
-  }
-  if (segmentIndex === 2) {
-    return [
-      "Segment 2/4: +A -> Mean",
-      "Force pulls back toward x_eq.",
-      "Speed rises while returning."
-    ];
-  }
-  if (segmentIndex === 3) {
-    return [
-      "Segment 3/4: Mean -> -A",
-      "Block passes x_eq and compresses spring.",
-      "Restoring force builds opposite to motion."
-    ];
-  }
-  return [
-    "Segment 4/4: -A -> Mean",
-    "Spring pushes block back toward x_eq.",
-    "Cycle ends at mean with max speed again."
-  ];
-}
-
 function getCheckpointExplanation(checkpointCount) {
   const quarter = ((checkpointCount - 1) % 4) + 1;
 
@@ -295,8 +266,13 @@ function configureArrowOverlay(arrow) {
   arrow.cone.renderOrder = 23;
 }
 
-export default function SpringMassScene({ mass, springConstant, amplitude }) {
+export default function SpringMassScene({ mass, springConstant, amplitude, isPlaying }) {
   const containerRef = useRef(null);
+  const isPlayingRef = useRef(isPlaying);
+
+  useEffect(() => {
+    isPlayingRef.current = isPlaying;
+  }, [isPlaying]);
 
   useEffect(() => {
     const container = containerRef.current;
@@ -462,7 +438,11 @@ export default function SpringMassScene({ mass, springConstant, amplitude }) {
     velocityLabel.scale.multiplyScalar(0.58);
     scene.add(velocityLabel);
 
-    const narrationSprite = createNarrationSprite(getSegmentIntro(1));
+    const narrationSprite = createNarrationSprite([
+      "Quarter-cycle teaching mode is ON.",
+      "Simulation pauses at T/4, T/2, 3T/4, and T.",
+      "Read each checkpoint before motion resumes."
+    ]);
     narrationSprite.center.set(0.5, 0.5);
     narrationSprite.position.set(0, 1.1, -6.6);
     camera.add(narrationSprite);
@@ -486,7 +466,10 @@ export default function SpringMassScene({ mass, springConstant, amplitude }) {
 
     const omega = Math.sqrt(springConstant / mass);
     const quarterStep = Math.PI / 2;
-    const pauseDuration = 1.85;
+    const pauseDuration = 2.7;
+    const minRunDuration = 1.35;
+    const physicalQuarterDuration = quarterStep / Math.max(omega, 0.001);
+    const playbackTimeScale = Math.min(1, physicalQuarterDuration / minRunDuration);
 
     let theta = 0;
     let nextCheckpointTheta = quarterStep;
@@ -511,7 +494,11 @@ export default function SpringMassScene({ mass, springConstant, amplitude }) {
       }
     };
 
-    setNarration("segment-1", getSegmentIntro(1));
+    setNarration("intro", [
+      "Quarter-cycle teaching mode is ON.",
+      "Simulation pauses at T/4, T/2, 3T/4, and T.",
+      "Read each checkpoint before motion resumes."
+    ]);
 
     const updateVisuals = () => {
       block.position.x = positionX;
@@ -587,6 +574,10 @@ export default function SpringMassScene({ mass, springConstant, amplitude }) {
     updateVisuals();
 
     const stepSimulation = (deltaTime) => {
+      if (!isPlayingRef.current) {
+        return;
+      }
+
       const dt = Math.min(deltaTime, 0.05);
 
       if (isPaused) {
@@ -594,13 +585,11 @@ export default function SpringMassScene({ mass, springConstant, amplitude }) {
         if (pausedFor >= pauseDuration) {
           isPaused = false;
           pausedFor = 0;
-          const nextSegment = (checkpointCount % 4) + 1;
-          setNarration(`segment-${checkpointCount + 1}`, getSegmentIntro(nextSegment));
         }
         return;
       }
 
-      theta += omega * dt;
+      theta += omega * dt * playbackTimeScale;
       if (theta >= nextCheckpointTheta) {
         theta = nextCheckpointTheta;
         checkpointCount += 1;

@@ -7,6 +7,7 @@ export default function App() {
   const [mass, setMass] = useState(1.0);
   const [springConstant, setSpringConstant] = useState(7.0);
   const [amplitude, setAmplitude] = useState(1.0);
+  const [isPlaying, setIsPlaying] = useState(true);
 
   const omega = useMemo(() => Math.sqrt(springConstant / mass), [springConstant, mass]);
   const period = useMemo(() => (2 * Math.PI) / omega, [omega]);
@@ -14,7 +15,12 @@ export default function App() {
   return (
     <main className="app-shell">
       <div className="scene-panel">
-        <SpringMassScene mass={mass} springConstant={springConstant} amplitude={amplitude} />
+        <SpringMassScene
+          mass={mass}
+          springConstant={springConstant}
+          amplitude={amplitude}
+          isPlaying={isPlaying}
+        />
       </div>
 
       <aside className="controls-panel">
@@ -23,6 +29,17 @@ export default function App() {
           Undamped simple harmonic motion where the wall-fixed spring pulls a movable block via
           Hooke&apos;s Law and Newton&apos;s Second Law.
         </p>
+
+        <div className="sim-toggle">
+          <span>Simulation:</span>
+          <button
+            type="button"
+            className={`sim-toggle-btn ${isPlaying ? "playing" : "paused"}`}
+            onClick={() => setIsPlaying((prev) => !prev)}
+          >
+            {isPlaying ? "Pause" : "Play"}
+          </button>
+        </div>
 
         <label>
           Mass m (kg): <span>{mass.toFixed(2)}</span>
