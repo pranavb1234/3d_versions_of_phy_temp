@@ -155,6 +155,81 @@ function createTextLabelSprite(text) {
   return sprite;
 }
 
+function wrapTextLines(context, text, maxWidth) {
+  const words = text.split(" ");
+  const lines = [];
+  let currentLine = "";
+
+  words.forEach((word) => {
+    const candidate = currentLine ? `${currentLine} ${word}` : word;
+    if (context.measureText(candidate).width <= maxWidth) {
+      currentLine = candidate;
+    } else {
+      if (currentLine) {
+        lines.push(currentLine);
+      }
+      currentLine = word;
+    }
+  });
+
+  if (currentLine) {
+    lines.push(currentLine);
+  }
+
+  return lines.length > 0 ? lines : [text];
+}
+
+function createWrappedTextLabelSprite(text, options = {}) {
+  const width = options.width ?? 520;
+  const fontSize = options.fontSize ?? 42;
+  const paddingX = options.paddingX ?? 22;
+  const paddingY = options.paddingY ?? 16;
+  const lineHeight = options.lineHeight ?? 1.18;
+  const scale = options.scale ?? 0.0032;
+
+  const canvas = document.createElement("canvas");
+  const context = canvas.getContext("2d");
+  if (!context) {
+    return createTextLabelSprite(text);
+  }
+
+  canvas.width = width;
+  context.font = `600 ${fontSize}px "Segoe UI", "Trebuchet MS", sans-serif`;
+  const lines = wrapTextLines(context, text, width - paddingX * 2);
+  const lineHeightPx = fontSize * lineHeight;
+  canvas.height = Math.ceil(paddingY * 2 + lines.length * lineHeightPx);
+
+  context.font = `600 ${fontSize}px "Segoe UI", "Trebuchet MS", sans-serif`;
+  context.fillStyle = "rgba(246, 249, 255, 0.92)";
+  context.fillRect(0, 0, canvas.width, canvas.height);
+  context.strokeStyle = "rgba(38, 53, 78, 0.35)";
+  context.lineWidth = 4;
+  context.strokeRect(2, 2, canvas.width - 4, canvas.height - 4);
+  context.fillStyle = "#1e293b";
+  context.textBaseline = "top";
+
+  lines.forEach((line, index) => {
+    context.fillText(line, paddingX, paddingY + index * lineHeightPx);
+  });
+
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.colorSpace = THREE.SRGBColorSpace;
+  texture.minFilter = THREE.LinearFilter;
+  texture.generateMipmaps = false;
+
+  const material = new THREE.SpriteMaterial({
+    map: texture,
+    transparent: true,
+    depthTest: false,
+    depthWrite: false
+  });
+
+  const sprite = new THREE.Sprite(material);
+  sprite.scale.set(canvas.width * scale, canvas.height * scale, 1);
+  sprite.renderOrder = 20;
+  return sprite;
+}
+
 function createNarrationSprite(lines) {
   const canvas = document.createElement("canvas");
   canvas.width = 2048;
@@ -191,7 +266,7 @@ function updateNarrationSprite(sprite, lines) {
     return;
   }
 
-  const fontSize = 34;
+  const fontSize = 30;
   const paddingX = 30;
   const paddingY = 20;
   const lineGap = 7;
@@ -200,7 +275,7 @@ function updateNarrationSprite(sprite, lines) {
   context.font = `700 ${fontSize}px "Segoe UI", "Trebuchet MS", sans-serif`;
   context.clearRect(0, 0, canvas.width, canvas.height);
   context.strokeStyle = "rgba(15, 23, 42, 0.8)";
-  context.lineWidth = 5;
+  context.lineWidth = 4;
   context.lineJoin = "round";
   context.fillStyle = "#f8fbff";
   context.shadowColor = "rgba(13, 20, 35, 0.65)";
@@ -225,7 +300,80 @@ function updateNarrationSprite(sprite, lines) {
   context.shadowOffsetY = 0;
 
   texture.needsUpdate = true;
-  const scale = 0.001;
+  const scale = 0.0009;
+  sprite.scale.set(canvas.width * scale, canvas.height * scale, 1);
+}
+
+function createBottomInfoSprite(lines) {
+  const canvas = document.createElement("canvas");
+  canvas.width = 2048;
+  canvas.height = 340;
+  const context = canvas.getContext("2d");
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.colorSpace = THREE.SRGBColorSpace;
+  texture.minFilter = THREE.LinearFilter;
+  texture.magFilter = THREE.LinearFilter;
+  texture.generateMipmaps = false;
+
+  const material = new THREE.SpriteMaterial({
+    map: texture,
+    transparent: true,
+    sizeAttenuation: false,
+    depthTest: false,
+    depthWrite: false
+  });
+
+  const sprite = new THREE.Sprite(material);
+  sprite.userData.canvas = canvas;
+  sprite.userData.context = context;
+  sprite.userData.texture = texture;
+  sprite.renderOrder = 21;
+  updateBottomInfoSprite(sprite, lines);
+  return sprite;
+}
+
+function updateBottomInfoSprite(sprite, lines) {
+  const canvas = sprite.userData.canvas;
+  const context = sprite.userData.context;
+  const texture = sprite.userData.texture;
+  if (!context || !Array.isArray(lines) || lines.length === 0) {
+    return;
+  }
+
+  const fontSize = 30;
+  const paddingX = 32;
+  const paddingY = 20;
+  const lineGap = 7;
+  context.font = `700 ${fontSize}px "Segoe UI", "Trebuchet MS", sans-serif`;
+
+  context.clearRect(0, 0, canvas.width, canvas.height);
+  context.strokeStyle = "rgba(15, 23, 42, 0.82)";
+  context.lineWidth = 6;
+  context.lineJoin = "round";
+  context.fillStyle = "#f7fbff";
+  context.shadowColor = "rgba(13, 20, 35, 0.66)";
+  context.shadowBlur = 4;
+  context.shadowOffsetX = 0;
+  context.shadowOffsetY = 2;
+  context.textBaseline = "top";
+
+  const maxTextWidth = lines.reduce((maxWidth, line) => {
+    return Math.max(maxWidth, context.measureText(line).width);
+  }, 0);
+  const startX = Math.max((canvas.width - maxTextWidth) * 0.5, paddingX);
+
+  let y = paddingY;
+  lines.forEach((line) => {
+    context.strokeText(line, startX, y);
+    context.fillText(line, startX, y);
+    y += fontSize + lineGap;
+  });
+  context.shadowBlur = 0;
+  context.shadowOffsetX = 0;
+  context.shadowOffsetY = 0;
+
+  texture.needsUpdate = true;
+  const scale = 0.00095;
   sprite.scale.set(canvas.width * scale, canvas.height * scale, 1);
 }
 
@@ -447,6 +595,52 @@ export default function SpringMassScene({ mass, springConstant, amplitude, isPla
     velocityLabel.scale.multiplyScalar(0.58);
     scene.add(velocityLabel);
 
+    const sideExplainLabelOptions = {
+      width: 360,
+      fontSize: 34,
+      scale: 0.003,
+      paddingX: 20,
+      paddingY: 14,
+      lineHeight: 1.16
+    };
+
+    const sideOverlayDepth = 6.6;
+    const sideOverlayY = 0.18;
+    const sideOverlayMargin = 0.08;
+
+    const velocityExplainLabel = createWrappedTextLabelSprite(
+      "v: block velocity (blue arrow)",
+      sideExplainLabelOptions
+    );
+    velocityExplainLabel.center.set(0.5, 0.5);
+    velocityExplainLabel.position.set(0, sideOverlayY, -sideOverlayDepth);
+    camera.add(velocityExplainLabel);
+
+    const forceExplainLabel = createWrappedTextLabelSprite(
+      "F_s: restoring spring force (red arrow)",
+      sideExplainLabelOptions
+    );
+    forceExplainLabel.center.set(0.5, 0.5);
+    forceExplainLabel.position.set(0, sideOverlayY, -sideOverlayDepth);
+    camera.add(forceExplainLabel);
+
+    const updateSideExplainLabelPositions = () => {
+      const halfViewHeight =
+        Math.tan(THREE.MathUtils.degToRad(camera.fov * 0.5)) * sideOverlayDepth;
+      const halfViewWidth = halfViewHeight * camera.aspect;
+
+      velocityExplainLabel.position.set(
+        -halfViewWidth + velocityExplainLabel.scale.x * 0.5 + sideOverlayMargin,
+        sideOverlayY,
+        -sideOverlayDepth
+      );
+      forceExplainLabel.position.set(
+        halfViewWidth - forceExplainLabel.scale.x * 0.5 - sideOverlayMargin,
+        sideOverlayY,
+        -sideOverlayDepth
+      );
+    };
+
     const narrationSprite = createNarrationSprite([
       "Quarter-cycle teaching mode is ON.",
       "Simulation pauses at T/4, T/2, 3T/4, and T.",
@@ -455,6 +649,16 @@ export default function SpringMassScene({ mass, springConstant, amplitude, isPla
     narrationSprite.center.set(0.5, 0.5);
     narrationSprite.position.set(0, 1.1, -6.6);
     camera.add(narrationSprite);
+
+    const bottomInfoSprite = createBottomInfoSprite([
+      "Status: simulation loaded.",
+      "Blue v = velocity of the moving block.",
+      "Red F_s = restoring spring force toward equilibrium.",
+      "Watch: turning point -> v ~ 0, equilibrium -> |v| is largest."
+    ]);
+    bottomInfoSprite.center.set(0.5, 0.5);
+    bottomInfoSprite.position.set(0, -2.28, -6.6);
+    camera.add(bottomInfoSprite);
 
     const axisHelper = new THREE.AxesHelper(2.6);
     axisHelper.position.set(-5.6, 0.01, -2.2);
@@ -467,6 +671,7 @@ export default function SpringMassScene({ mass, springConstant, amplitude, isPla
       renderer.setSize(width, height, false);
       camera.aspect = width / Math.max(height, 1);
       camera.updateProjectionMatrix();
+      updateSideExplainLabelPositions();
     };
     setRendererSize();
 
@@ -490,6 +695,7 @@ export default function SpringMassScene({ mass, springConstant, amplitude, isPla
     let velocityX = amplitude * omega * Math.cos(theta);
     let previousTime = performance.now() / 1000;
     let narrationKey = "";
+    let bottomInfoKey = "";
     let animationFrameId = 0;
 
     const lineA = new THREE.Vector3();
@@ -502,11 +708,23 @@ export default function SpringMassScene({ mass, springConstant, amplitude, isPla
         narrationKey = key;
       }
     };
+    const setBottomInfo = (key, lines) => {
+      if (key !== bottomInfoKey) {
+        updateBottomInfoSprite(bottomInfoSprite, lines);
+        bottomInfoKey = key;
+      }
+    };
 
     setNarration("intro", [
       "Quarter-cycle teaching mode is ON.",
       "Simulation pauses at T/4, T/2, 3T/4, and T.",
       "Read each checkpoint before motion resumes."
+    ]);
+    setBottomInfo("intro", [
+      "Status: quarter-cycle teaching mode is active.",
+      "Blue v = velocity of the moving block.",
+      "Red F_s = restoring spring force toward equilibrium.",
+      "Watch: turning point -> v ~ 0, equilibrium -> |v| is largest."
     ]);
 
     const updateVisuals = () => {
@@ -578,6 +796,29 @@ export default function SpringMassScene({ mass, springConstant, amplitude, isPla
         velocityArrow.visible = false;
         velocityLabel.visible = false;
       }
+
+      const activeQuarter = isPaused
+        ? ((checkpointCount - 1 + 4) % 4) + 1
+        : (checkpointCount % 4) + 1;
+      const statusText = isPaused
+        ? `Status: paused at checkpoint ${activeQuarter}/4.`
+        : `Status: moving through quarter ${activeQuarter}/4.`;
+      const velocityDirectionText =
+        velocityX > 0.02 ? "moving right" : velocityX < -0.02 ? "moving left" : "near turning point";
+      const forceDirectionText =
+        forceX > 0.02
+          ? "points right toward equilibrium"
+          : forceX < -0.02
+            ? "points left toward equilibrium"
+            : "is near zero at equilibrium";
+
+      const infoKey = `${isPaused ? 1 : 0}|${activeQuarter}|${Math.sign(velocityX)}|${Math.sign(forceX)}`;
+      setBottomInfo(infoKey, [
+        statusText,
+        `Blue v = velocity of the block (${velocityDirectionText}).`,
+        `Red F_s = restoring spring force (${forceDirectionText}).`,
+        "Watch: turning point -> v ~ 0, equilibrium -> |v| is largest."
+      ]);
 
     };
     updateVisuals();
