@@ -1,16 +1,11 @@
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import SpringMassScene from "./components/SpringMassScene";
 
-const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
-
 export default function App() {
-  const [mass, setMass] = useState(1.0);
-  const [springConstant, setSpringConstant] = useState(7.0);
-  const [amplitude, setAmplitude] = useState(1.0);
+  const mass = 1.0;
+  const springConstant = 15.0;
+  const amplitude = 3.0;
   const [isPlaying, setIsPlaying] = useState(true);
-
-  const omega = useMemo(() => Math.sqrt(springConstant / mass), [springConstant, mass]);
-  const period = useMemo(() => (2 * Math.PI) / omega, [omega]);
 
   return (
     <main className="app-shell">
@@ -41,48 +36,14 @@ export default function App() {
           </button>
         </div>
 
-        <label>
-          Mass m (kg): <span>{mass.toFixed(2)}</span>
-        </label>
-        <input
-          type="range"
-          min="0.5"
-          max="5"
-          step="0.1"
-          value={mass}
-          onChange={(event) => setMass(clamp(Number(event.target.value), 0.5, 5))}
-        />
-
-        <label>
-          Spring constant k (N/m): <span>{springConstant.toFixed(2)}</span>
-        </label>
-        <input
-          type="range"
-          min="2"
-          max="20"
-          step="0.2"
-          value={springConstant}
-          onChange={(event) => setSpringConstant(clamp(Number(event.target.value), 2, 20))}
-        />
-
-        <label>
-          Initial amplitude A (m): <span>{amplitude.toFixed(2)}</span>
-        </label>
-        <input
-          type="range"
-          min="0.2"
-          max="2.4"
-          step="0.1"
-          value={amplitude}
-          onChange={(event) => setAmplitude(clamp(Number(event.target.value), 0.2, 2.4))}
-        />
-
-        <div className="equations">
-          <p>F = -k (x - x_eq)</p>
-          <p>m * d2x/dt2 = F</p>
-          <p>omega = sqrt(k / m) = {omega.toFixed(3)} rad/s</p>
-          <p>T = 2 * pi / omega = {period.toFixed(3)} s</p>
-        </div>
+        <p>Fixed for now: m = 1.0 kg, k = 15.0 N/m, A = 3.0 m</p>
+        {/*
+          Parameter controls are intentionally hidden for now:
+          - Mass slider
+          - Spring constant slider
+          - Amplitude slider
+          - Formula/equation block
+        */}
 
         <div className="hint">
           <p>Camera controls:</p>

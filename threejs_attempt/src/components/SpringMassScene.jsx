@@ -397,17 +397,26 @@ export default function SpringMassScene({ mass, springConstant, amplitude, isPla
     scene.add(springLeader);
     scene.add(massLeader);
 
-    const equilibriumMarker = new THREE.Mesh(
-      new THREE.CylinderGeometry(0.022, 0.022, 1.15, 14),
-      new THREE.MeshStandardMaterial({ color: "#475569", roughness: 0.65, metalness: 0.2 })
+    const equilibriumLineGeometry = new THREE.BufferGeometry().setFromPoints([
+      new THREE.Vector3(equilibriumX, 0.03, -0.82),
+      new THREE.Vector3(equilibriumX, 3.05, -0.82)
+    ]);
+    const equilibriumMarker = new THREE.Line(
+      equilibriumLineGeometry,
+      new THREE.LineDashedMaterial({
+        color: "#475569",
+        dashSize: 0.14,
+        gapSize: 0.09
+      })
     );
-    equilibriumMarker.position.set(equilibriumX, 0.58, -0.82);
+    equilibriumMarker.computeLineDistances();
+    equilibriumMarker.frustumCulled = false;
     scene.add(equilibriumMarker);
 
-    const eqLabel = createTextLabelSprite("x_eq");
+    const eqLabel = createTextLabelSprite("equilibrium position");
     eqLabel.center.set(0.5, 0.5);
-    eqLabel.scale.multiplyScalar(0.68);
-    eqLabel.position.set(equilibriumX, 1.4, -0.82);
+    eqLabel.scale.multiplyScalar(0.5);
+    eqLabel.position.set(equilibriumX, 3.38, -0.82);
     scene.add(eqLabel);
 
     const forceArrow = new THREE.ArrowHelper(
