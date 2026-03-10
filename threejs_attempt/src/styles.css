@@ -116,6 +116,22 @@ body {
   justify-content: space-between;
 }
 
+.template-select {
+  margin-top: 0.35rem;
+  align-items: center;
+  gap: 0.55rem;
+}
+
+.template-select select {
+  border-radius: 10px;
+  border: 1px solid #9bb0c4;
+  background: rgba(246, 250, 255, 0.92);
+  color: #1d2a3d;
+  font-weight: 600;
+  padding: 0.35rem 0.6rem;
+  min-width: 180px;
+}
+
 .controls-panel input[type="range"] {
   width: 100%;
 }
