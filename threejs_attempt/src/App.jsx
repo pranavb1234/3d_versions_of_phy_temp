@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import SpringMassScene from "./components/SpringMassScene";
 import DoubleSpringMassScene from "./components/DoubleSpringMassScene";
+import PendulumScene from "./components/PendulumScene";
 
 export default function App() {
   const mass = 1.0;
@@ -26,6 +27,14 @@ export default function App() {
           "Mass connected to two identical springs fixed to both walls; the net restoring force is the sum of both springs.",
         fixedText: "Fixed for now: m = 1.0 kg, k = 15.0 N/m (each), A = 3.0 m",
         Scene: DoubleSpringMassScene
+      },
+      pendulum: {
+        label: "Simple Pendulum",
+        title: "Simple Pendulum Oscillation",
+        description:
+          "Small-angle pendulum motion where a bob swings about equilibrium under gravity with a rigid support.",
+        fixedText: "Fixed for now: m = 1.0 kg, L = 2.8 m, θ_max = 21°",
+        Scene: PendulumScene
       }
     }),
     []
@@ -54,6 +63,7 @@ export default function App() {
           <select value={templateId} onChange={(event) => setTemplateId(event.target.value)}>
             <option value="single">{templateConfig.single.label}</option>
             <option value="double">{templateConfig.double.label}</option>
+            <option value="pendulum">{templateConfig.pendulum.label}</option>
           </select>
         </label>
 
