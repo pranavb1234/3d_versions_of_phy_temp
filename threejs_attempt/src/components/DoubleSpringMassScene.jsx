@@ -269,33 +269,38 @@ function updateNarrationSprite(sprite, lines) {
     return;
   }
 
-  const fontSize = 30;
+  const headingFontSize = 36;
+  const bodyFontSize = 26;
   const paddingX = 30;
   const paddingY = 20;
-  const lineGap = 7;
-  context.font = `700 ${fontSize}px "Segoe UI", "Trebuchet MS", sans-serif`;
-
+  const lineGap = 6;
   context.clearRect(0, 0, canvas.width, canvas.height);
   context.strokeStyle = "rgba(15, 23, 42, 0.8)";
   context.lineWidth = 4;
   context.lineJoin = "round";
-  context.fillStyle = "#f8fbff";
   context.shadowColor = "rgba(13, 20, 35, 0.65)";
   context.shadowBlur = 4;
   context.shadowOffsetX = 0;
   context.shadowOffsetY = 2;
   context.textBaseline = "top";
 
-  const maxTextWidth = lines.reduce((maxWidth, line) => {
-    return Math.max(maxWidth, context.measureText(line).width);
+  const lineMetrics = lines.map((line, index) => {
+    const fontSize = index === 0 ? headingFontSize : bodyFontSize;
+    context.font = `700 ${fontSize}px "Segoe UI", "Trebuchet MS", sans-serif`;
+    return { line, fontSize, width: context.measureText(line).width };
+  });
+  const maxTextWidth = lineMetrics.reduce((maxWidth, entry) => {
+    return Math.max(maxWidth, entry.width);
   }, 0);
   const startX = Math.max((canvas.width - maxTextWidth) * 0.5, paddingX);
 
   let y = paddingY;
-  lines.forEach((line) => {
-    context.strokeText(line, startX, y);
-    context.fillText(line, startX, y);
-    y += fontSize + lineGap;
+  lineMetrics.forEach((entry, index) => {
+    context.font = `700 ${entry.fontSize}px "Segoe UI", "Trebuchet MS", sans-serif`;
+    context.fillStyle = index === 0 ? "#ff7a00" : "#f8fbff";
+    context.strokeText(entry.line, startX, y);
+    context.fillText(entry.line, startX, y);
+    y += entry.fontSize + lineGap;
   });
   context.shadowBlur = 0;
   context.shadowOffsetX = 0;
@@ -670,9 +675,8 @@ export default function DoubleSpringMassScene({ mass, springConstant, amplitude,
     };
 
     const narrationSprite = createNarrationSprite([
-      "Quarter-cycle teaching mode is ON.",
-      "Simulation pauses at T/4, T/2, 3T/4, and T.",
-      "Read each checkpoint before motion resumes."
+      "Double Spring-Mass",
+      "Net force: F = -2k*x about x_eq."
     ]);
     narrationSprite.center.set(0.5, 0.5);
     narrationSprite.position.set(0, 1.1, -6.6);
@@ -743,11 +747,7 @@ export default function DoubleSpringMassScene({ mass, springConstant, amplitude,
       }
     };
 
-    setNarration("intro", [
-      "Quarter-cycle teaching mode is ON.",
-      "Simulation pauses at T/4, T/2, 3T/4, and T.",
-      "Read each checkpoint before motion resumes."
-    ]);
+    setNarration("intro", ["Double Spring-Mass", "Net force: F = -2k*x about x_eq."]);
     setBottomInfo("intro", [
       "Status: quarter-cycle teaching mode is active.",
       "Blue v = velocity of the moving block.",
@@ -885,7 +885,6 @@ export default function DoubleSpringMassScene({ mass, springConstant, amplitude,
         nextCheckpointTheta += quarterStep;
         isPaused = true;
         pausedFor = 0;
-        setNarration(`pause-${checkpointCount}`, getCheckpointExplanation(checkpointCount));
       }
 
       positionX = equilibriumX + amplitude * Math.sin(theta);

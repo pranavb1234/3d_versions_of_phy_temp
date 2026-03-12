@@ -18,29 +18,29 @@ function getCheckpointExplanation(checkpointCount) {
 
   if (quarter === 1) {
     return [
-      "Pause at T/4: Maximum Stretch (+A)",
-      "Block reached far-right turning point.",
-      "v = 0 and spring force is maximum toward x_eq."
+      "Checkpoint: +A (T/4)",
+      "Turning point: v = 0",
+      "Red F toward x_eq."
     ];
   }
   if (quarter === 2) {
     return [
-      "Pause at T/2: Mean Position",
-      "Block crossed x_eq moving left at max speed.",
-      "Here spring force is near zero momentarily."
+      "Checkpoint: x_eq (T/2)",
+      "Speed max: |v| is largest",
+      "Red F near zero."
     ];
   }
   if (quarter === 3) {
     return [
-      "Pause at 3T/4: Maximum Compression (-A)",
-      "Block reached far-left turning point.",
-      "v = 0 and spring force is maximum toward x_eq."
+      "Checkpoint: -A (3T/4)",
+      "Turning point: v = 0",
+      "Red F toward x_eq."
     ];
   }
   return [
-    "Pause at T: Mean Position",
-    "One full oscillation is complete.",
-    "Block crosses x_eq moving right at max speed."
+    "Checkpoint: x_eq (T)",
+    "Cycle complete",
+    "Speed max: |v| is largest"
   ];
 }
 
@@ -266,34 +266,38 @@ function updateNarrationSprite(sprite, lines) {
     return;
   }
 
-  const fontSize = 30;
+  const headingFontSize = 36;
+  const bodyFontSize = 26;
   const paddingX = 30;
   const paddingY = 20;
-  const lineGap = 7;
-  context.font = `700 ${fontSize}px "Segoe UI", "Trebuchet MS", sans-serif`;
-
-  context.font = `700 ${fontSize}px "Segoe UI", "Trebuchet MS", sans-serif`;
+  const lineGap = 6;
   context.clearRect(0, 0, canvas.width, canvas.height);
   context.strokeStyle = "rgba(15, 23, 42, 0.8)";
   context.lineWidth = 4;
   context.lineJoin = "round";
-  context.fillStyle = "#f8fbff";
   context.shadowColor = "rgba(13, 20, 35, 0.65)";
   context.shadowBlur = 4;
   context.shadowOffsetX = 0;
   context.shadowOffsetY = 2;
   context.textBaseline = "top";
 
-  const maxTextWidth = lines.reduce((maxWidth, line) => {
-    return Math.max(maxWidth, context.measureText(line).width);
+  const lineMetrics = lines.map((line, index) => {
+    const fontSize = index === 0 ? headingFontSize : bodyFontSize;
+    context.font = `700 ${fontSize}px "Segoe UI", "Trebuchet MS", sans-serif`;
+    return { line, fontSize, width: context.measureText(line).width };
+  });
+  const maxTextWidth = lineMetrics.reduce((maxWidth, entry) => {
+    return Math.max(maxWidth, entry.width);
   }, 0);
   const startX = Math.max((canvas.width - maxTextWidth) * 0.5, paddingX);
 
   let y = paddingY;
-  lines.forEach((line) => {
-    context.strokeText(line, startX, y);
-    context.fillText(line, startX, y);
-    y += fontSize + lineGap;
+  lineMetrics.forEach((entry, index) => {
+    context.font = `700 ${entry.fontSize}px "Segoe UI", "Trebuchet MS", sans-serif`;
+    context.fillStyle = index === 0 ? "#ff7a00" : "#f8fbff";
+    context.strokeText(entry.line, startX, y);
+    context.fillText(entry.line, startX, y);
+    y += entry.fontSize + lineGap;
   });
   context.shadowBlur = 0;
   context.shadowOffsetX = 0;
@@ -528,9 +532,9 @@ export default function SpringMassScene({ mass, springConstant, amplitude, isPla
     const blockAnchor = new THREE.Mesh(new THREE.SphereGeometry(0.1, 20, 20), anchorMaterial);
     scene.add(blockAnchor);
 
-    const blockLabel = createTextLabelSprite("block");
+    const blockLabel = createTextLabelSprite("wall");
     const springLabel = createTextLabelSprite("spring");
-    const massLabel = createTextLabelSprite("mass");
+    const massLabel = createTextLabelSprite("mass (m)");
     blockLabel.center.set(0, 0.5);
     springLabel.center.set(0, 0.5);
     massLabel.center.set(0, 0.5);
@@ -552,7 +556,7 @@ export default function SpringMassScene({ mass, springConstant, amplitude, isPla
     const equilibriumMarker = new THREE.Line(
       equilibriumLineGeometry,
       new THREE.LineDashedMaterial({
-        color: "#475569",
+        color: "#16a34a",
         dashSize: 0.14,
         gapSize: 0.09
       })
@@ -561,7 +565,7 @@ export default function SpringMassScene({ mass, springConstant, amplitude, isPla
     equilibriumMarker.frustumCulled = false;
     scene.add(equilibriumMarker);
 
-    const eqLabel = createTextLabelSprite("equilibrium position");
+    const eqLabel = createTextLabelSprite("equilibrium x_eq");
     eqLabel.center.set(0.5, 0.5);
     eqLabel.scale.multiplyScalar(0.5);
     eqLabel.position.set(equilibriumX, 3.38, -0.82);
@@ -585,7 +589,7 @@ export default function SpringMassScene({ mass, springConstant, amplitude, isPla
     configureArrowOverlay(velocityArrow);
     scene.add(velocityArrow);
 
-    const forceLabel = createTextLabelSprite("F_s");
+    const forceLabel = createTextLabelSprite("F");
     forceLabel.center.set(0, 0.5);
     forceLabel.scale.multiplyScalar(0.58);
     scene.add(forceLabel);
@@ -605,56 +609,51 @@ export default function SpringMassScene({ mass, springConstant, amplitude, isPla
     };
 
     const sideOverlayDepth = 6.6;
-    const sideOverlayY = 0.18;
-    const sideOverlayMargin = 0.08;
+    const sideOverlayMargin = 0.12;
+    const sideOverlayGap = 0.12;
 
     const velocityExplainLabel = createWrappedTextLabelSprite(
-      "v: block velocity (blue arrow)",
+      "Blue: velocity v",
       sideExplainLabelOptions
     );
     velocityExplainLabel.center.set(0.5, 0.5);
-    velocityExplainLabel.position.set(0, sideOverlayY, -sideOverlayDepth);
+    velocityExplainLabel.position.set(0, 0, -sideOverlayDepth);
     camera.add(velocityExplainLabel);
 
     const forceExplainLabel = createWrappedTextLabelSprite(
-      "F_s: restoring spring force (red arrow)",
+      "Red: restoring force F",
       sideExplainLabelOptions
     );
     forceExplainLabel.center.set(0.5, 0.5);
-    forceExplainLabel.position.set(0, sideOverlayY, -sideOverlayDepth);
+    forceExplainLabel.position.set(0, 0, -sideOverlayDepth);
     camera.add(forceExplainLabel);
 
     const updateSideExplainLabelPositions = () => {
       const halfViewHeight =
         Math.tan(THREE.MathUtils.degToRad(camera.fov * 0.5)) * sideOverlayDepth;
       const halfViewWidth = halfViewHeight * camera.aspect;
+      const leftX = -halfViewWidth + velocityExplainLabel.scale.x * 0.5 + sideOverlayMargin;
+      const topY = halfViewHeight - velocityExplainLabel.scale.y * 0.5 - sideOverlayMargin;
+      const stackedOffset =
+        velocityExplainLabel.scale.y * 0.5 + forceExplainLabel.scale.y * 0.5 + sideOverlayGap;
 
-      velocityExplainLabel.position.set(
-        -halfViewWidth + velocityExplainLabel.scale.x * 0.5 + sideOverlayMargin,
-        sideOverlayY,
-        -sideOverlayDepth
-      );
-      forceExplainLabel.position.set(
-        halfViewWidth - forceExplainLabel.scale.x * 0.5 - sideOverlayMargin,
-        sideOverlayY,
-        -sideOverlayDepth
-      );
+      velocityExplainLabel.position.set(leftX, topY, -sideOverlayDepth);
+      forceExplainLabel.position.set(leftX, topY - stackedOffset, -sideOverlayDepth);
     };
 
     const narrationSprite = createNarrationSprite([
-      "Quarter-cycle teaching mode is ON.",
-      "Simulation pauses at T/4, T/2, 3T/4, and T.",
-      "Read each checkpoint before motion resumes."
+      "Spring-Mass Experiment",
+      "Undamped SHM: F = -k*x about x_eq."
     ]);
     narrationSprite.center.set(0.5, 0.5);
     narrationSprite.position.set(0, 1.1, -6.6);
     camera.add(narrationSprite);
 
     const bottomInfoSprite = createBottomInfoSprite([
-      "Status: simulation loaded.",
-      "Blue v = velocity of the moving block.",
-      "Red F_s = restoring spring force toward equilibrium.",
-      "Watch: turning point -> v ~ 0, equilibrium -> |v| is largest."
+      "Motion summary",
+      "Blue v = velocity",
+      "Red F = restoring force (F = -k*x)",
+      "Green x_eq = equilibrium"
     ]);
     bottomInfoSprite.center.set(0.5, 0.5);
     bottomInfoSprite.position.set(0, -2.28, -6.6);
@@ -715,16 +714,12 @@ export default function SpringMassScene({ mass, springConstant, amplitude, isPla
       }
     };
 
-    setNarration("intro", [
-      "Quarter-cycle teaching mode is ON.",
-      "Simulation pauses at T/4, T/2, 3T/4, and T.",
-      "Read each checkpoint before motion resumes."
-    ]);
+    setNarration("intro", ["Spring-Mass Experiment", "Undamped SHM: F = -k*x about x_eq."]);
     setBottomInfo("intro", [
-      "Status: quarter-cycle teaching mode is active.",
-      "Blue v = velocity of the moving block.",
-      "Red F_s = restoring spring force toward equilibrium.",
-      "Watch: turning point -> v ~ 0, equilibrium -> |v| is largest."
+      "Motion summary",
+      "Blue v = velocity",
+      "Red F = restoring force (F = -k*x)",
+      "Green x_eq = equilibrium"
     ]);
 
     const updateVisuals = () => {
@@ -814,10 +809,10 @@ export default function SpringMassScene({ mass, springConstant, amplitude, isPla
 
       const infoKey = `${isPaused ? 1 : 0}|${activeQuarter}|${Math.sign(velocityX)}|${Math.sign(forceX)}`;
       setBottomInfo(infoKey, [
-        statusText,
-        `Blue v = velocity of the block (${velocityDirectionText}).`,
-        `Red F_s = restoring spring force (${forceDirectionText}).`,
-        "Watch: turning point -> v ~ 0, equilibrium -> |v| is largest."
+        statusText.replace("Status:", "Status"),
+        `Blue v (${velocityDirectionText}).`,
+        `Red F (${forceDirectionText}).`,
+        "Green x_eq = equilibrium"
       ]);
 
     };
@@ -846,7 +841,6 @@ export default function SpringMassScene({ mass, springConstant, amplitude, isPla
         nextCheckpointTheta += quarterStep;
         isPaused = true;
         pausedFor = 0;
-        setNarration(`pause-${checkpointCount}`, getCheckpointExplanation(checkpointCount));
       }
 
       positionX = equilibriumX + amplitude * Math.sin(theta);
