@@ -221,8 +221,8 @@ function updateNarrationSprite(sprite, lines) {
     return;
   }
 
-  const headingFontSize = 36;
-  const bodyFontSize = 26;
+  const headingFontSize = 37;
+  const bodyFontSize = 27;
   const paddingX = 30;
   const paddingY = 20;
   const lineGap = 6;
@@ -244,14 +244,16 @@ function updateNarrationSprite(sprite, lines) {
   const maxTextWidth = lineMetrics.reduce((maxWidth, entry) => {
     return Math.max(maxWidth, entry.width);
   }, 0);
-  const startX = Math.max((canvas.width - maxTextWidth) * 0.5, paddingX);
+  const bodyStartX = Math.max((canvas.width - maxTextWidth) * 0.5, paddingX);
 
   let y = paddingY;
   lineMetrics.forEach((entry, index) => {
     context.font = `700 ${entry.fontSize}px "Segoe UI", "Trebuchet MS", sans-serif`;
     context.fillStyle = index === 0 ? "#ff7a00" : "#f8fbff";
-    context.strokeText(entry.line, startX, y);
-    context.fillText(entry.line, startX, y);
+    const lineX =
+      index === 0 ? Math.max((canvas.width - entry.width) * 0.5, paddingX) : bodyStartX;
+    context.strokeText(entry.line, lineX, y);
+    context.fillText(entry.line, lineX, y);
     y += entry.fontSize + lineGap;
   });
   context.shadowBlur = 0;
@@ -299,11 +301,12 @@ function updateBottomInfoSprite(sprite, lines) {
     return;
   }
 
-  const fontSize = 30;
-  const paddingX = 32;
+  const fontSize = 31;
+  const paddingX = 24;
   const paddingY = 20;
   const lineGap = 7;
-  context.font = `700 ${fontSize}px "Segoe UI", "Trebuchet MS", sans-serif`;
+  const maxTextWidthRatio = 1;
+  const minHeight = 320;
 
   context.clearRect(0, 0, canvas.width, canvas.height);
   context.strokeStyle = "rgba(15, 23, 42, 0.82)";
@@ -316,13 +319,26 @@ function updateBottomInfoSprite(sprite, lines) {
   context.shadowOffsetY = 2;
   context.textBaseline = "top";
 
-  const maxTextWidth = lines.reduce((maxWidth, line) => {
+  context.font = `700 ${fontSize}px "Segoe UI", "Trebuchet MS", sans-serif`;
+  const maxTextWidth = Math.min(canvas.width - paddingX * 2, canvas.width * maxTextWidthRatio);
+  const paragraph = lines.join(" ");
+  const wrappedLines = wrapTextLines(context, paragraph, maxTextWidth);
+  const contentHeight =
+    paddingY * 2 +
+    wrappedLines.length * fontSize +
+    Math.max(wrappedLines.length - 1, 0) * lineGap;
+  const targetHeight = Math.max(minHeight, Math.ceil(contentHeight));
+  if (canvas.height !== targetHeight) {
+    canvas.height = targetHeight;
+  }
+
+  const maxLineWidth = wrappedLines.reduce((maxWidth, line) => {
     return Math.max(maxWidth, context.measureText(line).width);
   }, 0);
-  const startX = Math.max((canvas.width - maxTextWidth) * 0.5, paddingX);
+  const startX = Math.max((canvas.width - maxLineWidth) * 0.5, paddingX);
 
   let y = paddingY;
-  lines.forEach((line) => {
+  wrappedLines.forEach((line) => {
     context.strokeText(line, startX, y);
     context.fillText(line, startX, y);
     y += fontSize + lineGap;
@@ -332,8 +348,9 @@ function updateBottomInfoSprite(sprite, lines) {
   context.shadowOffsetY = 0;
 
   texture.needsUpdate = true;
-  const scale = 0.00095;
-  sprite.scale.set(canvas.width * scale, canvas.height * scale, 1);
+  const baseScale = 0.00095;
+  sprite.userData.baseScale = baseScale;
+  sprite.scale.set(canvas.width * baseScale, canvas.height * baseScale, 1);
 }
 
 function createLeaderLine() {
@@ -603,7 +620,9 @@ export default function PendulumScene({ mass, amplitude, isPlaying }) {
 
     const narrationSprite = createNarrationSprite([
       "Simple Pendulum",
-      "Small-angle SHM: T = 2π√(L/g)."
+      "Small-angle SHM: T = 2π√(L/g).",
+      "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor.",
+      "Incididunt ut labore et dolore magna aliqua, ut enim ad minim veniam."
     ]);
     narrationSprite.center.set(0.5, 0.5);
     narrationSprite.position.set(0, 1.1, -6.6);
@@ -613,11 +632,42 @@ export default function PendulumScene({ mass, amplitude, isPlaying }) {
       "Status: simulation loaded.",
       "Blue v = bob velocity along the arc.",
       "Red F_t = tangential restoring force.",
-      "Watch: turning point -> v ~ 0, equilibrium -> |v| is largest."
+      "Watch: turning point -> v ~ 0, equilibrium -> |v| is largest.",
+      "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+      "Sed do eiusmod tempor incididunt ut labore et dolore."
     ]);
     bottomInfoSprite.center.set(0.5, 0.5);
     bottomInfoSprite.position.set(0, -2.28, -6.6);
     camera.add(bottomInfoSprite);
+
+    const bottomOverlayDepth = 6.6;
+    const bottomOverlayMargin = 0.32;
+
+    const updateBottomInfoPosition = () => {
+      const halfViewHeight =
+        Math.tan(THREE.MathUtils.degToRad(camera.fov * 0.5)) * bottomOverlayDepth;
+      const halfViewWidth = halfViewHeight * camera.aspect;
+      const baseScale = bottomInfoSprite.userData.baseScale ?? 0.00095;
+      bottomInfoSprite.scale.set(
+        bottomInfoSprite.userData.canvas.width * baseScale,
+        bottomInfoSprite.userData.canvas.height * baseScale,
+        1
+      );
+
+      const maxAllowedWidth = Math.max(0.001, 2 * halfViewWidth - 0.4);
+      const maxAllowedHeight = Math.max(0.001, 2 * halfViewHeight - 0.4);
+      const shrink = Math.min(
+        maxAllowedWidth / bottomInfoSprite.scale.x,
+        maxAllowedHeight / bottomInfoSprite.scale.y,
+        1
+      );
+      if (shrink < 1) {
+        bottomInfoSprite.scale.multiplyScalar(shrink);
+      }
+
+      const bottomY = -halfViewHeight + bottomInfoSprite.scale.y * 0.5 + bottomOverlayMargin;
+      bottomInfoSprite.position.set(0, bottomY, -bottomOverlayDepth);
+    };
 
     const axisHelper = new THREE.AxesHelper(2.6);
     axisHelper.position.set(-7.8, 0.01, -2.2);
@@ -631,6 +681,7 @@ export default function PendulumScene({ mass, amplitude, isPlaying }) {
       camera.aspect = width / Math.max(height, 1);
       camera.updateProjectionMatrix();
       updateSideExplainLabelPositions();
+      updateBottomInfoPosition();
     };
     setRendererSize();
 
@@ -679,15 +730,23 @@ export default function PendulumScene({ mass, amplitude, isPlaying }) {
       if (key !== bottomInfoKey) {
         updateBottomInfoSprite(bottomInfoSprite, lines);
         bottomInfoKey = key;
+        updateBottomInfoPosition();
       }
     };
 
-    setNarration("intro", ["Simple Pendulum", "Small-angle SHM: T = 2π√(L/g)."]);
+    setNarration("intro", [
+      "Simple Pendulum",
+      "Small-angle SHM: T = 2π√(L/g).",
+      "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor.",
+      "Incididunt ut labore et dolore magna aliqua, ut enim ad minim veniam."
+    ]);
     setBottomInfo("intro", [
       "Status: quarter-cycle teaching mode is active.",
       "Blue v = bob velocity along the arc.",
       "Red F_t = tangential restoring force.",
-      "Watch: turning point -> v ~ 0, equilibrium -> |v| is largest."
+      "Watch: turning point -> v ~ 0, equilibrium -> |v| is largest.",
+      "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+      "Sed do eiusmod tempor incididunt ut labore et dolore."
     ]);
 
     const updateVisuals = () => {
@@ -780,7 +839,9 @@ export default function PendulumScene({ mass, amplitude, isPlaying }) {
         statusText,
         `Blue v = bob velocity (${velocityDirectionText}).`,
         `Red F_t = tangential restoring force (${forceDirectionText}).`,
-        "Watch: turning point -> v ~ 0, equilibrium -> |v| is largest."
+        "Watch: turning point -> v ~ 0, equilibrium -> |v| is largest.",
+        "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+        "Sed do eiusmod tempor incididunt ut labore et dolore."
       ]);
     };
     updateVisuals();
@@ -840,3 +901,4 @@ export default function PendulumScene({ mass, amplitude, isPlaying }) {
 
   return <div className="scene-canvas" ref={containerRef} />;
 }
+

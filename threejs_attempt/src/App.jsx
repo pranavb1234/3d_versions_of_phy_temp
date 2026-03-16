@@ -52,50 +52,28 @@ export default function App() {
           amplitude={amplitude}
           isPlaying={isPlaying}
         />
+        <div className="scene-controls">
+          <label className="template-select">
+            <span>Template</span>
+            <select value={templateId} onChange={(event) => setTemplateId(event.target.value)}>
+              <option value="single">{templateConfig.single.label}</option>
+              <option value="double">{templateConfig.double.label}</option>
+              <option value="pendulum">{templateConfig.pendulum.label}</option>
+            </select>
+          </label>
+
+          <div className="sim-toggle">
+            <span>Simulation:</span>
+            <button
+              type="button"
+              className={`sim-toggle-btn ${isPlaying ? "playing" : "paused"}`}
+              onClick={() => setIsPlaying((prev) => !prev)}
+            >
+              {isPlaying ? "Pause" : "Play"}
+            </button>
+          </div>
+        </div>
       </div>
-
-      <aside className="controls-panel">
-        {templateId !== "single" ? (
-          <>
-            <h1>{activeTemplate.title}</h1>
-            <p>{activeTemplate.description}</p>
-          </>
-        ) : null}
-
-        <label className="template-select">
-          <span>Template</span>
-          <select value={templateId} onChange={(event) => setTemplateId(event.target.value)}>
-            <option value="single">{templateConfig.single.label}</option>
-            <option value="double">{templateConfig.double.label}</option>
-            <option value="pendulum">{templateConfig.pendulum.label}</option>
-          </select>
-        </label>
-
-        <div className="sim-toggle">
-          <span>Simulation:</span>
-          <button
-            type="button"
-            className={`sim-toggle-btn ${isPlaying ? "playing" : "paused"}`}
-            onClick={() => setIsPlaying((prev) => !prev)}
-          >
-            {isPlaying ? "Pause" : "Play"}
-          </button>
-        </div>
-
-        <p>{activeTemplate.fixedText}</p>
-        {/*
-          Parameter controls are intentionally hidden for now:
-          - Mass slider
-          - Spring constant slider
-          - Amplitude slider
-          - Formula/equation block
-        */}
-
-        <div className="hint">
-          <p>Camera controls:</p>
-          <p>Left drag: rotate | Wheel: zoom | Right drag: pan</p>
-        </div>
-      </aside>
     </main>
   );
 }

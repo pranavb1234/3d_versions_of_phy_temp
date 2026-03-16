@@ -26,7 +26,7 @@ body {
   padding: 0.85rem;
   display: grid;
   gap: 0.85rem;
-  grid-template-columns: minmax(0, 1fr) 320px;
+  grid-template-columns: minmax(0, 1fr);
 }
 
 .scene-panel {
@@ -36,6 +36,7 @@ body {
   overflow: hidden;
   background: radial-gradient(circle at 20% 16%, #f6faff 0%, #dde6f0 52%, #c5d0de 100%);
   box-shadow: 0 18px 42px rgba(25, 40, 62, 0.22);
+  position: relative;
 }
 
 .scene-canvas {
@@ -43,6 +44,22 @@ body {
   height: 100%;
   min-height: 420px;
   position: relative;
+}
+
+.scene-controls {
+  position: absolute;
+  top: 0.8rem;
+  right: 0.8rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0.7rem 0.8rem;
+  border-radius: 14px;
+  border: 1px solid #9bb3ca;
+  background: rgba(238, 244, 251, 0.96);
+  box-shadow: 0 12px 26px rgba(36, 52, 79, 0.22);
+  min-width: 200px;
+  z-index: 5;
 }
 
 .controls-panel {
@@ -114,6 +131,16 @@ body {
   color: #1e2a3b;
   display: flex;
   justify-content: space-between;
+}
+
+.scene-controls label {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: #1e2a3b;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.55rem;
 }
 
 .template-select {

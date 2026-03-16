@@ -22,7 +22,9 @@ function getCheckpointExplanation(checkpointCount) {
       "The spring is fully stretched right now.",
       "The mass has stopped moving for a split second before coming back.",
       "The spring is pulling the mass back toward the center with maximum force.",
-      "Think of it like a rubber band - the more you stretch it, the harder it pulls back."
+      "Think of it like a rubber band - the more you stretch it, the harder it pulls back.",
+      "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore.",
+      "Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo."
     ];
   }
   if (quarter === 2) {
@@ -31,7 +33,9 @@ function getCheckpointExplanation(checkpointCount) {
       "The mass is now at the center position (equilibrium).",
       "It is moving at its fastest speed right now - like a pendulum at the bottom of its swing.",
       "The spring force is zero here because it is neither stretched nor compressed.",
-      "All the energy is kinetic (motion energy) at this point."
+      "All the energy is kinetic (motion energy) at this point.",
+      "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore.",
+      "Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo."
     ];
   }
   if (quarter === 3) {
@@ -40,7 +44,9 @@ function getCheckpointExplanation(checkpointCount) {
       "The spring is now fully compressed, like a squished coil.",
       "The mass has stopped again, just like it did on the right side.",
       "Now the spring is pushing the mass back toward the center with maximum force.",
-      "This is the mirror image of Checkpoint 1."
+      "This is the mirror image of Checkpoint 1.",
+      "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore.",
+      "Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo."
     ];
   }
   return [
@@ -48,7 +54,9 @@ function getCheckpointExplanation(checkpointCount) {
     "The mass is back at the center, moving at full speed toward the right.",
     "Spring force is zero again, just like Checkpoint 2.",
     "The mass is about to repeat the whole cycle from the beginning.",
-    "One complete oscillation is now finished - this keeps repeating forever."
+    "One complete oscillation is now finished - this keeps repeating forever.",
+    "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore.",
+    "Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo."
   ];
 }
 
@@ -274,8 +282,8 @@ function updateNarrationSprite(sprite, lines) {
     return;
   }
 
-  const headingFontSize = 36;
-  const bodyFontSize = 26;
+  const headingFontSize = 37;
+  const bodyFontSize = 27;
   const paddingX = 30;
   const paddingY = 20;
   const lineGap = 6;
@@ -297,14 +305,16 @@ function updateNarrationSprite(sprite, lines) {
   const maxTextWidth = lineMetrics.reduce((maxWidth, entry) => {
     return Math.max(maxWidth, entry.width);
   }, 0);
-  const startX = Math.max((canvas.width - maxTextWidth) * 0.5, paddingX);
+  const bodyStartX = Math.max((canvas.width - maxTextWidth) * 0.5, paddingX);
 
   let y = paddingY;
   lineMetrics.forEach((entry, index) => {
     context.font = `700 ${entry.fontSize}px "Segoe UI", "Trebuchet MS", sans-serif`;
     context.fillStyle = index === 0 ? "#ff7a00" : "#f8fbff";
-    context.strokeText(entry.line, startX, y);
-    context.fillText(entry.line, startX, y);
+    const lineX =
+      index === 0 ? Math.max((canvas.width - entry.width) * 0.5, paddingX) : bodyStartX;
+    context.strokeText(entry.line, lineX, y);
+    context.fillText(entry.line, lineX, y);
     y += entry.fontSize + lineGap;
   });
   context.shadowBlur = 0;
@@ -352,12 +362,12 @@ function updateBottomInfoSprite(sprite, lines) {
     return;
   }
 
-  const headingFontSize = 28;
-  const bodyFontSize = 22;
-  const paddingX = 44;
+  const headingFontSize = 29;
+  const bodyFontSize = 23;
+  const paddingX = 24;
   const paddingY = 24;
   const lineGap = 6;
-  const maxTextWidthRatio = 0.7;
+  const maxTextWidthRatio = 1;
   const minHeight = 320;
   context.textBaseline = "top";
 
@@ -371,8 +381,10 @@ function updateBottomInfoSprite(sprite, lines) {
   context.shadowOffsetX = 0;
   context.shadowOffsetY = 2;
   const maxTextWidth = Math.min(canvas.width - paddingX * 2, canvas.width * maxTextWidthRatio);
+  const normalizedLines =
+    lines.length > 1 ? [lines[0], lines.slice(1).join(" ")] : lines;
   const wrappedLines = [];
-  lines.forEach((line, index) => {
+  normalizedLines.forEach((line, index) => {
     const fontSize = index === 0 ? headingFontSize : bodyFontSize;
     context.font = `700 ${fontSize}px "Segoe UI", "Trebuchet MS", sans-serif`;
     const pieces = wrapTextLines(context, line, maxTextWidth);
@@ -673,7 +685,9 @@ export default function SpringMassScene({ mass, springConstant, amplitude, isPla
 
     const narrationSprite = createNarrationSprite([
       "Spring-Mass Experiment",
-      "Undamped Simple Harmonic Motion: The mass bounces back and forth forever"
+      "Undamped Simple Harmonic Motion: The mass bounces back and forth forever.",
+      "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor.",
+      "Incididunt ut labore et dolore magna aliqua, ut enim ad minim veniam."
     ]);
     narrationSprite.center.set(0.5, 0.5);
     narrationSprite.position.set(0, 1.1, -6.6);
@@ -691,7 +705,7 @@ export default function SpringMassScene({ mass, springConstant, amplitude, isPla
     scene.add(axisHelper);
 
     const bottomOverlayDepth = 6.6;
-    const bottomOverlayMargin = 0.2;
+    const bottomOverlayMargin = 0.32;
 
     const updateBottomInfoPosition = () => {
       const halfViewHeight = Math.tan(THREE.MathUtils.degToRad(camera.fov * 0.5)) * bottomOverlayDepth;
@@ -773,7 +787,9 @@ export default function SpringMassScene({ mass, springConstant, amplitude, isPla
 
     setNarration("intro", [
       "Spring-Mass Experiment",
-      "Undamped Simple Harmonic Motion: The mass bounces back and forth forever"
+      "Undamped Simple Harmonic Motion: The mass bounces back and forth forever.",
+      "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor.",
+      "Incididunt ut labore et dolore magna aliqua, ut enim ad minim veniam."
     ]);
     setBottomInfo("intro", getCheckpointExplanation(1));
 
