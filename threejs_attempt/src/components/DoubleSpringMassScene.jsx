@@ -21,29 +21,36 @@ function getCheckpointExplanation(checkpointCount) {
 
   if (quarter === 1) {
     return [
-      "Pause at T/4: Maximum Stretch (+A)",
-      "Block reached far-right turning point.",
-      "Left spring stretched, right spring compressed; net force toward x_eq."
+      "Checkpoint 1/4 - Mass pulled to the right",
+      "Left spring stretched; right spring compressed.",
+      "The mass pauses for an instant (v = 0).",
+      "Both springs pull/push back toward the center.",
+      "Restoring force is largest here."
     ];
   }
   if (quarter === 2) {
     return [
-      "Pause at T/2: Mean Position",
-      "Block crossed x_eq moving left at max speed.",
-      "Left/right spring forces balance to zero momentarily."
+      "Checkpoint 2/4 - Mass crosses the center",
+      "The mass passes equilibrium moving left.",
+      "Speed is maximum here.",
+      "Left/right spring forces cancel (net F ~ 0).",
+      "Energy is mostly kinetic."
     ];
   }
   if (quarter === 3) {
     return [
-      "Pause at 3T/4: Maximum Compression (-A)",
-      "Block reached far-left turning point.",
-      "Right spring stretched, left spring compressed; net force toward x_eq."
+      "Checkpoint 3/4 - Mass pulled to the left",
+      "Right spring stretched; left spring compressed.",
+      "The mass pauses again (v = 0).",
+      "Both springs push/pull back toward the center.",
+      "Restoring force is largest here."
     ];
   }
   return [
-    "Pause at T: Mean Position",
-    "One full oscillation is complete.",
-    "Block crosses x_eq moving right at max speed."
+    "Checkpoint 4/4 - Mass crosses the center again",
+    "Back through equilibrium moving right.",
+    "Speed is maximum; net spring force ~ 0.",
+    "One full oscillation is complete."
   ];
 }
 
@@ -347,11 +354,13 @@ function updateBottomInfoSprite(sprite, lines) {
     return;
   }
 
-  const fontSize = 30;
-  const paddingX = 32;
-  const paddingY = 20;
-  const lineGap = 7;
-  context.font = `700 ${fontSize}px "Segoe UI", "Trebuchet MS", sans-serif`;
+  const headingFontSize = 28;
+  const bodyFontSize = 22;
+  const paddingX = 44;
+  const paddingY = 24;
+  const lineGap = 6;
+  const maxTextWidthRatio = 0.7;
+  const minHeight = 320;
 
   context.clearRect(0, 0, canvas.width, canvas.height);
   context.strokeStyle = "rgba(15, 23, 42, 0.82)";
@@ -364,24 +373,45 @@ function updateBottomInfoSprite(sprite, lines) {
   context.shadowOffsetY = 2;
   context.textBaseline = "top";
 
-  const maxTextWidth = lines.reduce((maxWidth, line) => {
-    return Math.max(maxWidth, context.measureText(line).width);
+  const maxTextWidth = Math.min(canvas.width - paddingX * 2, canvas.width * maxTextWidthRatio);
+  const wrappedLines = [];
+  lines.forEach((line, index) => {
+    const fontSize = index === 0 ? headingFontSize : bodyFontSize;
+    context.font = `700 ${fontSize}px "Segoe UI", "Trebuchet MS", sans-serif`;
+    const pieces = wrapTextLines(context, line, maxTextWidth);
+    pieces.forEach((piece) => wrappedLines.push({ text: piece, fontSize, isHeading: index === 0 }));
+  });
+
+  const contentHeight =
+    paddingY * 2 +
+    wrappedLines.reduce((total, entry) => total + entry.fontSize, 0) +
+    Math.max(wrappedLines.length - 1, 0) * lineGap;
+  const targetHeight = Math.max(minHeight, Math.ceil(contentHeight));
+  if (canvas.height !== targetHeight) {
+    canvas.height = targetHeight;
+  }
+
+  const maxLineWidth = wrappedLines.reduce((maxWidth, entry) => {
+    context.font = `700 ${entry.fontSize}px "Segoe UI", "Trebuchet MS", sans-serif`;
+    return Math.max(maxWidth, context.measureText(entry.text).width);
   }, 0);
-  const startX = Math.max((canvas.width - maxTextWidth) * 0.5, paddingX);
+  const startX = Math.max((canvas.width - maxLineWidth) * 0.5, paddingX);
 
   let y = paddingY;
-  lines.forEach((line) => {
-    context.strokeText(line, startX, y);
-    context.fillText(line, startX, y);
-    y += fontSize + lineGap;
+  wrappedLines.forEach((entry) => {
+    context.font = `700 ${entry.fontSize}px "Segoe UI", "Trebuchet MS", sans-serif`;
+    context.strokeText(entry.text, startX, y);
+    context.fillText(entry.text, startX, y);
+    y += entry.fontSize + lineGap;
   });
   context.shadowBlur = 0;
   context.shadowOffsetX = 0;
   context.shadowOffsetY = 0;
 
   texture.needsUpdate = true;
-  const scale = 0.00095;
-  sprite.scale.set(canvas.width * scale, canvas.height * scale, 1);
+  const baseScale = 0.00085;
+  sprite.userData.baseScale = baseScale;
+  sprite.scale.set(canvas.width * baseScale, canvas.height * baseScale, 1);
 }
 
 function createLeaderLine() {
@@ -600,14 +630,22 @@ export default function DoubleSpringMassScene({ mass, springConstant, amplitude,
     eqLabel.position.set(equilibriumX, 3.38, -0.82);
     scene.add(eqLabel);
 
-    const forceArrow = new THREE.ArrowHelper(
+    const leftForceArrow = new THREE.ArrowHelper(
       new THREE.Vector3(1, 0, 0),
-      new THREE.Vector3(equilibriumX, 1.18, 0.42),
+      new THREE.Vector3(equilibriumX, 1.18, 0.35),
       0.4,
       "#dc2626"
     );
-    configureArrowOverlay(forceArrow);
-    scene.add(forceArrow);
+    const rightForceArrow = new THREE.ArrowHelper(
+      new THREE.Vector3(1, 0, 0),
+      new THREE.Vector3(equilibriumX, 1.18, -0.35),
+      0.4,
+      "#dc2626"
+    );
+    configureArrowOverlay(leftForceArrow);
+    configureArrowOverlay(rightForceArrow);
+    scene.add(leftForceArrow);
+    scene.add(rightForceArrow);
 
     const velocityArrow = new THREE.ArrowHelper(
       new THREE.Vector3(1, 0, 0),
@@ -618,10 +656,15 @@ export default function DoubleSpringMassScene({ mass, springConstant, amplitude,
     configureArrowOverlay(velocityArrow);
     scene.add(velocityArrow);
 
-    const forceLabel = createTextLabelSprite("F_s");
-    forceLabel.center.set(0, 0.5);
-    forceLabel.scale.multiplyScalar(0.58);
-    scene.add(forceLabel);
+    const leftForceLabel = createTextLabelSprite("F_L");
+    leftForceLabel.center.set(0, 0.5);
+    leftForceLabel.scale.multiplyScalar(0.58);
+    scene.add(leftForceLabel);
+
+    const rightForceLabel = createTextLabelSprite("F_R");
+    rightForceLabel.center.set(0, 0.5);
+    rightForceLabel.scale.multiplyScalar(0.58);
+    scene.add(rightForceLabel);
 
     const velocityLabel = createTextLabelSprite("v");
     velocityLabel.center.set(0, 0.5);
@@ -638,23 +681,23 @@ export default function DoubleSpringMassScene({ mass, springConstant, amplitude,
     };
 
     const sideOverlayDepth = 6.6;
-    const sideOverlayY = 0.18;
-    const sideOverlayMargin = 0.08;
+    const sideOverlayMargin = 0.12;
+    const sideOverlayGap = 0.12;
 
     const velocityExplainLabel = createWrappedTextLabelSprite(
       "v: block velocity (blue arrow)",
       sideExplainLabelOptions
     );
     velocityExplainLabel.center.set(0.5, 0.5);
-    velocityExplainLabel.position.set(0, sideOverlayY, -sideOverlayDepth);
+    velocityExplainLabel.position.set(0, 0, -sideOverlayDepth);
     camera.add(velocityExplainLabel);
 
     const forceExplainLabel = createWrappedTextLabelSprite(
-      "F_s: net restoring force (both springs)",
+      "Red: left/right spring forces",
       sideExplainLabelOptions
     );
     forceExplainLabel.center.set(0.5, 0.5);
-    forceExplainLabel.position.set(0, sideOverlayY, -sideOverlayDepth);
+    forceExplainLabel.position.set(0, 0, -sideOverlayDepth);
     camera.add(forceExplainLabel);
 
     const updateSideExplainLabelPositions = () => {
@@ -662,32 +705,24 @@ export default function DoubleSpringMassScene({ mass, springConstant, amplitude,
         Math.tan(THREE.MathUtils.degToRad(camera.fov * 0.5)) * sideOverlayDepth;
       const halfViewWidth = halfViewHeight * camera.aspect;
 
-      velocityExplainLabel.position.set(
-        -halfViewWidth + velocityExplainLabel.scale.x * 0.5 + sideOverlayMargin,
-        sideOverlayY,
-        -sideOverlayDepth
-      );
-      forceExplainLabel.position.set(
-        halfViewWidth - forceExplainLabel.scale.x * 0.5 - sideOverlayMargin,
-        sideOverlayY,
-        -sideOverlayDepth
-      );
+      const leftX = -halfViewWidth + velocityExplainLabel.scale.x * 0.5 + sideOverlayMargin;
+      const topY = halfViewHeight - velocityExplainLabel.scale.y * 0.5 - sideOverlayMargin;
+      const stackedOffset =
+        velocityExplainLabel.scale.y * 0.5 + forceExplainLabel.scale.y * 0.5 + sideOverlayGap;
+
+      velocityExplainLabel.position.set(leftX, topY, -sideOverlayDepth);
+      forceExplainLabel.position.set(leftX, topY - stackedOffset, -sideOverlayDepth);
     };
 
     const narrationSprite = createNarrationSprite([
-      "Double Spring-Mass",
-      "Net force: F = -2k*x about x_eq."
+      "Double Spring-Mass Experiment",
+      "Two springs pull the mass back to center from both sides (net F = -2k*x)."
     ]);
     narrationSprite.center.set(0.5, 0.5);
     narrationSprite.position.set(0, 1.1, -6.6);
     camera.add(narrationSprite);
 
-    const bottomInfoSprite = createBottomInfoSprite([
-      "Status: simulation loaded.",
-      "Blue v = velocity of the moving block.",
-      "Red F_s = net restoring force from both springs.",
-      "Watch: turning point -> v ~ 0, equilibrium -> |v| is largest."
-    ]);
+    const bottomInfoSprite = createBottomInfoSprite([...getCheckpointExplanation(1)]);
     bottomInfoSprite.center.set(0.5, 0.5);
     bottomInfoSprite.position.set(0, -2.28, -6.6);
     camera.add(bottomInfoSprite);
@@ -695,6 +730,34 @@ export default function DoubleSpringMassScene({ mass, springConstant, amplitude,
     const axisHelper = new THREE.AxesHelper(2.6);
     axisHelper.position.set(-7.8, 0.01, -2.2);
     scene.add(axisHelper);
+
+    const bottomOverlayDepth = 6.6;
+    const bottomOverlayMargin = 0.2;
+
+    const updateBottomInfoPosition = () => {
+      const halfViewHeight = Math.tan(THREE.MathUtils.degToRad(camera.fov * 0.5)) * bottomOverlayDepth;
+      const halfViewWidth = halfViewHeight * camera.aspect;
+      const baseScale = bottomInfoSprite.userData.baseScale ?? 0.00085;
+      bottomInfoSprite.scale.set(
+        bottomInfoSprite.userData.canvas.width * baseScale,
+        bottomInfoSprite.userData.canvas.height * baseScale,
+        1
+      );
+
+      const maxAllowedWidth = Math.max(0.001, 2 * halfViewWidth - 0.4);
+      const maxAllowedHeight = Math.max(0.001, 2 * halfViewHeight - 0.4);
+      const shrink = Math.min(
+        maxAllowedWidth / bottomInfoSprite.scale.x,
+        maxAllowedHeight / bottomInfoSprite.scale.y,
+        1
+      );
+      if (shrink < 1) {
+        bottomInfoSprite.scale.multiplyScalar(shrink);
+      }
+
+      const bottomY = -halfViewHeight + bottomInfoSprite.scale.y * 0.5 + bottomOverlayMargin;
+      bottomInfoSprite.position.set(0, bottomY, -bottomOverlayDepth);
+    };
 
     const setRendererSize = () => {
       const width = container.clientWidth;
@@ -704,6 +767,7 @@ export default function DoubleSpringMassScene({ mass, springConstant, amplitude,
       camera.aspect = width / Math.max(height, 1);
       camera.updateProjectionMatrix();
       updateSideExplainLabelPositions();
+      updateBottomInfoPosition();
     };
     setRendererSize();
 
@@ -744,16 +808,15 @@ export default function DoubleSpringMassScene({ mass, springConstant, amplitude,
       if (key !== bottomInfoKey) {
         updateBottomInfoSprite(bottomInfoSprite, lines);
         bottomInfoKey = key;
+        updateBottomInfoPosition();
       }
     };
 
-    setNarration("intro", ["Double Spring-Mass", "Net force: F = -2k*x about x_eq."]);
-    setBottomInfo("intro", [
-      "Status: quarter-cycle teaching mode is active.",
-      "Blue v = velocity of the moving block.",
-      "Red F_s = net restoring force from both springs.",
-      "Watch: turning point -> v ~ 0, equilibrium -> |v| is largest."
+    setNarration("intro", [
+      "Double Spring-Mass Experiment",
+      "Two springs pull the mass back to center from both sides (net F = -2k*x)."
     ]);
+    setBottomInfo("intro", getCheckpointExplanation(1));
 
     const updateVisuals = () => {
       block.position.x = positionX;
@@ -795,26 +858,48 @@ export default function DoubleSpringMassScene({ mass, springConstant, amplitude,
       updateLeaderLine(massLeader, lineA, lineB, lineC);
 
       const displacement = positionX - equilibriumX;
-      const forceX = -2 * springConstant * displacement;
+      const forceEach = -springConstant * displacement;
 
-      const forceMagnitude = Math.abs(forceX);
+      const forceMagnitude = Math.abs(forceEach);
       if (forceMagnitude > 0.02) {
-        const forceDirection = Math.sign(forceX);
-        const forceLength = clamp(0.1 + forceMagnitude * 0.07, 0.18, 1.85);
+        const forceDirection = Math.sign(forceEach) || 1;
+        const forceLength = clamp(0.1 + forceMagnitude * 0.07, 0.18, 1.65);
         arrowDirection.set(forceDirection, 0, 0);
-        forceArrow.position.set(positionX, 1.18, 0.42);
-        forceArrow.setDirection(arrowDirection);
-        forceArrow.setLength(
+
+        leftForceArrow.position.set(blockLeftX + 0.06, 1.18, 0.35);
+        leftForceArrow.setDirection(arrowDirection);
+        leftForceArrow.setLength(
           forceLength,
           Math.min(forceLength * 0.32, 0.26),
           Math.min(forceLength * 0.24, 0.18)
         );
-        forceArrow.visible = true;
-        forceLabel.visible = true;
-        forceLabel.position.set(positionX + forceDirection * (forceLength + 0.22), 1.34, 0.46);
+        leftForceArrow.visible = true;
+        leftForceLabel.visible = true;
+        leftForceLabel.position.set(
+          blockLeftX + 0.06 + forceDirection * (forceLength + 0.22),
+          1.34,
+          0.4
+        );
+
+        rightForceArrow.position.set(blockRightX - 0.06, 1.18, -0.35);
+        rightForceArrow.setDirection(arrowDirection);
+        rightForceArrow.setLength(
+          forceLength,
+          Math.min(forceLength * 0.32, 0.26),
+          Math.min(forceLength * 0.24, 0.18)
+        );
+        rightForceArrow.visible = true;
+        rightForceLabel.visible = true;
+        rightForceLabel.position.set(
+          blockRightX - 0.06 + forceDirection * (forceLength + 0.22),
+          1.34,
+          -0.4
+        );
       } else {
-        forceArrow.visible = false;
-        forceLabel.visible = false;
+        leftForceArrow.visible = false;
+        rightForceArrow.visible = false;
+        leftForceLabel.visible = false;
+        rightForceLabel.visible = false;
       }
 
       const velocityMagnitude = Math.abs(velocityX);
@@ -840,25 +925,8 @@ export default function DoubleSpringMassScene({ mass, springConstant, amplitude,
       const activeQuarter = isPaused
         ? ((checkpointCount - 1 + 4) % 4) + 1
         : (checkpointCount % 4) + 1;
-      const statusText = isPaused
-        ? `Status: paused at checkpoint ${activeQuarter}/4.`
-        : `Status: moving through quarter ${activeQuarter}/4.`;
-      const velocityDirectionText =
-        velocityX > 0.02 ? "moving right" : velocityX < -0.02 ? "moving left" : "near turning point";
-      const forceDirectionText =
-        forceX > 0.02
-          ? "points right toward equilibrium"
-          : forceX < -0.02
-            ? "points left toward equilibrium"
-            : "is near zero at equilibrium";
-
-      const infoKey = `${isPaused ? 1 : 0}|${activeQuarter}|${Math.sign(velocityX)}|${Math.sign(forceX)}`;
-      setBottomInfo(infoKey, [
-        statusText,
-        `Blue v = velocity of the block (${velocityDirectionText}).`,
-        `Red F_s = net restoring force (${forceDirectionText}).`,
-        "Watch: turning point -> v ~ 0, equilibrium -> |v| is largest."
-      ]);
+      const infoKey = `${activeQuarter}`;
+      setBottomInfo(infoKey, getCheckpointExplanation(activeQuarter));
     };
     updateVisuals();
 

@@ -18,29 +18,37 @@ function getCheckpointExplanation(checkpointCount) {
 
   if (quarter === 1) {
     return [
-      "Checkpoint: +A (T/4)",
-      "Turning point: v = 0",
-      "Red F toward x_eq."
+      "Checkpoint 1/4 - Mass is pulled all the way to the right",
+      "The spring is fully stretched right now.",
+      "The mass has stopped moving for a split second before coming back.",
+      "The spring is pulling the mass back toward the center with maximum force.",
+      "Think of it like a rubber band - the more you stretch it, the harder it pulls back."
     ];
   }
   if (quarter === 2) {
     return [
-      "Checkpoint: x_eq (T/2)",
-      "Speed max: |v| is largest",
-      "Red F near zero."
+      "Checkpoint 2/4 - Mass is flying through the middle",
+      "The mass is now at the center position (equilibrium).",
+      "It is moving at its fastest speed right now - like a pendulum at the bottom of its swing.",
+      "The spring force is zero here because it is neither stretched nor compressed.",
+      "All the energy is kinetic (motion energy) at this point."
     ];
   }
   if (quarter === 3) {
     return [
-      "Checkpoint: -A (3T/4)",
-      "Turning point: v = 0",
-      "Red F toward x_eq."
+      "Checkpoint 3/4 - Mass is pushed all the way to the left",
+      "The spring is now fully compressed, like a squished coil.",
+      "The mass has stopped again, just like it did on the right side.",
+      "Now the spring is pushing the mass back toward the center with maximum force.",
+      "This is the mirror image of Checkpoint 1."
     ];
   }
   return [
-    "Checkpoint: x_eq (T)",
-    "Cycle complete",
-    "Speed max: |v| is largest"
+    "Checkpoint 4/4 - Mass is flying through the middle again",
+    "The mass is back at the center, moving at full speed toward the right.",
+    "Spring force is zero again, just like Checkpoint 2.",
+    "The mass is about to repeat the whole cycle from the beginning.",
+    "One complete oscillation is now finished - this keeps repeating forever."
   ];
 }
 
@@ -344,11 +352,14 @@ function updateBottomInfoSprite(sprite, lines) {
     return;
   }
 
-  const fontSize = 30;
-  const paddingX = 32;
-  const paddingY = 20;
-  const lineGap = 7;
-  context.font = `700 ${fontSize}px "Segoe UI", "Trebuchet MS", sans-serif`;
+  const headingFontSize = 28;
+  const bodyFontSize = 22;
+  const paddingX = 44;
+  const paddingY = 24;
+  const lineGap = 6;
+  const maxTextWidthRatio = 0.7;
+  const minHeight = 320;
+  context.textBaseline = "top";
 
   context.clearRect(0, 0, canvas.width, canvas.height);
   context.strokeStyle = "rgba(15, 23, 42, 0.82)";
@@ -359,26 +370,45 @@ function updateBottomInfoSprite(sprite, lines) {
   context.shadowBlur = 4;
   context.shadowOffsetX = 0;
   context.shadowOffsetY = 2;
-  context.textBaseline = "top";
+  const maxTextWidth = Math.min(canvas.width - paddingX * 2, canvas.width * maxTextWidthRatio);
+  const wrappedLines = [];
+  lines.forEach((line, index) => {
+    const fontSize = index === 0 ? headingFontSize : bodyFontSize;
+    context.font = `700 ${fontSize}px "Segoe UI", "Trebuchet MS", sans-serif`;
+    const pieces = wrapTextLines(context, line, maxTextWidth);
+    pieces.forEach((piece) => wrappedLines.push({ text: piece, fontSize, isHeading: index === 0 }));
+  });
 
-  const maxTextWidth = lines.reduce((maxWidth, line) => {
-    return Math.max(maxWidth, context.measureText(line).width);
+  const contentHeight =
+    paddingY * 2 +
+    wrappedLines.reduce((total, entry) => total + entry.fontSize, 0) +
+    Math.max(wrappedLines.length - 1, 0) * lineGap;
+  const targetHeight = Math.max(minHeight, Math.ceil(contentHeight));
+  if (canvas.height !== targetHeight) {
+    canvas.height = targetHeight;
+  }
+
+  const maxLineWidth = wrappedLines.reduce((maxWidth, entry) => {
+    context.font = `700 ${entry.fontSize}px "Segoe UI", "Trebuchet MS", sans-serif`;
+    return Math.max(maxWidth, context.measureText(entry.text).width);
   }, 0);
-  const startX = Math.max((canvas.width - maxTextWidth) * 0.5, paddingX);
+  const startX = Math.max((canvas.width - maxLineWidth) * 0.5, paddingX);
 
   let y = paddingY;
-  lines.forEach((line) => {
-    context.strokeText(line, startX, y);
-    context.fillText(line, startX, y);
-    y += fontSize + lineGap;
+  wrappedLines.forEach((entry) => {
+    context.font = `700 ${entry.fontSize}px "Segoe UI", "Trebuchet MS", sans-serif`;
+    context.strokeText(entry.text, startX, y);
+    context.fillText(entry.text, startX, y);
+    y += entry.fontSize + lineGap;
   });
   context.shadowBlur = 0;
   context.shadowOffsetX = 0;
   context.shadowOffsetY = 0;
 
   texture.needsUpdate = true;
-  const scale = 0.00095;
-  sprite.scale.set(canvas.width * scale, canvas.height * scale, 1);
+  const baseScale = 0.00085;
+  sprite.userData.baseScale = baseScale;
+  sprite.scale.set(canvas.width * baseScale, canvas.height * baseScale, 1);
 }
 
 function createLeaderLine() {
@@ -643,17 +673,14 @@ export default function SpringMassScene({ mass, springConstant, amplitude, isPla
 
     const narrationSprite = createNarrationSprite([
       "Spring-Mass Experiment",
-      "Undamped SHM: F = -k*x about x_eq."
+      "Undamped Simple Harmonic Motion: The mass bounces back and forth forever"
     ]);
     narrationSprite.center.set(0.5, 0.5);
     narrationSprite.position.set(0, 1.1, -6.6);
     camera.add(narrationSprite);
 
     const bottomInfoSprite = createBottomInfoSprite([
-      "Motion summary",
-      "Blue v = velocity",
-      "Red F = restoring force (F = -k*x)",
-      "Green x_eq = equilibrium"
+      ...getCheckpointExplanation(1)
     ]);
     bottomInfoSprite.center.set(0.5, 0.5);
     bottomInfoSprite.position.set(0, -2.28, -6.6);
@@ -663,6 +690,34 @@ export default function SpringMassScene({ mass, springConstant, amplitude, isPla
     axisHelper.position.set(-5.6, 0.01, -2.2);
     scene.add(axisHelper);
 
+    const bottomOverlayDepth = 6.6;
+    const bottomOverlayMargin = 0.2;
+
+    const updateBottomInfoPosition = () => {
+      const halfViewHeight = Math.tan(THREE.MathUtils.degToRad(camera.fov * 0.5)) * bottomOverlayDepth;
+      const halfViewWidth = halfViewHeight * camera.aspect;
+      const baseScale = bottomInfoSprite.userData.baseScale ?? 0.00085;
+      bottomInfoSprite.scale.set(
+        bottomInfoSprite.userData.canvas.width * baseScale,
+        bottomInfoSprite.userData.canvas.height * baseScale,
+        1
+      );
+
+      const maxAllowedWidth = Math.max(0.001, 2 * halfViewWidth - 0.4);
+      const maxAllowedHeight = Math.max(0.001, 2 * halfViewHeight - 0.4);
+      const shrink = Math.min(
+        maxAllowedWidth / bottomInfoSprite.scale.x,
+        maxAllowedHeight / bottomInfoSprite.scale.y,
+        1
+      );
+      if (shrink < 1) {
+        bottomInfoSprite.scale.multiplyScalar(shrink);
+      }
+
+      const bottomY = -halfViewHeight + bottomInfoSprite.scale.y * 0.5 + bottomOverlayMargin;
+      bottomInfoSprite.position.set(0, bottomY, -bottomOverlayDepth);
+    };
+
     const setRendererSize = () => {
       const width = container.clientWidth;
       const height = container.clientHeight;
@@ -671,6 +726,7 @@ export default function SpringMassScene({ mass, springConstant, amplitude, isPla
       camera.aspect = width / Math.max(height, 1);
       camera.updateProjectionMatrix();
       updateSideExplainLabelPositions();
+      updateBottomInfoPosition();
     };
     setRendererSize();
 
@@ -711,16 +767,15 @@ export default function SpringMassScene({ mass, springConstant, amplitude, isPla
       if (key !== bottomInfoKey) {
         updateBottomInfoSprite(bottomInfoSprite, lines);
         bottomInfoKey = key;
+        updateBottomInfoPosition();
       }
     };
 
-    setNarration("intro", ["Spring-Mass Experiment", "Undamped SHM: F = -k*x about x_eq."]);
-    setBottomInfo("intro", [
-      "Motion summary",
-      "Blue v = velocity",
-      "Red F = restoring force (F = -k*x)",
-      "Green x_eq = equilibrium"
+    setNarration("intro", [
+      "Spring-Mass Experiment",
+      "Undamped Simple Harmonic Motion: The mass bounces back and forth forever"
     ]);
+    setBottomInfo("intro", getCheckpointExplanation(1));
 
     const updateVisuals = () => {
       block.position.x = positionX;
@@ -795,25 +850,8 @@ export default function SpringMassScene({ mass, springConstant, amplitude, isPla
       const activeQuarter = isPaused
         ? ((checkpointCount - 1 + 4) % 4) + 1
         : (checkpointCount % 4) + 1;
-      const statusText = isPaused
-        ? `Status: paused at checkpoint ${activeQuarter}/4.`
-        : `Status: moving through quarter ${activeQuarter}/4.`;
-      const velocityDirectionText =
-        velocityX > 0.02 ? "moving right" : velocityX < -0.02 ? "moving left" : "near turning point";
-      const forceDirectionText =
-        forceX > 0.02
-          ? "points right toward equilibrium"
-          : forceX < -0.02
-            ? "points left toward equilibrium"
-            : "is near zero at equilibrium";
-
-      const infoKey = `${isPaused ? 1 : 0}|${activeQuarter}|${Math.sign(velocityX)}|${Math.sign(forceX)}`;
-      setBottomInfo(infoKey, [
-        statusText.replace("Status:", "Status"),
-        `Blue v (${velocityDirectionText}).`,
-        `Red F (${forceDirectionText}).`,
-        "Green x_eq = equilibrium"
-      ]);
+      const infoKey = `${activeQuarter}`;
+      setBottomInfo(infoKey, getCheckpointExplanation(activeQuarter));
 
     };
     updateVisuals();

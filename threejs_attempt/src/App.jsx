@@ -22,9 +22,9 @@ export default function App() {
       },
       double: {
         label: "Double Spring-Mass",
-        title: "Double Spring-Mass Oscillation",
+        title: "Double Spring-Mass Experiment",
         description:
-          "Mass connected to two identical springs fixed to both walls; the net restoring force is the sum of both springs.",
+          "Two springs pull the mass back to center from both sides, making the restoring force stronger than a single spring.",
         fixedText: "Fixed for now: m = 1.0 kg, k = 15.0 N/m (each), A = 3.0 m",
         Scene: DoubleSpringMassScene
       },
@@ -55,8 +55,12 @@ export default function App() {
       </div>
 
       <aside className="controls-panel">
-        <h1>{activeTemplate.title}</h1>
-        <p>{activeTemplate.description}</p>
+        {templateId !== "single" ? (
+          <>
+            <h1>{activeTemplate.title}</h1>
+            <p>{activeTemplate.description}</p>
+          </>
+        ) : null}
 
         <label className="template-select">
           <span>Template</span>
