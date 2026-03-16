@@ -21,44 +21,25 @@ function getCheckpointExplanation(checkpointCount) {
 
   if (quarter === 1) {
     return [
-      "Checkpoint 1/4 - Mass pulled to the right",
-      "Left spring stretched; right spring compressed.",
-      "The mass pauses for an instant (v = 0).",
-      "Both springs pull/push back toward the center.",
-      "Restoring force is largest here.",
-      "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore.",
-      "Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo."
+      "Checkpoint 1/4 — At Mean Position (Moving Right)",
+      "The mass is at the center (x = 0). Both springs are at their natural length — neither stretched nor compressed. So the force from each spring is zero, meaning net force = 0 and acceleration = 0. The mass is moving at its maximum speed. All energy is Kinetic Energy."
     ];
   }
   if (quarter === 2) {
     return [
-      "Checkpoint 2/4 - Mass crosses the center",
-      "The mass passes equilibrium moving left.",
-      "Speed is maximum here.",
-      "Left/right spring forces cancel (net F ~ 0).",
-      "Energy is mostly kinetic.",
-      "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore.",
-      "Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo."
+      "Checkpoint 2/4 — At Right Extreme (x = +A)",
+      "The mass has moved to the right extreme. The right spring is compressed and the left spring is stretched — both by the same amount A. Both springs are now pushing and pulling the mass back toward the center. Net restoring force = −2kA (maximum). Velocity = 0, acceleration = maximum. All energy is Potential Energy."
     ];
   }
   if (quarter === 3) {
     return [
-      "Checkpoint 3/4 - Mass pulled to the left",
-      "Right spring stretched; left spring compressed.",
-      "The mass pauses again (v = 0).",
-      "Both springs push/pull back toward the center.",
-      "Restoring force is largest here.",
-      "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore.",
-      "Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo."
+      "Checkpoint 3/4 — Back at Mean Position (Moving Left)",
+      "The mass is passing through the center again, now moving leftward. Both springs are back to natural length — net force = 0, acceleration = 0. Speed is at its maximum (in the left direction). All energy is Kinetic Energy. This is identical to Checkpoint 1 but in the opposite direction."
     ];
   }
   return [
-    "Checkpoint 4/4 - Mass crosses the center again",
-    "Back through equilibrium moving right.",
-    "Speed is maximum; net spring force ~ 0.",
-    "One full oscillation is complete.",
-    "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore.",
-    "Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo."
+    "Checkpoint 4/4 — At Left Extreme (x = −A)",
+    "The mass has moved to the left extreme. Now the left spring is compressed and the right spring is stretched — both by amount A. Again both springs act together to push and pull the mass back toward center. Net force = +2kA (maximum, pointing right). Velocity = 0, acceleration = maximum. All energy is Potential Energy. After this the mass returns to center and one full oscillation is complete."
   ];
 }
 
@@ -290,18 +271,18 @@ function updateNarrationSprite(sprite, lines) {
   const paddingY = 20;
   const lineGap = 6;
   context.clearRect(0, 0, canvas.width, canvas.height);
-  context.strokeStyle = "rgba(15, 23, 42, 0.8)";
-  context.lineWidth = 4;
+  context.strokeStyle = "#000000";
+  context.lineWidth = 2;
   context.lineJoin = "round";
-  context.shadowColor = "rgba(13, 20, 35, 0.65)";
-  context.shadowBlur = 4;
+  context.shadowColor = "transparent";
+  context.shadowBlur = 0;
   context.shadowOffsetX = 0;
-  context.shadowOffsetY = 2;
+  context.shadowOffsetY = 0;
   context.textBaseline = "top";
 
   const lineMetrics = lines.map((line, index) => {
     const fontSize = index === 0 ? headingFontSize : bodyFontSize;
-    context.font = `700 ${fontSize}px "Segoe UI", "Trebuchet MS", sans-serif`;
+    context.font = `500 ${fontSize}px "Segoe UI", "Trebuchet MS", sans-serif`;
     return { line, fontSize, width: context.measureText(line).width };
   });
   const maxTextWidth = lineMetrics.reduce((maxWidth, entry) => {
@@ -311,11 +292,13 @@ function updateNarrationSprite(sprite, lines) {
 
   let y = paddingY;
   lineMetrics.forEach((entry, index) => {
-    context.font = `700 ${entry.fontSize}px "Segoe UI", "Trebuchet MS", sans-serif`;
-    context.fillStyle = index === 0 ? "#ff7a00" : "#f8fbff";
+    context.font = `500 ${entry.fontSize}px "Segoe UI", "Trebuchet MS", sans-serif`;
+    context.fillStyle = index === 0 ? "#ff7a00" : "#000000";
     const lineX =
       index === 0 ? Math.max((canvas.width - entry.width) * 0.5, paddingX) : bodyStartX;
-    context.strokeText(entry.line, lineX, y);
+    if (index === 0) {
+      context.strokeText(entry.line, lineX, y);
+    }
     context.fillText(entry.line, lineX, y);
     y += entry.fontSize + lineGap;
   });
@@ -364,23 +347,23 @@ function updateBottomInfoSprite(sprite, lines) {
     return;
   }
 
-  const headingFontSize = 29;
-  const bodyFontSize = 23;
-  const paddingX = 24;
-  const paddingY = 24;
-  const lineGap = 6;
-  const maxTextWidthRatio = 1;
-  const minHeight = 320;
+  const headingFontSize = 30;
+  const bodyFontSize = 30;
+  const paddingX = 28;
+  const paddingY = 2;
+  const lineGap = 10;
+  const maxTextWidthRatio = 0.7;
+  const minHeight = 350;
 
   context.clearRect(0, 0, canvas.width, canvas.height);
   context.strokeStyle = "rgba(15, 23, 42, 0.82)";
-  context.lineWidth = 6;
+  context.lineWidth = 4;
   context.lineJoin = "round";
-  context.fillStyle = "#f7fbff";
-  context.shadowColor = "rgba(13, 20, 35, 0.66)";
-  context.shadowBlur = 4;
+  context.fillStyle = "#000000";
+  context.shadowColor = "transparent";
+  context.shadowBlur = 0;
   context.shadowOffsetX = 0;
-  context.shadowOffsetY = 2;
+  context.shadowOffsetY = 0;
   context.textBaseline = "top";
 
   const maxTextWidth = Math.min(canvas.width - paddingX * 2, canvas.width * maxTextWidthRatio);
@@ -389,7 +372,7 @@ function updateBottomInfoSprite(sprite, lines) {
   const wrappedLines = [];
   normalizedLines.forEach((line, index) => {
     const fontSize = index === 0 ? headingFontSize : bodyFontSize;
-    context.font = `700 ${fontSize}px "Segoe UI", "Trebuchet MS", sans-serif`;
+    context.font = `500 ${fontSize}px "Segoe UI", "Trebuchet MS", sans-serif`;
     const pieces = wrapTextLines(context, line, maxTextWidth);
     pieces.forEach((piece) => wrappedLines.push({ text: piece, fontSize, isHeading: index === 0 }));
   });
@@ -404,15 +387,67 @@ function updateBottomInfoSprite(sprite, lines) {
   }
 
   const maxLineWidth = wrappedLines.reduce((maxWidth, entry) => {
-    context.font = `700 ${entry.fontSize}px "Segoe UI", "Trebuchet MS", sans-serif`;
+    context.font = `500 ${entry.fontSize}px "Segoe UI", "Trebuchet MS", sans-serif`;
     return Math.max(maxWidth, context.measureText(entry.text).width);
   }, 0);
-  const startX = Math.max((canvas.width - maxLineWidth) * 0.5, paddingX);
+  const textBlockHeight =
+    wrappedLines.reduce((total, entry) => total + entry.fontSize, 0) +
+    Math.max(wrappedLines.length - 1, 0) * lineGap;
+  const bgPaddingX = 20;
+  const bgPaddingY = 12;
+  if (!sprite.userData.fixedBox) {
+    let maxBoxWidth = 0;
+    let maxBoxHeight = 0;
+    for (let idx = 1; idx <= 4; idx += 1) {
+      const checkpointLines = getCheckpointExplanation(idx);
+      const normalized =
+        checkpointLines.length > 1
+          ? [checkpointLines[0], checkpointLines.slice(1).join(" ")]
+          : checkpointLines;
+      const tempWrapped = [];
+      normalized.forEach((line, lineIndex) => {
+        const fontSize = lineIndex === 0 ? headingFontSize : bodyFontSize;
+        context.font = `500 ${fontSize}px "Segoe UI", "Trebuchet MS", sans-serif`;
+        const pieces = wrapTextLines(context, line, maxTextWidth);
+        pieces.forEach((piece) => tempWrapped.push({ text: piece, fontSize }));
+      });
+      const tempMaxLineWidth = tempWrapped.reduce((acc, entry) => {
+        context.font = `500 ${entry.fontSize}px "Segoe UI", "Trebuchet MS", sans-serif`;
+        return Math.max(acc, context.measureText(entry.text).width);
+      }, 0);
+      const tempTextBlockHeight =
+        tempWrapped.reduce((total, entry) => total + entry.fontSize, 0) +
+        Math.max(tempWrapped.length - 1, 0) * lineGap;
+      const boxWidth = Math.min(canvas.width - paddingX * 2, tempMaxLineWidth + bgPaddingX * 2);
+      const boxHeight = Math.min(canvas.height - paddingY * 2, tempTextBlockHeight + bgPaddingY * 2);
+      maxBoxWidth = Math.max(maxBoxWidth, boxWidth);
+      maxBoxHeight = Math.max(maxBoxHeight, boxHeight);
+    }
+    sprite.userData.fixedBox = { width: maxBoxWidth, height: maxBoxHeight };
+  }
 
-  let y = paddingY;
+  const fixedBox = sprite.userData.fixedBox;
+  const bgWidth =
+    fixedBox?.width ?? Math.min(canvas.width - paddingX * 2, maxLineWidth + bgPaddingX * 2);
+  const bgHeight =
+    fixedBox?.height ?? Math.min(canvas.height - paddingY * 2, textBlockHeight + bgPaddingY * 2);
+  const bgX = Math.max(0, (canvas.width - bgWidth) * 0.5);
+  const blockYOffset = -22;
+  const bgY = Math.max(0, (canvas.height - bgHeight) * 0.5 + blockYOffset);
+  const textInsetX = Math.max((bgWidth - bgPaddingX * 2 - maxLineWidth) * 0.5, 0);
+  const textInsetY = Math.max((bgHeight - bgPaddingY * 2 - textBlockHeight) * 0.5, 0);
+  const startX = bgX + bgPaddingX + textInsetX;
+
+  context.fillStyle = "rgba(255, 255, 255, 0.5)";
+  context.strokeStyle = "rgba(0, 0, 0, 0.25)";
+  context.lineWidth = 2;
+  context.fillRect(bgX, bgY, bgWidth, bgHeight);
+  context.strokeRect(bgX, bgY, bgWidth, bgHeight);
+  context.fillStyle = "#000000";
+
+  let y = bgY + bgPaddingY + textInsetY;
   wrappedLines.forEach((entry) => {
-    context.font = `700 ${entry.fontSize}px "Segoe UI", "Trebuchet MS", sans-serif`;
-    context.strokeText(entry.text, startX, y);
+    context.font = `500 ${entry.fontSize}px "Segoe UI", "Trebuchet MS", sans-serif`;
     context.fillText(entry.text, startX, y);
     y += entry.fontSize + lineGap;
   });
@@ -652,7 +687,7 @@ export default function DoubleSpringMassScene({ mass, springConstant, amplitude,
       new THREE.Vector3(1, 0, 0),
       new THREE.Vector3(equilibriumX, 1.18, -0.35),
       0.4,
-      "#dc2626"
+      "#16a34a"
     );
     configureArrowOverlay(leftForceArrow);
     configureArrowOverlay(rightForceArrow);
@@ -704,13 +739,45 @@ export default function DoubleSpringMassScene({ mass, springConstant, amplitude,
     velocityExplainLabel.position.set(0, 0, -sideOverlayDepth);
     camera.add(velocityExplainLabel);
 
-    const forceExplainLabel = createWrappedTextLabelSprite(
-      "Red: left/right spring forces",
+    const leftForceExplainLabel = createWrappedTextLabelSprite(
+      "Left spring force (red)",
       sideExplainLabelOptions
     );
-    forceExplainLabel.center.set(0.5, 0.5);
-    forceExplainLabel.position.set(0, 0, -sideOverlayDepth);
-    camera.add(forceExplainLabel);
+    leftForceExplainLabel.center.set(0.5, 0.5);
+    leftForceExplainLabel.position.set(0, 0, -sideOverlayDepth);
+    camera.add(leftForceExplainLabel);
+
+    const rightForceExplainLabel = createWrappedTextLabelSprite(
+      "Right spring force (green)",
+      sideExplainLabelOptions
+    );
+    rightForceExplainLabel.center.set(0.5, 0.5);
+    rightForceExplainLabel.position.set(0, 0, -sideOverlayDepth);
+    camera.add(rightForceExplainLabel);
+
+    const kEffLabel = createWrappedTextLabelSprite(
+      "k_eff: k1 + k2 (k1 = k2 = k).",
+      sideExplainLabelOptions
+    );
+    kEffLabel.center.set(0.5, 0.5);
+    kEffLabel.position.set(0, 0, -sideOverlayDepth);
+    camera.add(kEffLabel);
+
+    const amplitudeLabel = createWrappedTextLabelSprite(
+      "A: amplitude.",
+      sideExplainLabelOptions
+    );
+    amplitudeLabel.center.set(0.5, 0.5);
+    amplitudeLabel.position.set(0, 0, -sideOverlayDepth);
+    camera.add(amplitudeLabel);
+
+    const displacementLabel = createWrappedTextLabelSprite(
+      "x: displacement from equilibrium position.",
+      sideExplainLabelOptions
+    );
+    displacementLabel.center.set(0.5, 0.5);
+    displacementLabel.position.set(0, 0, -sideOverlayDepth);
+    camera.add(displacementLabel);
 
     const updateSideExplainLabelPositions = () => {
       const halfViewHeight =
@@ -720,17 +787,46 @@ export default function DoubleSpringMassScene({ mass, springConstant, amplitude,
       const leftX = -halfViewWidth + velocityExplainLabel.scale.x * 0.5 + sideOverlayMargin;
       const topY = halfViewHeight - velocityExplainLabel.scale.y * 0.5 - sideOverlayMargin;
       const stackedOffset =
-        velocityExplainLabel.scale.y * 0.5 + forceExplainLabel.scale.y * 0.5 + sideOverlayGap;
+        velocityExplainLabel.scale.y * 0.5 + leftForceExplainLabel.scale.y * 0.5 + sideOverlayGap;
+      const stackedOffset2 =
+        leftForceExplainLabel.scale.y * 0.5 + rightForceExplainLabel.scale.y * 0.5 + sideOverlayGap;
+      const stackedOffset3 =
+        rightForceExplainLabel.scale.y * 0.5 + kEffLabel.scale.y * 0.5 + sideOverlayGap;
+      const stackedOffset4 =
+        kEffLabel.scale.y * 0.5 + amplitudeLabel.scale.y * 0.5 + sideOverlayGap;
+      const stackedOffset5 =
+        amplitudeLabel.scale.y * 0.5 + displacementLabel.scale.y * 0.5 + sideOverlayGap;
 
       velocityExplainLabel.position.set(leftX, topY, -sideOverlayDepth);
-      forceExplainLabel.position.set(leftX, topY - stackedOffset, -sideOverlayDepth);
+      leftForceExplainLabel.position.set(leftX, topY - stackedOffset, -sideOverlayDepth);
+      rightForceExplainLabel.position.set(
+        leftX,
+        topY - stackedOffset - stackedOffset2,
+        -sideOverlayDepth
+      );
+      kEffLabel.position.set(
+        leftX,
+        topY - stackedOffset - stackedOffset2 - stackedOffset3,
+        -sideOverlayDepth
+      );
+      amplitudeLabel.position.set(
+        leftX,
+        topY - stackedOffset - stackedOffset2 - stackedOffset3 - stackedOffset4,
+        -sideOverlayDepth
+      );
+      displacementLabel.position.set(
+        leftX,
+        topY - stackedOffset - stackedOffset2 - stackedOffset3 - stackedOffset4 - stackedOffset5,
+        -sideOverlayDepth
+      );
     };
 
     const narrationSprite = createNarrationSprite([
       "Double Spring-Mass Experiment",
-      "Two springs pull the mass back to center from both sides (net F = -2k*x).",
-      "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor.",
-      "Incididunt ut labore et dolore magna aliqua, ut enim ad minim veniam."
+      "A mass is connected between two springs, one on each side, both attached to fixed walls.",
+      "When the mass is pushed or pulled from the center, one spring stretches and the other",
+      "compresses at the same time. Both springs work together to pull and push the mass back to",
+      "the center. "
     ]);
     narrationSprite.center.set(0.5, 0.5);
     narrationSprite.position.set(0, 1.1, -6.6);
@@ -746,7 +842,7 @@ export default function DoubleSpringMassScene({ mass, springConstant, amplitude,
     scene.add(axisHelper);
 
     const bottomOverlayDepth = 6.6;
-    const bottomOverlayMargin = 0.32;
+    const bottomOverlayMargin = 0.55;
 
     const updateBottomInfoPosition = () => {
       const halfViewHeight = Math.tan(THREE.MathUtils.degToRad(camera.fov * 0.5)) * bottomOverlayDepth;
@@ -828,9 +924,10 @@ export default function DoubleSpringMassScene({ mass, springConstant, amplitude,
 
     setNarration("intro", [
       "Double Spring-Mass Experiment",
-      "Two springs pull the mass back to center from both sides (net F = -2k*x).",
-      "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor.",
-      "Incididunt ut labore et dolore magna aliqua, ut enim ad minim veniam."
+      "A mass is connected between two springs, one on each side, both attached to fixed walls.",
+      "When the mass is pushed or pulled from the center, one spring stretches and the other",
+      "compresses at the same time. Both springs work together to pull and push the mass back to",
+      "the center."
     ]);
     setBottomInfo("intro", getCheckpointExplanation(1));
 

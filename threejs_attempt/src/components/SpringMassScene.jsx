@@ -268,18 +268,18 @@ function updateNarrationSprite(sprite, lines) {
   const paddingY = 20;
   const lineGap = 6;
   context.clearRect(0, 0, canvas.width, canvas.height);
-  context.strokeStyle = "rgba(15, 23, 42, 0.8)";
-  context.lineWidth = 4;
+  context.strokeStyle = "#000000";
+  context.lineWidth = 2;
   context.lineJoin = "round";
-  context.shadowColor = "rgba(13, 20, 35, 0.65)";
-  context.shadowBlur = 4;
+  context.shadowColor = "transparent";
+  context.shadowBlur = 0;
   context.shadowOffsetX = 0;
-  context.shadowOffsetY = 2;
+  context.shadowOffsetY = 0;
   context.textBaseline = "top";
 
   const lineMetrics = lines.map((line, index) => {
     const fontSize = index === 0 ? headingFontSize : bodyFontSize;
-    context.font = `700 ${fontSize}px "Segoe UI", "Trebuchet MS", sans-serif`;
+    context.font = `500 ${fontSize}px "Segoe UI", "Trebuchet MS", sans-serif`;
     return { line, fontSize, width: context.measureText(line).width };
   });
   const maxTextWidth = lineMetrics.reduce((maxWidth, entry) => {
@@ -289,11 +289,13 @@ function updateNarrationSprite(sprite, lines) {
 
   let y = paddingY;
   lineMetrics.forEach((entry, index) => {
-    context.font = `700 ${entry.fontSize}px "Segoe UI", "Trebuchet MS", sans-serif`;
-    context.fillStyle = index === 0 ? "#ff7a00" : "#f8fbff";
+    context.font = `500 ${entry.fontSize}px "Segoe UI", "Trebuchet MS", sans-serif`;
+    context.fillStyle = index === 0 ? "#ff7a00" : "#000000";
     const lineX =
       index === 0 ? Math.max((canvas.width - entry.width) * 0.5, paddingX) : bodyStartX;
-    context.strokeText(entry.line, lineX, y);
+    if (index === 0) {
+      context.strokeText(entry.line, lineX, y);
+    }
     context.fillText(entry.line, lineX, y);
     y += entry.fontSize + lineGap;
   });
@@ -355,18 +357,18 @@ function updateBottomInfoSprite(sprite, lines) {
   context.strokeStyle = "rgba(15, 23, 42, 0.82)";
   context.lineWidth = 6;
   context.lineJoin = "round";
-  context.fillStyle = "#f7fbff";
-  context.shadowColor = "rgba(13, 20, 35, 0.66)";
-  context.shadowBlur = 4;
+  context.fillStyle = "#000000";
+  context.shadowColor = "transparent";
+  context.shadowBlur = 0;
   context.shadowOffsetX = 0;
-  context.shadowOffsetY = 2;
+  context.shadowOffsetY = 0;
   const maxTextWidth = Math.min(canvas.width - paddingX * 2, canvas.width * maxTextWidthRatio);
   const normalizedLines =
     lines.length > 1 ? [lines[0], lines.slice(1).join(" ")] : lines;
   const wrappedLines = [];
   normalizedLines.forEach((line, index) => {
     const fontSize = index === 0 ? headingFontSize : bodyFontSize;
-    context.font = `700 ${fontSize}px "Segoe UI", "Trebuchet MS", sans-serif`;
+    context.font = `500 ${fontSize}px "Segoe UI", "Trebuchet MS", sans-serif`;
     const pieces = wrapTextLines(context, line, maxTextWidth);
     pieces.forEach((piece) => wrappedLines.push({ text: piece, fontSize, isHeading: index === 0 }));
   });
@@ -381,15 +383,68 @@ function updateBottomInfoSprite(sprite, lines) {
   }
 
   const maxLineWidth = wrappedLines.reduce((maxWidth, entry) => {
-    context.font = `700 ${entry.fontSize}px "Segoe UI", "Trebuchet MS", sans-serif`;
+    context.font = `500 ${entry.fontSize}px "Segoe UI", "Trebuchet MS", sans-serif`;
     return Math.max(maxWidth, context.measureText(entry.text).width);
   }, 0);
-  const startX = Math.max((canvas.width - maxLineWidth) * 0.5, paddingX);
+  const textBlockHeight =
+    wrappedLines.reduce((total, entry) => total + entry.fontSize, 0) +
+    Math.max(wrappedLines.length - 1, 0) * lineGap;
+  const bgPaddingX = 20;
+  const bgPaddingY = 12;
 
-  let y = paddingY;
+  if (!sprite.userData.fixedBox) {
+    let maxBoxWidth = 0;
+    let maxBoxHeight = 0;
+    for (let idx = 1; idx <= 4; idx += 1) {
+      const checkpointLines = getCheckpointExplanation(idx);
+      const normalized =
+        checkpointLines.length > 1
+          ? [checkpointLines[0], checkpointLines.slice(1).join(" ")]
+          : checkpointLines;
+      const tempWrapped = [];
+      normalized.forEach((line, lineIndex) => {
+        const fontSize = lineIndex === 0 ? headingFontSize : bodyFontSize;
+        context.font = `500 ${fontSize}px "Segoe UI", "Trebuchet MS", sans-serif`;
+        const pieces = wrapTextLines(context, line, maxTextWidth);
+        pieces.forEach((piece) => tempWrapped.push({ text: piece, fontSize }));
+      });
+      const tempMaxLineWidth = tempWrapped.reduce((acc, entry) => {
+        context.font = `500 ${entry.fontSize}px "Segoe UI", "Trebuchet MS", sans-serif`;
+        return Math.max(acc, context.measureText(entry.text).width);
+      }, 0);
+      const tempTextBlockHeight =
+        tempWrapped.reduce((total, entry) => total + entry.fontSize, 0) +
+        Math.max(tempWrapped.length - 1, 0) * lineGap;
+      const boxWidth = Math.min(canvas.width - paddingX * 2, tempMaxLineWidth + bgPaddingX * 2);
+      const boxHeight = Math.min(canvas.height - paddingY * 2, tempTextBlockHeight + bgPaddingY * 2);
+      maxBoxWidth = Math.max(maxBoxWidth, boxWidth);
+      maxBoxHeight = Math.max(maxBoxHeight, boxHeight);
+    }
+    sprite.userData.fixedBox = { width: maxBoxWidth, height: maxBoxHeight };
+  }
+
+  const fixedBox = sprite.userData.fixedBox;
+  const bgWidth =
+    fixedBox?.width ?? Math.min(canvas.width - paddingX * 2, maxLineWidth + bgPaddingX * 2);
+  const bgHeight =
+    fixedBox?.height ?? Math.min(canvas.height - paddingY * 2, textBlockHeight + bgPaddingY * 2);
+  const bgX = Math.max(0, (canvas.width - bgWidth) * 0.5);
+  const bgY = Math.max(0, (canvas.height - bgHeight) * 0.5);
+  const textInsetX = Math.max((bgWidth - bgPaddingX * 2 - maxLineWidth) * 0.5, 0);
+  const textInsetY = Math.max((bgHeight - bgPaddingY * 2 - textBlockHeight) * 0.5, 0);
+  const startX = bgX + bgPaddingX + textInsetX;
+
+  context.fillStyle = "rgba(255, 255, 255, 0.5)";
+  context.strokeStyle = "rgba(0, 0, 0, 0.25)";
+  context.lineWidth = 2;
+  context.fillRect(bgX, bgY, bgWidth, bgHeight);
+  context.strokeRect(bgX, bgY, bgWidth, bgHeight);
+  context.fillStyle = "#000000";
+
+  let y = bgY + bgPaddingY + textInsetY;
   wrappedLines.forEach((entry) => {
-    context.font = `700 ${entry.fontSize}px "Segoe UI", "Trebuchet MS", sans-serif`;
-    context.strokeText(entry.text, startX, y);
+    context.font = `500 ${entry.fontSize}px "Segoe UI", "Trebuchet MS", sans-serif`;
+    context.fillStyle = "#000000";
     context.fillText(entry.text, startX, y);
     y += entry.fontSize + lineGap;
   });
@@ -650,6 +705,22 @@ export default function SpringMassScene({ mass, springConstant, amplitude, isPla
     forceExplainLabel.position.set(0, 0, -sideOverlayDepth);
     camera.add(forceExplainLabel);
 
+    const displacementLabel = createWrappedTextLabelSprite(
+      "x: displacement from equilibrium position",
+      sideExplainLabelOptions
+    );
+    displacementLabel.center.set(0.5, 0.5);
+    displacementLabel.position.set(0, 0, -sideOverlayDepth);
+    camera.add(displacementLabel);
+
+    const amplitudeLabel = createWrappedTextLabelSprite(
+      "A: amplitude",
+      sideExplainLabelOptions
+    );
+    amplitudeLabel.center.set(0.5, 0.5);
+    amplitudeLabel.position.set(0, 0, -sideOverlayDepth);
+    camera.add(amplitudeLabel);
+
     const updateSideExplainLabelPositions = () => {
       const halfViewHeight =
         Math.tan(THREE.MathUtils.degToRad(camera.fov * 0.5)) * sideOverlayDepth;
@@ -658,9 +729,23 @@ export default function SpringMassScene({ mass, springConstant, amplitude, isPla
       const topY = halfViewHeight - velocityExplainLabel.scale.y * 0.5 - sideOverlayMargin;
       const stackedOffset =
         velocityExplainLabel.scale.y * 0.5 + forceExplainLabel.scale.y * 0.5 + sideOverlayGap;
+      const stackedOffset2 =
+        forceExplainLabel.scale.y * 0.5 + displacementLabel.scale.y * 0.5 + sideOverlayGap;
+      const stackedOffset3 =
+        displacementLabel.scale.y * 0.5 + amplitudeLabel.scale.y * 0.5 + sideOverlayGap;
 
       velocityExplainLabel.position.set(leftX, topY, -sideOverlayDepth);
       forceExplainLabel.position.set(leftX, topY - stackedOffset, -sideOverlayDepth);
+      displacementLabel.position.set(
+        leftX,
+        topY - stackedOffset - stackedOffset2,
+        -sideOverlayDepth
+      );
+      amplitudeLabel.position.set(
+        leftX,
+        topY - stackedOffset - stackedOffset2 - stackedOffset3,
+        -sideOverlayDepth
+      );
     };
 
     const narrationSprite = createNarrationSprite([
@@ -686,7 +771,7 @@ export default function SpringMassScene({ mass, springConstant, amplitude, isPla
     scene.add(axisHelper);
 
     const bottomOverlayDepth = 6.6;
-    const bottomOverlayMargin = 0.32;
+    const bottomOverlayMargin = 0.55;
 
     const updateBottomInfoPosition = () => {
       const halfViewHeight = Math.tan(THREE.MathUtils.degToRad(camera.fov * 0.5)) * bottomOverlayDepth;
