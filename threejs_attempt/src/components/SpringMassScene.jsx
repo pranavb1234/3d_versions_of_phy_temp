@@ -18,45 +18,25 @@ function getCheckpointExplanation(checkpointCount) {
 
   if (quarter === 1) {
     return [
-      "Checkpoint 1/4 - Mass is pulled all the way to the right",
-      "The spring is fully stretched right now.",
-      "The mass has stopped moving for a split second before coming back.",
-      "The spring is pulling the mass back toward the center with maximum force.",
-      "Think of it like a rubber band - the more you stretch it, the harder it pulls back.",
-      "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore.",
-      "Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo."
+      "Checkpoint 1/4 — At Right Extreme (Maximum Stretch)",
+      "The mass has reached its maximum displacement (x = +A). The spring is fully stretched, so the restoring force and acceleration are at their maximum — pulling the mass back toward the center. The mass is momentarily at rest (v = 0). All energy is stored as Elastic Potential Energy."
     ];
   }
   if (quarter === 2) {
     return [
-      "Checkpoint 2/4 - Mass is flying through the middle",
-      "The mass is now at the center position (equilibrium).",
-      "It is moving at its fastest speed right now - like a pendulum at the bottom of its swing.",
-      "The spring force is zero here because it is neither stretched nor compressed.",
-      "All the energy is kinetic (motion energy) at this point.",
-      "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore.",
-      "Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo."
+      "Checkpoint 2/4 — At Mean Position (Moving Right→Left)",
+      "The mass is passing through the mean position (x = 0). The spring is neither stretched nor compressed, so restoring force = 0 and acceleration = 0. The mass is moving at its maximum speed (v = vₘₐₓ). All energy is Kinetic Energy."
     ];
   }
   if (quarter === 3) {
     return [
-      "Checkpoint 3/4 - Mass is pushed all the way to the left",
-      "The spring is now fully compressed, like a squished coil.",
-      "The mass has stopped again, just like it did on the right side.",
-      "Now the spring is pushing the mass back toward the center with maximum force.",
-      "This is the mirror image of Checkpoint 1.",
-      "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore.",
-      "Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo."
+      "Checkpoint 3/4 — At Left Extreme (Maximum Compression)",
+      "The mass has reached the other extreme (x = −A). The spring is fully compressed, so restoring force and acceleration are again at maximum — now pushing the mass back toward center. The mass is again momentarily at rest (v = 0). All energy is Elastic Potential Energy."
     ];
   }
   return [
-    "Checkpoint 4/4 - Mass is flying through the middle again",
-    "The mass is back at the center, moving at full speed toward the right.",
-    "Spring force is zero again, just like Checkpoint 2.",
-    "The mass is about to repeat the whole cycle from the beginning.",
-    "One complete oscillation is now finished - this keeps repeating forever.",
-    "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore.",
-    "Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo."
+    "Checkpoint 4/4 — Back at Mean Position (One Full Cycle Done!)",
+    "The mass has completed one full oscillation and is back at the mean position (x = 0), moving at maximum speed again. The time taken for this complete cycle is called the Time Period (T). Since there is no friction, this motion continues forever with total energy remaining constant."
   ];
 }
 
@@ -362,13 +342,13 @@ function updateBottomInfoSprite(sprite, lines) {
     return;
   }
 
-  const headingFontSize = 29;
-  const bodyFontSize = 23;
-  const paddingX = 24;
-  const paddingY = 24;
-  const lineGap = 6;
-  const maxTextWidthRatio = 1;
-  const minHeight = 320;
+  const headingFontSize = 30;
+  const bodyFontSize = 30;
+  const paddingX = 28;
+  const paddingY = 2;
+  const lineGap = 10;
+  const maxTextWidthRatio = 0.7;
+  const minHeight = 350;
   context.textBaseline = "top";
 
   context.clearRect(0, 0, canvas.width, canvas.height);
@@ -685,12 +665,13 @@ export default function SpringMassScene({ mass, springConstant, amplitude, isPla
 
     const narrationSprite = createNarrationSprite([
       "Spring-Mass Experiment",
-      "Undamped Simple Harmonic Motion: The mass bounces back and forth forever.",
-      "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor.",
-      "Incididunt ut labore et dolore magna aliqua, ut enim ad minim veniam."
+      "Simple Harmonic Motion (SHM): When a mass attached to a spring is displaced and released,",
+      "it oscillates back and forth about its mean position. The acceleration of the mass is always",
+      "directed towards the mean position and is proportional to its displacement — this is the",
+      "defining condition of SHM."
     ]);
     narrationSprite.center.set(0.5, 0.5);
-    narrationSprite.position.set(0, 1.1, -6.6);
+    narrationSprite.position.set(0, 1.25, -6.6);
     camera.add(narrationSprite);
 
     const bottomInfoSprite = createBottomInfoSprite([
@@ -787,9 +768,9 @@ export default function SpringMassScene({ mass, springConstant, amplitude, isPla
 
     setNarration("intro", [
       "Spring-Mass Experiment",
-      "Undamped Simple Harmonic Motion: The mass bounces back and forth forever.",
-      "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor.",
-      "Incididunt ut labore et dolore magna aliqua, ut enim ad minim veniam."
+      "Simple Harmonic Motion (SHM): When a mass attached to a spring is displaced and released,",
+      "it oscillates back and forth about its mean position. The acceleration of the mass is always",
+      "directed towards the mean position and is proportional to its displacement."
     ]);
     setBottomInfo("intro", getCheckpointExplanation(1));
 

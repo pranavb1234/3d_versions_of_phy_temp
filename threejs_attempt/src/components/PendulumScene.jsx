@@ -226,6 +226,7 @@ function updateNarrationSprite(sprite, lines) {
   const paddingX = 30;
   const paddingY = 20;
   const lineGap = 6;
+  const maxTextWidthRatio = 0.85;
   context.clearRect(0, 0, canvas.width, canvas.height);
   context.strokeStyle = "rgba(15, 23, 42, 0.8)";
   context.lineWidth = 4;
@@ -236,24 +237,32 @@ function updateNarrationSprite(sprite, lines) {
   context.shadowOffsetY = 2;
   context.textBaseline = "top";
 
-  const lineMetrics = lines.map((line, index) => {
+  const maxTextWidth = Math.min(canvas.width - paddingX * 2, canvas.width * maxTextWidthRatio);
+  const wrappedLines = [];
+  lines.forEach((line, index) => {
     const fontSize = index === 0 ? headingFontSize : bodyFontSize;
     context.font = `700 ${fontSize}px "Segoe UI", "Trebuchet MS", sans-serif`;
-    return { line, fontSize, width: context.measureText(line).width };
+    const pieces = wrapTextLines(context, line, maxTextWidth);
+    pieces.forEach((piece) => {
+      const width = context.measureText(piece).width;
+      wrappedLines.push({ text: piece, fontSize, isHeading: index === 0, width });
+    });
   });
-  const maxTextWidth = lineMetrics.reduce((maxWidth, entry) => {
+
+  const maxLineWidth = wrappedLines.reduce((maxWidth, entry) => {
     return Math.max(maxWidth, entry.width);
   }, 0);
-  const bodyStartX = Math.max((canvas.width - maxTextWidth) * 0.5, paddingX);
+  const bodyStartX = Math.max((canvas.width - maxLineWidth) * 0.5, paddingX);
 
   let y = paddingY;
-  lineMetrics.forEach((entry, index) => {
+  wrappedLines.forEach((entry) => {
     context.font = `700 ${entry.fontSize}px "Segoe UI", "Trebuchet MS", sans-serif`;
-    context.fillStyle = index === 0 ? "#ff7a00" : "#f8fbff";
-    const lineX =
-      index === 0 ? Math.max((canvas.width - entry.width) * 0.5, paddingX) : bodyStartX;
-    context.strokeText(entry.line, lineX, y);
-    context.fillText(entry.line, lineX, y);
+    context.fillStyle = entry.isHeading ? "#ff7a00" : "#f8fbff";
+    const lineX = entry.isHeading
+      ? Math.max((canvas.width - entry.width) * 0.5, paddingX)
+      : bodyStartX;
+    context.strokeText(entry.text, lineX, y);
+    context.fillText(entry.text, lineX, y);
     y += entry.fontSize + lineGap;
   });
   context.shadowBlur = 0;
@@ -301,10 +310,10 @@ function updateBottomInfoSprite(sprite, lines) {
     return;
   }
 
-  const fontSize = 31;
+  const fontSize = 23;
   const paddingX = 24;
   const paddingY = 20;
-  const lineGap = 7;
+  const lineGap = 6;
   const maxTextWidthRatio = 1;
   const minHeight = 320;
 
@@ -321,8 +330,11 @@ function updateBottomInfoSprite(sprite, lines) {
 
   context.font = `700 ${fontSize}px "Segoe UI", "Trebuchet MS", sans-serif`;
   const maxTextWidth = Math.min(canvas.width - paddingX * 2, canvas.width * maxTextWidthRatio);
-  const paragraph = lines.join(" ");
-  const wrappedLines = wrapTextLines(context, paragraph, maxTextWidth);
+  const wrappedLines = [];
+  lines.forEach((line) => {
+    const pieces = wrapTextLines(context, line, maxTextWidth);
+    pieces.forEach((piece) => wrappedLines.push(piece));
+  });
   const contentHeight =
     paddingY * 2 +
     wrappedLines.length * fontSize +
@@ -582,15 +594,15 @@ export default function PendulumScene({ mass, amplitude, isPlaying }) {
     };
 
     const sideOverlayDepth = 6.6;
-    const sideOverlayY = 0.18;
-    const sideOverlayMargin = 0.08;
+    const sideOverlayMargin = 0.12;
+    const sideOverlayGap = 0.12;
 
     const velocityExplainLabel = createWrappedTextLabelSprite(
       "v: bob velocity (tangent to arc)",
       sideExplainLabelOptions
     );
     velocityExplainLabel.center.set(0.5, 0.5);
-    velocityExplainLabel.position.set(0, sideOverlayY, -sideOverlayDepth);
+    velocityExplainLabel.position.set(0, 0, -sideOverlayDepth);
     camera.add(velocityExplainLabel);
 
     const forceExplainLabel = createWrappedTextLabelSprite(
@@ -598,7 +610,7 @@ export default function PendulumScene({ mass, amplitude, isPlaying }) {
       sideExplainLabelOptions
     );
     forceExplainLabel.center.set(0.5, 0.5);
-    forceExplainLabel.position.set(0, sideOverlayY, -sideOverlayDepth);
+    forceExplainLabel.position.set(0, 0, -sideOverlayDepth);
     camera.add(forceExplainLabel);
 
     const updateSideExplainLabelPositions = () => {
@@ -606,16 +618,13 @@ export default function PendulumScene({ mass, amplitude, isPlaying }) {
         Math.tan(THREE.MathUtils.degToRad(camera.fov * 0.5)) * sideOverlayDepth;
       const halfViewWidth = halfViewHeight * camera.aspect;
 
-      velocityExplainLabel.position.set(
-        -halfViewWidth + velocityExplainLabel.scale.x * 0.5 + sideOverlayMargin,
-        sideOverlayY,
-        -sideOverlayDepth
-      );
-      forceExplainLabel.position.set(
-        halfViewWidth - forceExplainLabel.scale.x * 0.5 - sideOverlayMargin,
-        sideOverlayY,
-        -sideOverlayDepth
-      );
+      const leftX = -halfViewWidth + velocityExplainLabel.scale.x * 0.5 + sideOverlayMargin;
+      const topY = halfViewHeight - velocityExplainLabel.scale.y * 0.5 - sideOverlayMargin;
+      const stackedOffset =
+        velocityExplainLabel.scale.y * 0.5 + forceExplainLabel.scale.y * 0.5 + sideOverlayGap;
+
+      velocityExplainLabel.position.set(leftX, topY, -sideOverlayDepth);
+      forceExplainLabel.position.set(leftX, topY - stackedOffset, -sideOverlayDepth);
     };
 
     const narrationSprite = createNarrationSprite([
