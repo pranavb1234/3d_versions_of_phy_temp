@@ -62,6 +62,126 @@ body {
   z-index: 5;
 }
 
+.param-trigger {
+  border: 1px solid #9bb0c4;
+  border-radius: 10px;
+  padding: 0.45rem 0.6rem;
+  font-weight: 700;
+  font-size: 0.86rem;
+  color: #1d2a3d;
+  background: rgba(246, 250, 255, 0.92);
+  cursor: pointer;
+  transition: filter 120ms ease, transform 120ms ease;
+}
+
+.param-trigger:hover {
+  filter: brightness(0.97);
+  transform: translateY(-1px);
+}
+
+.param-drawer-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(8, 12, 20, 0.35);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 180ms ease;
+  z-index: 8;
+}
+
+.param-drawer-overlay.open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.param-drawer {
+  position: absolute;
+  top: 0;
+  right: 0;
+  height: 100%;
+  width: min(360px, 88vw);
+  background: linear-gradient(180deg, #f3f7fb 0%, #e5edf6 100%);
+  border-left: 1px solid #9bb3ca;
+  box-shadow: -18px 0 28px rgba(15, 23, 42, 0.2);
+  transform: translateX(100%);
+  transition: transform 220ms ease;
+  display: flex;
+  flex-direction: column;
+  padding: 1.1rem;
+  gap: 1rem;
+  overflow-y: auto;
+}
+
+.param-drawer-overlay.open .param-drawer {
+  transform: translateX(0);
+}
+
+.param-drawer-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-weight: 700;
+  color: #1d2a3d;
+}
+
+.param-drawer-header button {
+  border: 0;
+  border-radius: 999px;
+  padding: 0.35rem 0.75rem;
+  background: #1f5eb1;
+  color: #ffffff;
+  font-weight: 700;
+  font-size: 0.82rem;
+  cursor: pointer;
+}
+
+.param-group {
+  display: grid;
+  gap: 1rem;
+}
+
+.param-notes {
+  border-radius: 12px;
+  border: 1px solid rgba(148, 163, 184, 0.6);
+  background: rgba(241, 246, 253, 0.9);
+  padding: 0.6rem 0.75rem;
+  display: grid;
+  gap: 0.25rem;
+  color: #334155;
+  font-size: 0.85rem;
+  line-height: 1.2;
+}
+
+.param-notes p {
+  margin: 0;
+}
+
+.param-group label {
+  display: grid;
+  gap: 0.4rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #1e2a3b;
+}
+
+.param-group label span {
+  font-size: 0.92rem;
+}
+
+.param-group input[type="range"] {
+  width: 100%;
+}
+
+.param-group input[type="number"] {
+  width: 100%;
+  border-radius: 10px;
+  border: 1px solid #9bb0c4;
+  padding: 0.35rem 0.6rem;
+  font-weight: 600;
+  color: #1d2a3d;
+  background: rgba(246, 250, 255, 0.95);
+}
+
 .controls-panel {
   border-radius: 16px;
   padding: 1rem;

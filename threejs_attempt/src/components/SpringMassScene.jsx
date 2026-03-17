@@ -287,6 +287,30 @@ function updateNarrationSprite(sprite, lines) {
   }, 0);
   const bodyStartX = Math.max((canvas.width - maxTextWidth) * 0.5, paddingX);
 
+  const headingEntry = lineMetrics[0];
+  const headingX = Math.max((canvas.width - headingEntry.width) * 0.5, paddingX);
+  const headingY = paddingY;
+  const headingBgPaddingX = 18;
+  const headingBgPaddingY = 8;
+
+  context.fillStyle = "rgba(255, 255, 255, 0.5)";
+  context.strokeStyle = "rgba(0, 0, 0, 0.25)";
+  context.lineWidth = 2;
+  context.fillRect(
+    headingX - headingBgPaddingX,
+    headingY - headingBgPaddingY,
+    headingEntry.width + headingBgPaddingX * 2,
+    headingEntry.fontSize + headingBgPaddingY * 2
+  );
+  context.strokeRect(
+    headingX - headingBgPaddingX,
+    headingY - headingBgPaddingY,
+    headingEntry.width + headingBgPaddingX * 2,
+    headingEntry.fontSize + headingBgPaddingY * 2
+  );
+  context.strokeStyle = "#000000";
+  context.lineWidth = 2;
+
   let y = paddingY;
   lineMetrics.forEach((entry, index) => {
     context.font = `500 ${entry.fontSize}px "Segoe UI", "Trebuchet MS", sans-serif`;
