@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+﻿import { useEffect, useRef } from "react";
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 
@@ -21,30 +21,73 @@ function getCheckpointExplanation(checkpointCount) {
 
   if (quarter === 1) {
     return [
-      "Pause at T/4: Maximum Angle (+θ_max)",
-      "Bob reached far-right turning point.",
-      "Tangential velocity is zero; restoring force is maximum."
+      "Checkpoint 1/4 — Maximum Displacement (t = 0)",
+      "The bob is at its extreme position. Velocity is zero and the restoring force is maximum, pulling back toward equilibrium. Energy is all potential."
     ];
   }
   if (quarter === 2) {
     return [
-      "Pause at T/2: Mean Position",
-      "Bob crossed equilibrium moving left at max speed.",
-      "Restoring force is near zero momentarily."
+      "Checkpoint 2/4 — Equilibrium Crossing (t = T/4, moving left)",
+      "The bob passes through equilibrium at maximum speed. Restoring force is nearly zero. Energy is all kinetic."
     ];
   }
   if (quarter === 3) {
     return [
-      "Pause at 3T/4: Maximum Angle (-θ_max)",
-      "Bob reached far-left turning point.",
-      "Tangential velocity is zero; restoring force is maximum."
+      "Checkpoint 3/4 — Opposite Extreme (t = T/2)",
+      "The bob reaches the opposite turning point. Velocity is zero and the restoring force is maximum in the opposite direction."
     ];
   }
   return [
-    "Pause at T: Mean Position",
-    "One full oscillation is complete.",
-    "Bob crosses equilibrium moving right at max speed."
+    "Checkpoint 4/4 — Equilibrium Crossing (t = 3T/4, moving right)",
+    "The bob passes through equilibrium at full speed. Restoring force is again near zero. The next quarter returns to the start (t = T)."
   ];
+}
+
+function getCheckpointCalculations(checkpointCount, params = {}) {
+  const quarter = ((checkpointCount - 1) % 4) + 1;
+  const mass = Math.max(params.mass ?? 1, 0.001);
+  const length = Math.max(params.length ?? pendulumLength, 0.001);
+  const g = params.gravity ?? gravity;
+  const theta0 = params.amplitude ?? 0.2;
+  const omega = Math.sqrt(g / length);
+  const period = 2 * Math.PI * Math.sqrt(length / g);
+  const vMax = theta0 * omega * length;
+  const totalEnergy = 0.5 * mass * length * length * omega * omega * theta0 * theta0;
+
+  const format = (value) => {
+    const safe = Math.abs(value) < 0.005 ? 0 : value;
+    return safe.toFixed(2);
+  };
+  const formatSigned = (value) => {
+    const safe = Math.abs(value) < 0.005 ? 0 : value;
+    const fixed = safe.toFixed(2);
+    return safe > 0 ? `+${fixed}` : fixed;
+  };
+
+  const summaryLines = [
+    "Calculations involved",
+    `L = ${format(length)} m`,
+    `g = ${format(g)} m/s^2`,
+    `\u03C9 = ${format(omega)} rad/s`,
+    `T = ${format(period)} s`,
+    `v_max = \u03C9L\u03B8\u2080 = ${format(vMax)} m/s`,
+    `E_total = ${format(totalEnergy)} J`
+  ];
+
+  const theta = quarter === 1 ? theta0 : quarter === 3 ? -theta0 : 0;
+  const v = quarter === 2 ? -vMax : quarter === 4 ? vMax : 0;
+  const force = -mass * g * Math.sin(theta);
+  const ke = 0.5 * mass * v * v;
+  const pe = mass * g * length * (1 - Math.cos(theta));
+
+  const instantLines = [
+    "At this checkpoint",
+    `\u03B8 = ${formatSigned(theta)} rad, v = ${formatSigned(v)} m/s`,
+    `F_t = ${formatSigned(force)} N`,
+    `KE = ${format(ke)} J, PE = ${format(pe)} J`
+  ];
+
+  return { summaryLines, instantLines };
 }
 
 function disposeObject3D(root) {
@@ -306,65 +349,231 @@ function updateBottomInfoSprite(sprite, lines) {
   const canvas = sprite.userData.canvas;
   const context = sprite.userData.context;
   const texture = sprite.userData.texture;
-  if (!context || !Array.isArray(lines) || lines.length === 0) {
+  const payload = Array.isArray(lines) ? { textLines: lines } : lines;
+  const textLines = payload?.textLines ?? [];
+  const calculationsPayload = payload?.calculationsLines ?? ["Calculations involved"];
+  const calculationsBlocks = Array.isArray(calculationsPayload)
+    ? { summaryLines: calculationsPayload, instantLines: [] }
+    : calculationsPayload ?? {};
+  const summaryLines = calculationsBlocks.summaryLines ?? [];
+  const instantLines = calculationsBlocks.instantLines ?? [];
+  if (!context || !Array.isArray(textLines) || textLines.length === 0) {
     return;
   }
 
-  const fontSize = 23;
-  const paddingX = 24;
-  const paddingY = 20;
-  const lineGap = 6;
-  const maxTextWidthRatio = 1;
+  const headingFontSize = 24;
+  const bodyFontSize = 22;
+  const paddingX = 28;
+  const paddingY = 2;
+  const lineGap = 8;
+  const leftTextWidthRatio = 0.52;
   const minHeight = 320;
+  context.textBaseline = "top";
 
   context.clearRect(0, 0, canvas.width, canvas.height);
   context.strokeStyle = "rgba(15, 23, 42, 0.82)";
-  context.lineWidth = 6;
+  context.lineWidth = 4;
   context.lineJoin = "round";
-  context.fillStyle = "#f7fbff";
-  context.shadowColor = "rgba(13, 20, 35, 0.66)";
-  context.shadowBlur = 4;
+  context.fillStyle = "#000000";
+  context.shadowColor = "transparent";
+  context.shadowBlur = 0;
   context.shadowOffsetX = 0;
-  context.shadowOffsetY = 2;
-  context.textBaseline = "top";
+  context.shadowOffsetY = 0;
 
-  context.font = `700 ${fontSize}px "Segoe UI", "Trebuchet MS", sans-serif`;
-  const maxTextWidth = Math.min(canvas.width - paddingX * 2, canvas.width * maxTextWidthRatio);
+  const maxTextWidth = Math.min(canvas.width - paddingX * 2, canvas.width * leftTextWidthRatio);
+  const normalizedLines =
+    textLines.length > 1 ? [textLines[0], textLines.slice(1).join(" ")] : textLines;
   const wrappedLines = [];
-  lines.forEach((line) => {
+  normalizedLines.forEach((line, index) => {
+    const fontSize = index === 0 ? headingFontSize : bodyFontSize;
+    context.font = `500 ${fontSize}px "Segoe UI", "Trebuchet MS", sans-serif`;
     const pieces = wrapTextLines(context, line, maxTextWidth);
-    pieces.forEach((piece) => wrappedLines.push(piece));
+    pieces.forEach((piece) => wrappedLines.push({ text: piece, fontSize, isHeading: index === 0 }));
   });
+
   const contentHeight =
     paddingY * 2 +
-    wrappedLines.length * fontSize +
+    wrappedLines.reduce((total, entry) => total + entry.fontSize, 0) +
     Math.max(wrappedLines.length - 1, 0) * lineGap;
   const targetHeight = Math.max(minHeight, Math.ceil(contentHeight));
   if (canvas.height !== targetHeight) {
     canvas.height = targetHeight;
   }
 
-  const maxLineWidth = wrappedLines.reduce((maxWidth, line) => {
-    return Math.max(maxWidth, context.measureText(line).width);
+  const maxLineWidth = wrappedLines.reduce((maxWidth, entry) => {
+    context.font = `500 ${entry.fontSize}px "Segoe UI", "Trebuchet MS", sans-serif`;
+    return Math.max(maxWidth, context.measureText(entry.text).width);
   }, 0);
-  const startX = Math.max((canvas.width - maxLineWidth) * 0.5, paddingX);
+  const textBlockHeight =
+    wrappedLines.reduce((total, entry) => total + entry.fontSize, 0) +
+    Math.max(wrappedLines.length - 1, 0) * lineGap;
+  const bgPaddingX = 20;
+  const bgPaddingY = 12;
 
-  let y = paddingY;
-  wrappedLines.forEach((line) => {
-    context.strokeText(line, startX, y);
-    context.fillText(line, startX, y);
-    y += fontSize + lineGap;
+  const availableWidth = canvas.width - paddingX * 2;
+  const columnGap = 24;
+
+  let leftMaxLineWidth = 0;
+  let leftMaxTextHeight = 0;
+  for (let idx = 1; idx <= 4; idx += 1) {
+    const checkpointLines = getCheckpointExplanation(idx);
+    const normalized =
+      checkpointLines.length > 1
+        ? [checkpointLines[0], checkpointLines.slice(1).join(" ")]
+        : checkpointLines;
+    const tempWrapped = [];
+    normalized.forEach((line, lineIndex) => {
+      const fontSize = lineIndex === 0 ? headingFontSize : bodyFontSize;
+      context.font = `500 ${fontSize}px "Segoe UI", "Trebuchet MS", sans-serif`;
+      const pieces = wrapTextLines(context, line, maxTextWidth);
+      pieces.forEach((piece) => tempWrapped.push({ text: piece, fontSize }));
+    });
+    const tempMaxLineWidth = tempWrapped.reduce((acc, entry) => {
+      context.font = `500 ${entry.fontSize}px "Segoe UI", "Trebuchet MS", sans-serif`;
+      return Math.max(acc, context.measureText(entry.text).width);
+    }, 0);
+    const tempTextHeight =
+      tempWrapped.reduce((total, entry) => total + entry.fontSize, 0) +
+      Math.max(tempWrapped.length - 1, 0) * lineGap;
+    leftMaxLineWidth = Math.max(leftMaxLineWidth, tempMaxLineWidth);
+    leftMaxTextHeight = Math.max(leftMaxTextHeight, tempTextHeight);
+  }
+
+  const leftBoxWidth = Math.min(availableWidth * 0.56, leftMaxLineWidth + bgPaddingX * 2);
+  const rightBoxWidth = Math.max(
+    220,
+    Math.min(availableWidth - leftBoxWidth - columnGap, availableWidth * 0.38)
+  );
+
+  const useSplitColumns = instantLines.length > 0;
+  const rightInnerWidth = Math.max(60, rightBoxWidth - bgPaddingX * 2);
+  const rightColumnGap = useSplitColumns ? 18 : 0;
+  const rightColumnWidth = useSplitColumns
+    ? Math.max(60, (rightInnerWidth - rightColumnGap) / 2)
+    : rightInnerWidth;
+  const rightWrappedSummary = [];
+  summaryLines.forEach((line, lineIndex) => {
+    const fontSize = lineIndex === 0 ? headingFontSize : bodyFontSize;
+    context.font = `500 ${fontSize}px "Segoe UI", "Trebuchet MS", sans-serif`;
+    const pieces = wrapTextLines(context, line, rightColumnWidth);
+    pieces.forEach((piece) =>
+      rightWrappedSummary.push({ text: piece, fontSize, isHeading: lineIndex === 0 })
+    );
   });
+
+  const rightWrappedInstant = [];
+  instantLines.forEach((line, lineIndex) => {
+    const fontSize = lineIndex === 0 ? headingFontSize : bodyFontSize;
+    context.font = `500 ${fontSize}px "Segoe UI", "Trebuchet MS", sans-serif`;
+    const pieces = wrapTextLines(context, line, rightColumnWidth);
+    pieces.forEach((piece) =>
+      rightWrappedInstant.push({ text: piece, fontSize, isHeading: lineIndex === 0 })
+    );
+  });
+
+  const summaryMaxLineWidth = rightWrappedSummary.reduce((acc, entry) => {
+    context.font = `500 ${entry.fontSize}px "Segoe UI", "Trebuchet MS", sans-serif`;
+    return Math.max(acc, context.measureText(entry.text).width);
+  }, 0);
+  const instantMaxLineWidth = rightWrappedInstant.reduce((acc, entry) => {
+    context.font = `500 ${entry.fontSize}px "Segoe UI", "Trebuchet MS", sans-serif`;
+    return Math.max(acc, context.measureText(entry.text).width);
+  }, 0);
+  const summaryHeight =
+    rightWrappedSummary.reduce((total, entry) => total + entry.fontSize, 0) +
+    Math.max(rightWrappedSummary.length - 1, 0) * lineGap;
+  const instantHeight =
+    rightWrappedInstant.reduce((total, entry) => total + entry.fontSize, 0) +
+    Math.max(rightWrappedInstant.length - 1, 0) * lineGap;
+  const rightTextHeight = useSplitColumns
+    ? Math.max(summaryHeight, instantHeight)
+    : summaryHeight + instantHeight;
+
+  const leftBoxHeight = Math.min(canvas.height - paddingY * 2, leftMaxTextHeight + bgPaddingY * 2);
+  const rightBoxHeight = Math.min(canvas.height - paddingY * 2, rightTextHeight + bgPaddingY * 2);
+  const boxHeight = Math.max(leftBoxHeight, rightBoxHeight);
+
+  const blockYOffset = -22;
+  const bgY = Math.max(0, (canvas.height - boxHeight) * 0.5 + blockYOffset);
+  const leftBoxX = Math.max(0, paddingX);
+  const rightBoxX = Math.max(leftBoxX + leftBoxWidth + columnGap, leftBoxX);
+
+  const leftTextInsetX = Math.max((leftBoxWidth - bgPaddingX * 2 - maxLineWidth) * 0.5, 0);
+  const leftTextInsetY = Math.max((boxHeight - bgPaddingY * 2 - textBlockHeight) * 0.5, 0);
+  const leftTextX = leftBoxX + bgPaddingX + leftTextInsetX;
+  let leftTextY = bgY + bgPaddingY + leftTextInsetY;
+
+  const rightTextInsetY = Math.max((boxHeight - bgPaddingY * 2 - rightTextHeight) * 0.5, 0);
+  let rightTextY = bgY + bgPaddingY + rightTextInsetY;
+
+  context.fillStyle = "rgba(255, 255, 255, 0.5)";
+  context.strokeStyle = "rgba(0, 0, 0, 0.25)";
+  context.lineWidth = 2;
+  context.fillRect(leftBoxX, bgY, leftBoxWidth, boxHeight);
+  context.strokeRect(leftBoxX, bgY, leftBoxWidth, boxHeight);
+  context.fillRect(rightBoxX, bgY, rightBoxWidth, boxHeight);
+  context.strokeRect(rightBoxX, bgY, rightBoxWidth, boxHeight);
+  context.fillStyle = "#000000";
+
+  wrappedLines.forEach((entry) => {
+    context.font = `500 ${entry.fontSize}px "Segoe UI", "Trebuchet MS", sans-serif`;
+    context.fillText(entry.text, leftTextX, leftTextY);
+    leftTextY += entry.fontSize + lineGap;
+  });
+
+  if (useSplitColumns) {
+    const summaryInsetX = Math.max((rightColumnWidth - summaryMaxLineWidth) * 0.5, 0);
+    const instantInsetX = Math.max((rightColumnWidth - instantMaxLineWidth) * 0.5, 0);
+    const summaryX = rightBoxX + bgPaddingX + summaryInsetX;
+    const instantX =
+      rightBoxX + bgPaddingX + rightColumnWidth + rightColumnGap + instantInsetX;
+    let summaryY = rightTextY;
+    let instantY = rightTextY;
+
+    rightWrappedSummary.forEach((entry) => {
+      context.font = `500 ${entry.fontSize}px "Segoe UI", "Trebuchet MS", sans-serif`;
+      context.fillStyle = "#000000";
+      context.fillText(entry.text, summaryX, summaryY);
+      summaryY += entry.fontSize + lineGap;
+    });
+
+    rightWrappedInstant.forEach((entry) => {
+      context.font = `500 ${entry.fontSize}px "Segoe UI", "Trebuchet MS", sans-serif`;
+      context.fillStyle = "#000000";
+      context.fillText(entry.text, instantX, instantY);
+      instantY += entry.fontSize + lineGap;
+    });
+
+    const dividerX = rightBoxX + bgPaddingX + rightColumnWidth + rightColumnGap * 0.5;
+    context.strokeStyle = "rgba(0, 0, 0, 0.28)";
+    context.lineWidth = 2;
+    context.beginPath();
+    context.moveTo(dividerX, bgY + bgPaddingY);
+    context.lineTo(dividerX, bgY + boxHeight - bgPaddingY);
+    context.stroke();
+  } else {
+    const rightTextInsetX = Math.max(
+      (rightBoxWidth - bgPaddingX * 2 - summaryMaxLineWidth) * 0.5,
+      0
+    );
+    const rightTextX = rightBoxX + bgPaddingX + rightTextInsetX;
+
+    rightWrappedSummary.forEach((entry) => {
+      context.font = `500 ${entry.fontSize}px "Segoe UI", "Trebuchet MS", sans-serif`;
+      context.fillStyle = "#000000";
+      context.fillText(entry.text, rightTextX, rightTextY);
+      rightTextY += entry.fontSize + lineGap;
+    });
+  }
   context.shadowBlur = 0;
   context.shadowOffsetX = 0;
   context.shadowOffsetY = 0;
 
   texture.needsUpdate = true;
-  const baseScale = 0.00095;
+  const baseScale = 0.00085;
   sprite.userData.baseScale = baseScale;
   sprite.scale.set(canvas.width * baseScale, canvas.height * baseScale, 1);
 }
-
 function createLeaderLine() {
   const geometry = new THREE.BufferGeometry();
   geometry.setAttribute("position", new THREE.BufferAttribute(new Float32Array(9), 3));
@@ -597,6 +806,46 @@ export default function PendulumScene({ mass, amplitude, isPlaying }) {
     const sideOverlayMargin = 0.12;
     const sideOverlayGap = 0.12;
 
+    const lengthExplainLabel = createWrappedTextLabelSprite(
+      "L: string length",
+      sideExplainLabelOptions
+    );
+    lengthExplainLabel.center.set(0.5, 0.5);
+    lengthExplainLabel.position.set(0, 0, -sideOverlayDepth);
+    camera.add(lengthExplainLabel);
+
+    const thetaExplainLabel = createWrappedTextLabelSprite(
+      "\u03B8: angular displacement",
+      sideExplainLabelOptions
+    );
+    thetaExplainLabel.center.set(0.5, 0.5);
+    thetaExplainLabel.position.set(0, 0, -sideOverlayDepth);
+    camera.add(thetaExplainLabel);
+
+    const theta0ExplainLabel = createWrappedTextLabelSprite(
+      "\u03B8\u2080: maximum angle",
+      sideExplainLabelOptions
+    );
+    theta0ExplainLabel.center.set(0.5, 0.5);
+    theta0ExplainLabel.position.set(0, 0, -sideOverlayDepth);
+    camera.add(theta0ExplainLabel);
+
+    const omegaExplainLabel = createWrappedTextLabelSprite(
+      "\u03C9: angular frequency",
+      sideExplainLabelOptions
+    );
+    omegaExplainLabel.center.set(0.5, 0.5);
+    omegaExplainLabel.position.set(0, 0, -sideOverlayDepth);
+    camera.add(omegaExplainLabel);
+
+    const periodExplainLabel = createWrappedTextLabelSprite(
+      "T: time period",
+      sideExplainLabelOptions
+    );
+    periodExplainLabel.center.set(0.5, 0.5);
+    periodExplainLabel.position.set(0, 0, -sideOverlayDepth);
+    camera.add(periodExplainLabel);
+
     const velocityExplainLabel = createWrappedTextLabelSprite(
       "v: bob velocity (tangent to arc)",
       sideExplainLabelOptions
@@ -618,33 +867,95 @@ export default function PendulumScene({ mass, amplitude, isPlaying }) {
         Math.tan(THREE.MathUtils.degToRad(camera.fov * 0.5)) * sideOverlayDepth;
       const halfViewWidth = halfViewHeight * camera.aspect;
 
-      const leftX = -halfViewWidth + velocityExplainLabel.scale.x * 0.5 + sideOverlayMargin;
-      const topY = halfViewHeight - velocityExplainLabel.scale.y * 0.5 - sideOverlayMargin;
+      const maxLabelWidth = Math.max(
+        lengthExplainLabel.scale.x,
+        thetaExplainLabel.scale.x,
+        theta0ExplainLabel.scale.x,
+        omegaExplainLabel.scale.x,
+        periodExplainLabel.scale.x,
+        velocityExplainLabel.scale.x,
+        forceExplainLabel.scale.x
+      );
+      const leftX = -halfViewWidth + maxLabelWidth * 0.5 + sideOverlayMargin;
+      const topY = halfViewHeight - lengthExplainLabel.scale.y * 0.5 - sideOverlayMargin;
       const stackedOffset =
+        lengthExplainLabel.scale.y * 0.5 + thetaExplainLabel.scale.y * 0.5 + sideOverlayGap;
+      const stackedOffset2 =
+        thetaExplainLabel.scale.y * 0.5 + theta0ExplainLabel.scale.y * 0.5 + sideOverlayGap;
+      const stackedOffset3 =
+        theta0ExplainLabel.scale.y * 0.5 + omegaExplainLabel.scale.y * 0.5 + sideOverlayGap;
+      const stackedOffset4 =
+        omegaExplainLabel.scale.y * 0.5 + periodExplainLabel.scale.y * 0.5 + sideOverlayGap;
+      const stackedOffset5 =
+        periodExplainLabel.scale.y * 0.5 + velocityExplainLabel.scale.y * 0.5 + sideOverlayGap;
+      const stackedOffset6 =
         velocityExplainLabel.scale.y * 0.5 + forceExplainLabel.scale.y * 0.5 + sideOverlayGap;
 
-      velocityExplainLabel.position.set(leftX, topY, -sideOverlayDepth);
-      forceExplainLabel.position.set(leftX, topY - stackedOffset, -sideOverlayDepth);
-    };
+      lengthExplainLabel.position.set(leftX, topY, -sideOverlayDepth);
+      thetaExplainLabel.position.set(leftX, topY - stackedOffset, -sideOverlayDepth);
+      theta0ExplainLabel.position.set(
+        leftX,
+        topY - stackedOffset - stackedOffset2,
+        -sideOverlayDepth
+      );
+      omegaExplainLabel.position.set(
+        leftX,
+        topY - stackedOffset - stackedOffset2 - stackedOffset3,
+        -sideOverlayDepth
+      );
+      periodExplainLabel.position.set(
+        leftX,
+        topY - stackedOffset - stackedOffset2 - stackedOffset3 - stackedOffset4,
+        -sideOverlayDepth
+      );
+      velocityExplainLabel.position.set(
+        leftX,
+        topY -
+          stackedOffset -
+          stackedOffset2 -
+          stackedOffset3 -
+          stackedOffset4 -
+          stackedOffset5,
+        -sideOverlayDepth
+      );
+      forceExplainLabel.position.set(
+        leftX,
+        topY -
+          stackedOffset -
+          stackedOffset2 -
+          stackedOffset3 -
+          stackedOffset4 -
+          stackedOffset5 -
+          stackedOffset6,
+        -sideOverlayDepth
+      );
+        };
+
+    const maxAngle = clamp(
+      THREE.MathUtils.degToRad(amplitude * 7),
+      THREE.MathUtils.degToRad(8),
+      THREE.MathUtils.degToRad(35)
+    );
 
     const narrationSprite = createNarrationSprite([
-      "Simple Pendulum",
-      "Small-angle SHM: T = 2π√(L/g).",
-      "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor.",
-      "Incididunt ut labore et dolore magna aliqua, ut enim ad minim veniam."
+      "Simple Pendulum — Simple Harmonic Motion",
+      "A bob on a string of length L oscillates about equilibrium for small angles.",
+      "\u03B8(t) = \u03B8\u2080 cos(\u03C9t), with \u03C9 = \u221A(g/L) and T = 2\u03C0\u221A(L/g).",
+      "Velocity and restoring force vary through each quarter-cycle."
     ]);
     narrationSprite.center.set(0.5, 0.5);
     narrationSprite.position.set(0, 1.1, -6.6);
     camera.add(narrationSprite);
 
-    const bottomInfoSprite = createBottomInfoSprite([
-      "Status: simulation loaded.",
-      "Blue v = bob velocity along the arc.",
-      "Red F_t = tangential restoring force.",
-      "Watch: turning point -> v ~ 0, equilibrium -> |v| is largest.",
-      "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
-      "Sed do eiusmod tempor incididunt ut labore et dolore."
-    ]);
+    const bottomInfoSprite = createBottomInfoSprite({
+      textLines: getCheckpointExplanation(1),
+      calculationsLines: getCheckpointCalculations(1, {
+        mass,
+        length: pendulumLength,
+        gravity,
+        amplitude: maxAngle
+      })
+    });
     bottomInfoSprite.center.set(0.5, 0.5);
     bottomInfoSprite.position.set(0, -2.28, -6.6);
     camera.add(bottomInfoSprite);
@@ -656,7 +967,7 @@ export default function PendulumScene({ mass, amplitude, isPlaying }) {
       const halfViewHeight =
         Math.tan(THREE.MathUtils.degToRad(camera.fov * 0.5)) * bottomOverlayDepth;
       const halfViewWidth = halfViewHeight * camera.aspect;
-      const baseScale = bottomInfoSprite.userData.baseScale ?? 0.00095;
+      const baseScale = bottomInfoSprite.userData.baseScale ?? 0.00085;
       bottomInfoSprite.scale.set(
         bottomInfoSprite.userData.canvas.width * baseScale,
         bottomInfoSprite.userData.canvas.height * baseScale,
@@ -697,11 +1008,6 @@ export default function PendulumScene({ mass, amplitude, isPlaying }) {
     const resizeObserver = new ResizeObserver(setRendererSize);
     resizeObserver.observe(container);
 
-    const maxAngle = clamp(
-      THREE.MathUtils.degToRad(amplitude * 7),
-      THREE.MathUtils.degToRad(8),
-      THREE.MathUtils.degToRad(35)
-    );
     const omega = Math.sqrt(gravity / pendulumLength);
     const quarterStep = Math.PI / 2;
     const pauseDuration = 2.7;
@@ -715,8 +1021,8 @@ export default function PendulumScene({ mass, amplitude, isPlaying }) {
     let pausedFor = 0;
     let isPaused = false;
 
-    let angle = maxAngle * Math.sin(phase);
-    let angleRate = maxAngle * omega * Math.cos(phase);
+    let angle = maxAngle * Math.cos(phase);
+    let angleRate = -maxAngle * omega * Math.sin(phase);
     let previousTime = performance.now() / 1000;
     let narrationKey = "";
     let bottomInfoKey = "";
@@ -744,19 +1050,20 @@ export default function PendulumScene({ mass, amplitude, isPlaying }) {
     };
 
     setNarration("intro", [
-      "Simple Pendulum",
-      "Small-angle SHM: T = 2π√(L/g).",
-      "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor.",
-      "Incididunt ut labore et dolore magna aliqua, ut enim ad minim veniam."
+      "Simple Pendulum — Simple Harmonic Motion",
+      "A bob on a string of length L oscillates about equilibrium for small angles.",
+      "\u03B8(t) = \u03B8\u2080 cos(\u03C9t), with \u03C9 = \u221A(g/L) and T = 2\u03C0\u221A(L/g).",
+      "Velocity and restoring force vary through each quarter-cycle."
     ]);
-    setBottomInfo("intro", [
-      "Status: quarter-cycle teaching mode is active.",
-      "Blue v = bob velocity along the arc.",
-      "Red F_t = tangential restoring force.",
-      "Watch: turning point -> v ~ 0, equilibrium -> |v| is largest.",
-      "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
-      "Sed do eiusmod tempor incididunt ut labore et dolore."
-    ]);
+    setBottomInfo("intro", {
+      textLines: getCheckpointExplanation(1),
+      calculationsLines: getCheckpointCalculations(1, {
+        mass,
+        length: pendulumLength,
+        gravity,
+        amplitude: maxAngle
+      })
+    });
 
     const updateVisuals = () => {
       pendulumGroup.rotation.z = angle;
@@ -828,30 +1135,17 @@ export default function PendulumScene({ mass, amplitude, isPlaying }) {
         velocityLabel.visible = false;
       }
 
-      const activeQuarter = isPaused
-        ? ((checkpointCount - 1 + 4) % 4) + 1
-        : (checkpointCount % 4) + 1;
-      const statusText = isPaused
-        ? `Status: paused at checkpoint ${activeQuarter}/4.`
-        : `Status: moving through quarter ${activeQuarter}/4.`;
-      const velocityDirectionText =
-        angleRate > 0.02 ? "moving right" : angleRate < -0.02 ? "moving left" : "near turning point";
-      const forceDirectionText =
-        angle > 0.02
-          ? "points left toward equilibrium"
-          : angle < -0.02
-            ? "points right toward equilibrium"
-            : "is near zero at equilibrium";
-
-      const infoKey = `${isPaused ? 1 : 0}|${activeQuarter}|${Math.sign(angleRate)}|${Math.sign(angle)}`;
-      setBottomInfo(infoKey, [
-        statusText,
-        `Blue v = bob velocity (${velocityDirectionText}).`,
-        `Red F_t = tangential restoring force (${forceDirectionText}).`,
-        "Watch: turning point -> v ~ 0, equilibrium -> |v| is largest.",
-        "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
-        "Sed do eiusmod tempor incididunt ut labore et dolore."
-      ]);
+      const activeQuarter = (checkpointCount % 4) + 1;
+      const infoKey = `${activeQuarter}`;
+      setBottomInfo(infoKey, {
+        textLines: getCheckpointExplanation(activeQuarter),
+        calculationsLines: getCheckpointCalculations(activeQuarter, {
+          mass,
+          length: pendulumLength,
+          gravity,
+          amplitude: maxAngle
+        })
+      });
     };
     updateVisuals();
 
@@ -880,8 +1174,8 @@ export default function PendulumScene({ mass, amplitude, isPlaying }) {
         pausedFor = 0;
       }
 
-      angle = maxAngle * Math.sin(phase);
-      angleRate = maxAngle * omega * Math.cos(phase);
+      angle = maxAngle * Math.cos(phase);
+      angleRate = -maxAngle * omega * Math.sin(phase);
     };
 
     const animate = () => {
@@ -910,4 +1204,15 @@ export default function PendulumScene({ mass, amplitude, isPlaying }) {
 
   return <div className="scene-canvas" ref={containerRef} />;
 }
+
+
+
+
+
+
+
+
+
+
+
 
