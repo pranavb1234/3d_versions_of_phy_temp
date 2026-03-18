@@ -432,8 +432,8 @@ function updateBottomInfoSprite(sprite, content) {
   const paddingX = 28;
   const paddingY = 2;
   const lineGap = 8;
-  const leftTextWidthRatio = 0.5;
-  const minHeight = 350;
+  const leftTextWidthRatio = 0.52;
+  const minHeight = 320
 
   context.clearRect(0, 0, canvas.width, canvas.height);
   context.strokeStyle = "rgba(15, 23, 42, 0.82)";
@@ -505,16 +505,18 @@ function updateBottomInfoSprite(sprite, content) {
     leftMaxTextHeight = Math.max(leftMaxTextHeight, tempTextHeight);
   }
 
-  const leftBoxWidth = Math.min(availableWidth * 0.5, leftMaxLineWidth + bgPaddingX * 2);
-  const availableRight = Math.max(0, availableWidth - leftBoxWidth - columnGap);
-  const rightBoxWidth = Math.min(Math.max(200, availableWidth * 0.46), availableRight);
-
-  const rightDividerGap = 10;
-  const rightDividerThickness = 2;
-  const rightColumnWidth = Math.max(
-    60,
-    (rightBoxWidth - bgPaddingX * 2 - rightDividerGap * 2 - rightDividerThickness) / 2
+  const leftBoxWidth = Math.min(availableWidth * 0.56, leftMaxLineWidth + bgPaddingX * 2);
+  const rightBoxWidth = Math.max(
+    220,
+    Math.min(availableWidth - leftBoxWidth - columnGap, availableWidth * 0.38)
   );
+
+  const useSplitColumns = instantLines.length > 0;
+  const rightInnerWidth = Math.max(60, rightBoxWidth - bgPaddingX * 2);
+  const rightColumnGap = useSplitColumns ? 18 : 0;
+  const rightColumnWidth = useSplitColumns
+    ? Math.max(60, (rightInnerWidth - rightColumnGap) / 2)
+    : rightInnerWidth;
   const rightWrappedSummary = [];
   summaryLines.forEach((line, lineIndex) => {
     const fontSize = lineIndex === 0 ? headingFontSize : bodyFontSize;
@@ -535,13 +537,23 @@ function updateBottomInfoSprite(sprite, content) {
     );
   });
 
+  const summaryMaxLineWidth = rightWrappedSummary.reduce((acc, entry) => {
+    context.font = `500 ${entry.fontSize}px "Segoe UI", "Trebuchet MS", sans-serif`;
+    return Math.max(acc, context.measureText(entry.text).width);
+  }, 0);
+  const instantMaxLineWidth = rightWrappedInstant.reduce((acc, entry) => {
+    context.font = `500 ${entry.fontSize}px "Segoe UI", "Trebuchet MS", sans-serif`;
+    return Math.max(acc, context.measureText(entry.text).width);
+  }, 0);
   const summaryHeight =
     rightWrappedSummary.reduce((total, entry) => total + entry.fontSize, 0) +
     Math.max(rightWrappedSummary.length - 1, 0) * lineGap;
   const instantHeight =
     rightWrappedInstant.reduce((total, entry) => total + entry.fontSize, 0) +
     Math.max(rightWrappedInstant.length - 1, 0) * lineGap;
-  const rightTextHeight = Math.max(summaryHeight, instantHeight);
+  const rightTextHeight = useSplitColumns
+    ? Math.max(summaryHeight, instantHeight)
+    : summaryHeight + instantHeight;
 
   const leftBoxHeight = Math.min(canvas.height - paddingY * 2, leftMaxTextHeight + bgPaddingY * 2);
   const rightBoxHeight = Math.min(canvas.height - paddingY * 2, rightTextHeight + bgPaddingY * 2);
@@ -558,11 +570,7 @@ function updateBottomInfoSprite(sprite, content) {
   let leftTextY = bgY + bgPaddingY + leftTextInsetY;
 
   const rightTextInsetY = Math.max((boxHeight - bgPaddingY * 2 - rightTextHeight) * 0.5, 0);
-  const rightSummaryX = rightBoxX + bgPaddingX;
-  const rightInstantX =
-    rightSummaryX + rightColumnWidth + rightDividerGap * 2 + rightDividerThickness;
-  let rightSummaryY = bgY + bgPaddingY + rightTextInsetY;
-  let rightInstantY = bgY + bgPaddingY + rightTextInsetY;
+  let rightTextY = bgY + bgPaddingY + rightTextInsetY;
 
   context.fillStyle = "rgba(255, 255, 255, 0.5)";
   context.strokeStyle = "rgba(0, 0, 0, 0.25)";
@@ -579,28 +587,48 @@ function updateBottomInfoSprite(sprite, content) {
     leftTextY += entry.fontSize + lineGap;
   });
 
-  rightWrappedSummary.forEach((entry) => {
-    context.font = `500 ${entry.fontSize}px "Segoe UI", "Trebuchet MS", sans-serif`;
-    context.fillStyle = "#000000";
-    context.fillText(entry.text, rightSummaryX, rightSummaryY);
-    rightSummaryY += entry.fontSize + lineGap;
-  });
+  if (useSplitColumns) {
+    const summaryInsetX = Math.max((rightColumnWidth - summaryMaxLineWidth) * 0.5, 0);
+    const instantInsetX = Math.max((rightColumnWidth - instantMaxLineWidth) * 0.5, 0);
+    const summaryX = rightBoxX + bgPaddingX + summaryInsetX;
+    const instantX =
+      rightBoxX + bgPaddingX + rightColumnWidth + rightColumnGap + instantInsetX;
+    let summaryY = rightTextY;
+    let instantY = rightTextY;
 
-  if (rightWrappedInstant.length > 0) {
-    const dividerX =
-      rightSummaryX + rightColumnWidth + rightDividerGap + rightDividerThickness * 0.5;
-    context.strokeStyle = "rgba(0, 0, 0, 0.28)";
-    context.lineWidth = rightDividerThickness;
-    context.beginPath();
-    context.moveTo(dividerX, bgY + bgPaddingY);
-    context.lineTo(dividerX, bgY + boxHeight - bgPaddingY);
-    context.stroke();
+    rightWrappedSummary.forEach((entry) => {
+      context.font = `500 ${entry.fontSize}px "Segoe UI", "Trebuchet MS", sans-serif`;
+      context.fillStyle = "#000000";
+      context.fillText(entry.text, summaryX, summaryY);
+      summaryY += entry.fontSize + lineGap;
+    });
 
     rightWrappedInstant.forEach((entry) => {
       context.font = `500 ${entry.fontSize}px "Segoe UI", "Trebuchet MS", sans-serif`;
       context.fillStyle = "#000000";
-      context.fillText(entry.text, rightInstantX, rightInstantY);
-      rightInstantY += entry.fontSize + lineGap;
+      context.fillText(entry.text, instantX, instantY);
+      instantY += entry.fontSize + lineGap;
+    });
+
+    const dividerX = rightBoxX + bgPaddingX + rightColumnWidth + rightColumnGap * 0.5;
+    context.strokeStyle = "rgba(0, 0, 0, 0.28)";
+    context.lineWidth = 2;
+    context.beginPath();
+    context.moveTo(dividerX, bgY + bgPaddingY);
+    context.lineTo(dividerX, bgY + boxHeight - bgPaddingY);
+    context.stroke();
+  } else {
+    const rightTextInsetX = Math.max(
+      (rightBoxWidth - bgPaddingX * 2 - summaryMaxLineWidth) * 0.5,
+      0
+    );
+    const rightTextX = rightBoxX + bgPaddingX + rightTextInsetX;
+
+    rightWrappedSummary.forEach((entry) => {
+      context.font = `500 ${entry.fontSize}px "Segoe UI", "Trebuchet MS", sans-serif`;
+      context.fillStyle = "#000000";
+      context.fillText(entry.text, rightTextX, rightTextY);
+      rightTextY += entry.fontSize + lineGap;
     });
   }
   context.shadowBlur = 0;
@@ -1306,4 +1334,3 @@ export default function DoubleSpringMassScene({ mass, springConstant, amplitude,
 
   return <div className="scene-canvas" ref={containerRef} />;
 }
-

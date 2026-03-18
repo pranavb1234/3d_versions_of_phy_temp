@@ -40,6 +40,51 @@ function getCheckpointExplanation(checkpointCount) {
   ];
 }
 
+function getCheckpointCalculations(checkpointCount, params = {}) {
+  const quarter = ((checkpointCount - 1) % 4) + 1;
+  const mass = Math.max(params.mass ?? 1, 0.001);
+  const springConstant = params.springConstant ?? 15;
+  const amplitude = params.amplitude ?? 3;
+  const kEff = springConstant;
+  const omega = Math.sqrt(kEff / mass);
+  const vMax = omega * amplitude;
+  const totalEnergy = 0.5 * kEff * amplitude * amplitude;
+
+  const format = (value) => {
+    const safe = Math.abs(value) < 0.005 ? 0 : value;
+    return safe.toFixed(2);
+  };
+  const formatSigned = (value) => {
+    const safe = Math.abs(value) < 0.005 ? 0 : value;
+    const fixed = safe.toFixed(2);
+    return safe > 0 ? `+${fixed}` : fixed;
+  };
+
+  const summaryLines = [
+    "Calculations involved",
+    `k = ${format(kEff)} N/m`,
+    `ω = ${format(omega)} rad/s`,
+    `v_max = ωA = ${format(vMax)} m/s`,
+    `Total energy = ${format(totalEnergy)} J`
+  ];
+
+  const x = quarter === 1 ? amplitude : quarter === 3 ? -amplitude : 0;
+  const v = quarter === 2 ? -vMax : quarter === 4 ? vMax : 0;
+  const a = -omega * omega * x;
+  const force = -kEff * x;
+  const ke = 0.5 * mass * v * v;
+  const pe = 0.5 * kEff * x * x;
+
+  const instantLines = [
+    "At this checkpoint",
+    `x = ${formatSigned(x)} m, v = ${formatSigned(v)} m/s`,
+    `acc. = ${formatSigned(a)} m/s^2, F = ${formatSigned(force)} N`,
+    `KE = ${format(ke)} J, PE = ${format(pe)} J`
+  ];
+
+  return { summaryLines, instantLines };
+}
+
 function createUnitSpringGeometry() {
   const points = [];
   const leadFraction = 0.05;
@@ -364,31 +409,40 @@ function updateBottomInfoSprite(sprite, lines) {
   const canvas = sprite.userData.canvas;
   const context = sprite.userData.context;
   const texture = sprite.userData.texture;
-  if (!context || !Array.isArray(lines) || lines.length === 0) {
+  const payload = Array.isArray(lines) ? { textLines: lines } : lines;
+  const textLines = payload?.textLines ?? [];
+  const calculationsPayload = payload?.calculationsLines ?? ["Calculations involved"];
+  const calculationsBlocks = Array.isArray(calculationsPayload)
+    ? { summaryLines: calculationsPayload, instantLines: [] }
+    : calculationsPayload ?? {};
+  const summaryLines = calculationsBlocks.summaryLines ?? [];
+  const instantLines = calculationsBlocks.instantLines ?? [];
+  if (!context || !Array.isArray(textLines) || textLines.length === 0) {
     return;
   }
 
-  const headingFontSize = 30;
-  const bodyFontSize = 30;
+  const headingFontSize = 24;
+  const bodyFontSize = 22;
   const paddingX = 28;
   const paddingY = 2;
-  const lineGap = 10;
-  const maxTextWidthRatio = 0.7;
-  const minHeight = 350;
+  const lineGap = 8;
+  const leftTextWidthRatio = 0.52;
+  const minHeight = 320;
   context.textBaseline = "top";
 
   context.clearRect(0, 0, canvas.width, canvas.height);
   context.strokeStyle = "rgba(15, 23, 42, 0.82)";
-  context.lineWidth = 6;
+  context.lineWidth = 4;
   context.lineJoin = "round";
   context.fillStyle = "#000000";
   context.shadowColor = "transparent";
   context.shadowBlur = 0;
   context.shadowOffsetX = 0;
   context.shadowOffsetY = 0;
-  const maxTextWidth = Math.min(canvas.width - paddingX * 2, canvas.width * maxTextWidthRatio);
+
+  const maxTextWidth = Math.min(canvas.width - paddingX * 2, canvas.width * leftTextWidthRatio);
   const normalizedLines =
-    lines.length > 1 ? [lines[0], lines.slice(1).join(" ")] : lines;
+    textLines.length > 1 ? [textLines[0], textLines.slice(1).join(" ")] : textLines;
   const wrappedLines = [];
   normalizedLines.forEach((line, index) => {
     const fontSize = index === 0 ? headingFontSize : bodyFontSize;
@@ -416,62 +470,161 @@ function updateBottomInfoSprite(sprite, lines) {
   const bgPaddingX = 20;
   const bgPaddingY = 12;
 
-  if (!sprite.userData.fixedBox) {
-    let maxBoxWidth = 0;
-    let maxBoxHeight = 0;
-    for (let idx = 1; idx <= 4; idx += 1) {
-      const checkpointLines = getCheckpointExplanation(idx);
-      const normalized =
-        checkpointLines.length > 1
-          ? [checkpointLines[0], checkpointLines.slice(1).join(" ")]
-          : checkpointLines;
-      const tempWrapped = [];
-      normalized.forEach((line, lineIndex) => {
-        const fontSize = lineIndex === 0 ? headingFontSize : bodyFontSize;
-        context.font = `500 ${fontSize}px "Segoe UI", "Trebuchet MS", sans-serif`;
-        const pieces = wrapTextLines(context, line, maxTextWidth);
-        pieces.forEach((piece) => tempWrapped.push({ text: piece, fontSize }));
-      });
-      const tempMaxLineWidth = tempWrapped.reduce((acc, entry) => {
-        context.font = `500 ${entry.fontSize}px "Segoe UI", "Trebuchet MS", sans-serif`;
-        return Math.max(acc, context.measureText(entry.text).width);
-      }, 0);
-      const tempTextBlockHeight =
-        tempWrapped.reduce((total, entry) => total + entry.fontSize, 0) +
-        Math.max(tempWrapped.length - 1, 0) * lineGap;
-      const boxWidth = Math.min(canvas.width - paddingX * 2, tempMaxLineWidth + bgPaddingX * 2);
-      const boxHeight = Math.min(canvas.height - paddingY * 2, tempTextBlockHeight + bgPaddingY * 2);
-      maxBoxWidth = Math.max(maxBoxWidth, boxWidth);
-      maxBoxHeight = Math.max(maxBoxHeight, boxHeight);
-    }
-    sprite.userData.fixedBox = { width: maxBoxWidth, height: maxBoxHeight };
+  const availableWidth = canvas.width - paddingX * 2;
+  const columnGap = 24;
+
+  let leftMaxLineWidth = 0;
+  let leftMaxTextHeight = 0;
+  for (let idx = 1; idx <= 4; idx += 1) {
+    const checkpointLines = getCheckpointExplanation(idx);
+    const normalized =
+      checkpointLines.length > 1
+        ? [checkpointLines[0], checkpointLines.slice(1).join(" ")]
+        : checkpointLines;
+    const tempWrapped = [];
+    normalized.forEach((line, lineIndex) => {
+      const fontSize = lineIndex === 0 ? headingFontSize : bodyFontSize;
+      context.font = `500 ${fontSize}px "Segoe UI", "Trebuchet MS", sans-serif`;
+      const pieces = wrapTextLines(context, line, maxTextWidth);
+      pieces.forEach((piece) => tempWrapped.push({ text: piece, fontSize }));
+    });
+    const tempMaxLineWidth = tempWrapped.reduce((acc, entry) => {
+      context.font = `500 ${entry.fontSize}px "Segoe UI", "Trebuchet MS", sans-serif`;
+      return Math.max(acc, context.measureText(entry.text).width);
+    }, 0);
+    const tempTextHeight =
+      tempWrapped.reduce((total, entry) => total + entry.fontSize, 0) +
+      Math.max(tempWrapped.length - 1, 0) * lineGap;
+    leftMaxLineWidth = Math.max(leftMaxLineWidth, tempMaxLineWidth);
+    leftMaxTextHeight = Math.max(leftMaxTextHeight, tempTextHeight);
   }
 
-  const fixedBox = sprite.userData.fixedBox;
-  const bgWidth =
-    fixedBox?.width ?? Math.min(canvas.width - paddingX * 2, maxLineWidth + bgPaddingX * 2);
-  const bgHeight =
-    fixedBox?.height ?? Math.min(canvas.height - paddingY * 2, textBlockHeight + bgPaddingY * 2);
-  const bgX = Math.max(0, (canvas.width - bgWidth) * 0.5);
-  const bgY = Math.max(0, (canvas.height - bgHeight) * 0.5);
-  const textInsetX = Math.max((bgWidth - bgPaddingX * 2 - maxLineWidth) * 0.5, 0);
-  const textInsetY = Math.max((bgHeight - bgPaddingY * 2 - textBlockHeight) * 0.5, 0);
-  const startX = bgX + bgPaddingX + textInsetX;
+  const leftBoxWidth = Math.min(availableWidth * 0.56, leftMaxLineWidth + bgPaddingX * 2);
+  const rightBoxWidth = Math.max(
+    220,
+    Math.min(availableWidth - leftBoxWidth - columnGap, availableWidth * 0.38)
+  );
+
+  const useSplitColumns = instantLines.length > 0;
+  const rightInnerWidth = Math.max(60, rightBoxWidth - bgPaddingX * 2);
+  const rightColumnGap = useSplitColumns ? 18 : 0;
+  const rightColumnWidth = useSplitColumns
+    ? Math.max(60, (rightInnerWidth - rightColumnGap) / 2)
+    : rightInnerWidth;
+  const rightWrappedSummary = [];
+  summaryLines.forEach((line, lineIndex) => {
+    const fontSize = lineIndex === 0 ? headingFontSize : bodyFontSize;
+    context.font = `500 ${fontSize}px "Segoe UI", "Trebuchet MS", sans-serif`;
+    const pieces = wrapTextLines(context, line, rightColumnWidth);
+    pieces.forEach((piece) =>
+      rightWrappedSummary.push({ text: piece, fontSize, isHeading: lineIndex === 0 })
+    );
+  });
+
+  const rightWrappedInstant = [];
+  instantLines.forEach((line, lineIndex) => {
+    const fontSize = lineIndex === 0 ? headingFontSize : bodyFontSize;
+    context.font = `500 ${fontSize}px "Segoe UI", "Trebuchet MS", sans-serif`;
+    const pieces = wrapTextLines(context, line, rightColumnWidth);
+    pieces.forEach((piece) =>
+      rightWrappedInstant.push({ text: piece, fontSize, isHeading: lineIndex === 0 })
+    );
+  });
+
+  const summaryMaxLineWidth = rightWrappedSummary.reduce((acc, entry) => {
+    context.font = `500 ${entry.fontSize}px "Segoe UI", "Trebuchet MS", sans-serif`;
+    return Math.max(acc, context.measureText(entry.text).width);
+  }, 0);
+  const instantMaxLineWidth = rightWrappedInstant.reduce((acc, entry) => {
+    context.font = `500 ${entry.fontSize}px "Segoe UI", "Trebuchet MS", sans-serif`;
+    return Math.max(acc, context.measureText(entry.text).width);
+  }, 0);
+  const summaryHeight =
+    rightWrappedSummary.reduce((total, entry) => total + entry.fontSize, 0) +
+    Math.max(rightWrappedSummary.length - 1, 0) * lineGap;
+  const instantHeight =
+    rightWrappedInstant.reduce((total, entry) => total + entry.fontSize, 0) +
+    Math.max(rightWrappedInstant.length - 1, 0) * lineGap;
+  const rightTextHeight = useSplitColumns
+    ? Math.max(summaryHeight, instantHeight)
+    : summaryHeight + instantHeight;
+
+  const leftBoxHeight = Math.min(canvas.height - paddingY * 2, leftMaxTextHeight + bgPaddingY * 2);
+  const rightBoxHeight = Math.min(canvas.height - paddingY * 2, rightTextHeight + bgPaddingY * 2);
+  const boxHeight = Math.max(leftBoxHeight, rightBoxHeight);
+
+  const blockYOffset = -22;
+  const bgY = Math.max(0, (canvas.height - boxHeight) * 0.5 + blockYOffset);
+  const leftBoxX = Math.max(0, paddingX);
+  const rightBoxX = Math.max(leftBoxX + leftBoxWidth + columnGap, leftBoxX);
+
+  const leftTextInsetX = Math.max((leftBoxWidth - bgPaddingX * 2 - maxLineWidth) * 0.5, 0);
+  const leftTextInsetY = Math.max((boxHeight - bgPaddingY * 2 - textBlockHeight) * 0.5, 0);
+  const leftTextX = leftBoxX + bgPaddingX + leftTextInsetX;
+  let leftTextY = bgY + bgPaddingY + leftTextInsetY;
+
+  const rightTextInsetY = Math.max((boxHeight - bgPaddingY * 2 - rightTextHeight) * 0.5, 0);
+  let rightTextY = bgY + bgPaddingY + rightTextInsetY;
 
   context.fillStyle = "rgba(255, 255, 255, 0.5)";
   context.strokeStyle = "rgba(0, 0, 0, 0.25)";
   context.lineWidth = 2;
-  context.fillRect(bgX, bgY, bgWidth, bgHeight);
-  context.strokeRect(bgX, bgY, bgWidth, bgHeight);
+  context.fillRect(leftBoxX, bgY, leftBoxWidth, boxHeight);
+  context.strokeRect(leftBoxX, bgY, leftBoxWidth, boxHeight);
+  context.fillRect(rightBoxX, bgY, rightBoxWidth, boxHeight);
+  context.strokeRect(rightBoxX, bgY, rightBoxWidth, boxHeight);
   context.fillStyle = "#000000";
 
-  let y = bgY + bgPaddingY + textInsetY;
   wrappedLines.forEach((entry) => {
     context.font = `500 ${entry.fontSize}px "Segoe UI", "Trebuchet MS", sans-serif`;
-    context.fillStyle = "#000000";
-    context.fillText(entry.text, startX, y);
-    y += entry.fontSize + lineGap;
+    context.fillText(entry.text, leftTextX, leftTextY);
+    leftTextY += entry.fontSize + lineGap;
   });
+
+  if (useSplitColumns) {
+    const summaryInsetX = Math.max((rightColumnWidth - summaryMaxLineWidth) * 0.5, 0);
+    const instantInsetX = Math.max((rightColumnWidth - instantMaxLineWidth) * 0.5, 0);
+    const summaryX = rightBoxX + bgPaddingX + summaryInsetX;
+    const instantX =
+      rightBoxX + bgPaddingX + rightColumnWidth + rightColumnGap + instantInsetX;
+    let summaryY = rightTextY;
+    let instantY = rightTextY;
+
+    rightWrappedSummary.forEach((entry) => {
+      context.font = `500 ${entry.fontSize}px "Segoe UI", "Trebuchet MS", sans-serif`;
+      context.fillStyle = "#000000";
+      context.fillText(entry.text, summaryX, summaryY);
+      summaryY += entry.fontSize + lineGap;
+    });
+
+    rightWrappedInstant.forEach((entry) => {
+      context.font = `500 ${entry.fontSize}px "Segoe UI", "Trebuchet MS", sans-serif`;
+      context.fillStyle = "#000000";
+      context.fillText(entry.text, instantX, instantY);
+      instantY += entry.fontSize + lineGap;
+    });
+
+    const dividerX = rightBoxX + bgPaddingX + rightColumnWidth + rightColumnGap * 0.5;
+    context.strokeStyle = "rgba(0, 0, 0, 0.28)";
+    context.lineWidth = 2;
+    context.beginPath();
+    context.moveTo(dividerX, bgY + bgPaddingY);
+    context.lineTo(dividerX, bgY + boxHeight - bgPaddingY);
+    context.stroke();
+  } else {
+    const rightTextInsetX = Math.max(
+      (rightBoxWidth - bgPaddingX * 2 - summaryMaxLineWidth) * 0.5,
+      0
+    );
+    const rightTextX = rightBoxX + bgPaddingX + rightTextInsetX;
+
+    rightWrappedSummary.forEach((entry) => {
+      context.font = `500 ${entry.fontSize}px "Segoe UI", "Trebuchet MS", sans-serif`;
+      context.fillStyle = "#000000";
+      context.fillText(entry.text, rightTextX, rightTextY);
+      rightTextY += entry.fontSize + lineGap;
+    });
+  }
   context.shadowBlur = 0;
   context.shadowOffsetX = 0;
   context.shadowOffsetY = 0;
@@ -737,6 +890,19 @@ export default function SpringMassScene({ mass, springConstant, amplitude, isPla
     displacementLabel.position.set(0, 0, -sideOverlayDepth);
     camera.add(displacementLabel);
 
+    const kLabel = createWrappedTextLabelSprite("k: spring constant", sideExplainLabelOptions);
+    kLabel.center.set(0.5, 0.5);
+    kLabel.position.set(0, 0, -sideOverlayDepth);
+    camera.add(kLabel);
+
+    const omegaLabel = createWrappedTextLabelSprite(
+      "ω: angular frequency",
+      sideExplainLabelOptions
+    );
+    omegaLabel.center.set(0.5, 0.5);
+    omegaLabel.position.set(0, 0, -sideOverlayDepth);
+    camera.add(omegaLabel);
+
     const amplitudeLabel = createWrappedTextLabelSprite(
       "A: amplitude",
       sideExplainLabelOptions
@@ -749,25 +915,52 @@ export default function SpringMassScene({ mass, springConstant, amplitude, isPla
       const halfViewHeight =
         Math.tan(THREE.MathUtils.degToRad(camera.fov * 0.5)) * sideOverlayDepth;
       const halfViewWidth = halfViewHeight * camera.aspect;
-      const leftX = -halfViewWidth + velocityExplainLabel.scale.x * 0.5 + sideOverlayMargin;
-      const topY = halfViewHeight - velocityExplainLabel.scale.y * 0.5 - sideOverlayMargin;
+      const maxLabelWidth = Math.max(
+        kLabel.scale.x,
+        omegaLabel.scale.x,
+        velocityExplainLabel.scale.x,
+        forceExplainLabel.scale.x,
+        displacementLabel.scale.x,
+        amplitudeLabel.scale.x
+      );
+      const leftX = -halfViewWidth + maxLabelWidth * 0.5 + sideOverlayMargin;
+      const topY = halfViewHeight - kLabel.scale.y * 0.5 - sideOverlayMargin;
       const stackedOffset =
-        velocityExplainLabel.scale.y * 0.5 + forceExplainLabel.scale.y * 0.5 + sideOverlayGap;
+        kLabel.scale.y * 0.5 + omegaLabel.scale.y * 0.5 + sideOverlayGap;
       const stackedOffset2 =
-        forceExplainLabel.scale.y * 0.5 + displacementLabel.scale.y * 0.5 + sideOverlayGap;
+        omegaLabel.scale.y * 0.5 + velocityExplainLabel.scale.y * 0.5 + sideOverlayGap;
       const stackedOffset3 =
+        velocityExplainLabel.scale.y * 0.5 + forceExplainLabel.scale.y * 0.5 + sideOverlayGap;
+      const stackedOffset4 =
+        forceExplainLabel.scale.y * 0.5 + displacementLabel.scale.y * 0.5 + sideOverlayGap;
+      const stackedOffset5 =
         displacementLabel.scale.y * 0.5 + amplitudeLabel.scale.y * 0.5 + sideOverlayGap;
 
-      velocityExplainLabel.position.set(leftX, topY, -sideOverlayDepth);
-      forceExplainLabel.position.set(leftX, topY - stackedOffset, -sideOverlayDepth);
-      displacementLabel.position.set(
+      kLabel.position.set(leftX, topY, -sideOverlayDepth);
+      omegaLabel.position.set(leftX, topY - stackedOffset, -sideOverlayDepth);
+      velocityExplainLabel.position.set(
         leftX,
         topY - stackedOffset - stackedOffset2,
         -sideOverlayDepth
       );
-      amplitudeLabel.position.set(
+      forceExplainLabel.position.set(
         leftX,
         topY - stackedOffset - stackedOffset2 - stackedOffset3,
+        -sideOverlayDepth
+      );
+      displacementLabel.position.set(
+        leftX,
+        topY - stackedOffset - stackedOffset2 - stackedOffset3 - stackedOffset4,
+        -sideOverlayDepth
+      );
+      amplitudeLabel.position.set(
+        leftX,
+        topY -
+          stackedOffset -
+          stackedOffset2 -
+          stackedOffset3 -
+          stackedOffset4 -
+          stackedOffset5,
         -sideOverlayDepth
       );
     };
@@ -783,9 +976,10 @@ export default function SpringMassScene({ mass, springConstant, amplitude, isPla
     narrationSprite.position.set(0, 1.25, -6.6);
     camera.add(narrationSprite);
 
-    const bottomInfoSprite = createBottomInfoSprite([
-      ...getCheckpointExplanation(1)
-    ]);
+    const bottomInfoSprite = createBottomInfoSprite({
+      textLines: getCheckpointExplanation(1),
+      calculationsLines: getCheckpointCalculations(1, { mass, springConstant, amplitude })
+    });
     bottomInfoSprite.center.set(0.5, 0.5);
     bottomInfoSprite.position.set(0, -2.28, -6.6);
     camera.add(bottomInfoSprite);
@@ -881,7 +1075,10 @@ export default function SpringMassScene({ mass, springConstant, amplitude, isPla
       "it oscillates back and forth about its mean position. The acceleration of the mass is always",
       "directed towards the mean position and is proportional to its displacement."
     ]);
-    setBottomInfo("intro", getCheckpointExplanation(1));
+    setBottomInfo("intro", {
+      textLines: getCheckpointExplanation(1),
+      calculationsLines: getCheckpointCalculations(1, { mass, springConstant, amplitude })
+    });
 
     const updateVisuals = () => {
       block.position.x = positionX;
@@ -957,7 +1154,14 @@ export default function SpringMassScene({ mass, springConstant, amplitude, isPla
         ? ((checkpointCount - 1 + 4) % 4) + 1
         : (checkpointCount % 4) + 1;
       const infoKey = `${activeQuarter}`;
-      setBottomInfo(infoKey, getCheckpointExplanation(activeQuarter));
+      setBottomInfo(infoKey, {
+        textLines: getCheckpointExplanation(activeQuarter),
+        calculationsLines: getCheckpointCalculations(activeQuarter, {
+          mass,
+          springConstant,
+          amplitude
+        })
+      });
 
     };
     updateVisuals();
