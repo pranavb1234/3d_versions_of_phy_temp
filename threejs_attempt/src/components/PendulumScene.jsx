@@ -58,6 +58,7 @@ function getCheckpointCalculations(checkpointCount, params = {}) {
     const safe = Math.abs(value) < 0.005 ? 0 : value;
     return safe.toFixed(2);
   };
+  // This is also ok
   const formatSigned = (value) => {
     const safe = Math.abs(value) < 0.005 ? 0 : value;
     const fixed = safe.toFixed(2);
@@ -79,7 +80,7 @@ function getCheckpointCalculations(checkpointCount, params = {}) {
   const force = -mass * g * Math.sin(theta);
   const ke = 0.5 * mass * v * v;
   const pe = mass * g * length * (1 - Math.cos(theta));
-
+ // this is ok - up
   const instantLines = [
     "At this checkpoint",
     `\u03B8 = ${formatSigned(theta)} rad, v = ${formatSigned(v)} m/s`,

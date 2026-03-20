@@ -62,124 +62,103 @@ body {
   z-index: 5;
 }
 
-.param-trigger {
-  border: 1px solid #9bb0c4;
-  border-radius: 10px;
-  padding: 0.45rem 0.6rem;
+.param-panel {
+  position: absolute;
+  top: 0.8rem;
+  left: 0.8rem;
+  display: grid;
+  gap: 0.6rem;
+  padding: 0.7rem 0.8rem;
+  border-radius: 14px;
+  border: 1px solid #9bb3ca;
+  background: rgba(238, 244, 251, 0.96);
+  box-shadow: 0 12px 26px rgba(36, 52, 79, 0.22);
+  min-width: 220px;
+  z-index: 5;
+}
+
+.param-panel-title {
   font-weight: 700;
-  font-size: 0.86rem;
+  font-size: 0.92rem;
   color: #1d2a3d;
-  background: rgba(246, 250, 255, 0.92);
-  cursor: pointer;
-  transition: filter 120ms ease, transform 120ms ease;
 }
 
-.param-trigger:hover {
-  filter: brightness(0.97);
-  transform: translateY(-1px);
-}
-
-.param-drawer-overlay {
-  position: absolute;
-  inset: 0;
-  background: rgba(8, 12, 20, 0.35);
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 180ms ease;
-  z-index: 8;
-}
-
-.param-drawer-overlay.open {
-  opacity: 1;
-  pointer-events: auto;
-}
-
-.param-drawer {
-  position: absolute;
-  top: 0;
-  right: 0;
-  height: 100%;
-  width: min(360px, 88vw);
-  background: linear-gradient(180deg, #f3f7fb 0%, #e5edf6 100%);
-  border-left: 1px solid #9bb3ca;
-  box-shadow: -18px 0 28px rgba(15, 23, 42, 0.2);
-  transform: translateX(100%);
-  transition: transform 220ms ease;
-  display: flex;
-  flex-direction: column;
-  padding: 1.1rem;
-  gap: 1rem;
-  overflow-y: auto;
-}
-
-.param-drawer-overlay.open .param-drawer {
-  transform: translateX(0);
-}
-
-.param-drawer-header {
+.param-item {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  font-weight: 700;
-  color: #1d2a3d;
+  gap: 0.6rem;
 }
 
-.param-drawer-header button {
-  border: 0;
-  border-radius: 999px;
-  padding: 0.35rem 0.75rem;
-  background: #1f5eb1;
-  color: #ffffff;
-  font-weight: 700;
-  font-size: 0.82rem;
-  cursor: pointer;
-}
-
-.param-group {
-  display: grid;
-  gap: 1rem;
-}
-
-.param-notes {
-  border-radius: 12px;
-  border: 1px solid rgba(148, 163, 184, 0.6);
-  background: rgba(241, 246, 253, 0.9);
-  padding: 0.6rem 0.75rem;
-  display: grid;
-  gap: 0.25rem;
-  color: #334155;
-  font-size: 0.85rem;
-  line-height: 1.2;
-}
-
-.param-notes p {
-  margin: 0;
-}
-
-.param-group label {
-  display: grid;
-  gap: 0.4rem;
-  font-size: 0.9rem;
+.param-label {
+  font-size: 0.88rem;
   font-weight: 600;
   color: #1e2a3b;
 }
 
-.param-group label span {
-  font-size: 0.92rem;
-}
-
-.param-group input[type="range"] {
-  width: 100%;
-}
-
-.param-group input[type="number"] {
-  width: 100%;
-  border-radius: 10px;
+.param-stepper {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.2rem;
+  border-radius: 999px;
   border: 1px solid #9bb0c4;
-  padding: 0.35rem 0.6rem;
-  font-weight: 600;
+  background: rgba(246, 250, 255, 0.9);
+}
+
+.stepper-btn {
+  width: 28px;
+  height: 28px;
+  border: 0;
+  border-radius: 50%;
+  background: #1f5eb1;
+  color: #ffffff;
+  font-weight: 700;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: filter 120ms ease, transform 120ms ease;
+}
+
+.stepper-btn:hover:not(:disabled) {
+  filter: brightness(0.96);
+  transform: translateY(-1px);
+}
+
+.stepper-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.param-value {
+  min-width: 2.4rem;
+  text-align: center;
+  font-weight: 700;
+  font-size: 0.9rem;
   color: #1d2a3d;
-  background: rgba(246, 250, 255, 0.95);
+}
+
+.legend-panel {
+  border-top: 1px solid #c3d1e2;
+  padding-top: 0.45rem;
+  display: grid;
+  gap: 0.35rem;
+}
+
+.legend-title {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #223248;
+}
+
+.legend-items {
+  display: grid;
+  gap: 0.25rem;
+  font-size: 0.8rem;
+  color: #334155;
+  line-height: 1.2;
+  max-height: 200px;
+  overflow: auto;
+  padding-right: 0.2rem;
 }
 
 .controls-panel {
@@ -312,5 +291,28 @@ body {
 
   .controls-panel {
     gap: 0.5rem;
+  }
+
+  .scene-controls,
+  .param-panel {
+    top: 0.6rem;
+    max-width: calc(50% - 1rem);
+  }
+
+  .scene-controls {
+    right: 0.6rem;
+  }
+
+  .param-panel {
+    left: 0.6rem;
+    min-width: 180px;
+  }
+
+  .legend-items {
+    max-height: 140px;
+  }
+
+  .template-select select {
+    min-width: 140px;
   }
 }

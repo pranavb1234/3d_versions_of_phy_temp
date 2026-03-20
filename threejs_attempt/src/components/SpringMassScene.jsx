@@ -853,117 +853,7 @@ export default function SpringMassScene({ mass, springConstant, amplitude, isPla
     velocityLabel.scale.multiplyScalar(0.58);
     scene.add(velocityLabel);
 
-    const sideExplainLabelOptions = {
-      width: 360,
-      fontSize: 34,
-      scale: 0.003,
-      paddingX: 20,
-      paddingY: 14,
-      lineHeight: 1.16
-    };
-
-    const sideOverlayDepth = 6.6;
-    const sideOverlayMargin = 0.12;
-    const sideOverlayGap = 0.12;
-
-    const velocityExplainLabel = createWrappedTextLabelSprite(
-      "Blue: velocity v",
-      sideExplainLabelOptions
-    );
-    velocityExplainLabel.center.set(0.5, 0.5);
-    velocityExplainLabel.position.set(0, 0, -sideOverlayDepth);
-    camera.add(velocityExplainLabel);
-
-    const forceExplainLabel = createWrappedTextLabelSprite(
-      "Red: restoring force F",
-      sideExplainLabelOptions
-    );
-    forceExplainLabel.center.set(0.5, 0.5);
-    forceExplainLabel.position.set(0, 0, -sideOverlayDepth);
-    camera.add(forceExplainLabel);
-
-    const displacementLabel = createWrappedTextLabelSprite(
-      "x: displacement from equilibrium position",
-      sideExplainLabelOptions
-    );
-    displacementLabel.center.set(0.5, 0.5);
-    displacementLabel.position.set(0, 0, -sideOverlayDepth);
-    camera.add(displacementLabel);
-
-    const kLabel = createWrappedTextLabelSprite("k: spring constant", sideExplainLabelOptions);
-    kLabel.center.set(0.5, 0.5);
-    kLabel.position.set(0, 0, -sideOverlayDepth);
-    camera.add(kLabel);
-
-    const omegaLabel = createWrappedTextLabelSprite(
-      "ω: angular frequency",
-      sideExplainLabelOptions
-    );
-    omegaLabel.center.set(0.5, 0.5);
-    omegaLabel.position.set(0, 0, -sideOverlayDepth);
-    camera.add(omegaLabel);
-
-    const amplitudeLabel = createWrappedTextLabelSprite(
-      "A: amplitude",
-      sideExplainLabelOptions
-    );
-    amplitudeLabel.center.set(0.5, 0.5);
-    amplitudeLabel.position.set(0, 0, -sideOverlayDepth);
-    camera.add(amplitudeLabel);
-
-    const updateSideExplainLabelPositions = () => {
-      const halfViewHeight =
-        Math.tan(THREE.MathUtils.degToRad(camera.fov * 0.5)) * sideOverlayDepth;
-      const halfViewWidth = halfViewHeight * camera.aspect;
-      const maxLabelWidth = Math.max(
-        kLabel.scale.x,
-        omegaLabel.scale.x,
-        velocityExplainLabel.scale.x,
-        forceExplainLabel.scale.x,
-        displacementLabel.scale.x,
-        amplitudeLabel.scale.x
-      );
-      const leftX = -halfViewWidth + maxLabelWidth * 0.5 + sideOverlayMargin;
-      const topY = halfViewHeight - kLabel.scale.y * 0.5 - sideOverlayMargin;
-      const stackedOffset =
-        kLabel.scale.y * 0.5 + omegaLabel.scale.y * 0.5 + sideOverlayGap;
-      const stackedOffset2 =
-        omegaLabel.scale.y * 0.5 + velocityExplainLabel.scale.y * 0.5 + sideOverlayGap;
-      const stackedOffset3 =
-        velocityExplainLabel.scale.y * 0.5 + forceExplainLabel.scale.y * 0.5 + sideOverlayGap;
-      const stackedOffset4 =
-        forceExplainLabel.scale.y * 0.5 + displacementLabel.scale.y * 0.5 + sideOverlayGap;
-      const stackedOffset5 =
-        displacementLabel.scale.y * 0.5 + amplitudeLabel.scale.y * 0.5 + sideOverlayGap;
-
-      kLabel.position.set(leftX, topY, -sideOverlayDepth);
-      omegaLabel.position.set(leftX, topY - stackedOffset, -sideOverlayDepth);
-      velocityExplainLabel.position.set(
-        leftX,
-        topY - stackedOffset - stackedOffset2,
-        -sideOverlayDepth
-      );
-      forceExplainLabel.position.set(
-        leftX,
-        topY - stackedOffset - stackedOffset2 - stackedOffset3,
-        -sideOverlayDepth
-      );
-      displacementLabel.position.set(
-        leftX,
-        topY - stackedOffset - stackedOffset2 - stackedOffset3 - stackedOffset4,
-        -sideOverlayDepth
-      );
-      amplitudeLabel.position.set(
-        leftX,
-        topY -
-          stackedOffset -
-          stackedOffset2 -
-          stackedOffset3 -
-          stackedOffset4 -
-          stackedOffset5,
-        -sideOverlayDepth
-      );
-    };
+    const updateSideExplainLabelPositions = () => {};
 
     const narrationSprite = createNarrationSprite([
       "Spring-Mass Experiment",
@@ -1221,3 +1111,4 @@ export default function SpringMassScene({ mass, springConstant, amplitude, isPla
 
   return <div className="scene-canvas" ref={containerRef} />;
 }
+

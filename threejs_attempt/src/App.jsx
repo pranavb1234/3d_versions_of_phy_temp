@@ -9,9 +9,13 @@ export default function App() {
   const [amplitude, setAmplitude] = useState(3.0);
   const [isPlaying, setIsPlaying] = useState(true);
   const [templateId, setTemplateId] = useState("single");
-  const [isParamOpen, setIsParamOpen] = useState(false);
 
   const clampValue = (value, min, max) => Math.min(max, Math.max(min, value));
+  const nudgeValue = (value, delta, min, max) => clampValue(value + delta, min, max);
+  const formatValue = (value, precision = 1) => {
+    const fixed = value.toFixed(precision);
+    return precision > 0 ? fixed.replace(/\.0$/, "") : fixed;
+  };
 
   const templateConfig = useMemo(
     () => ({
@@ -21,6 +25,14 @@ export default function App() {
         description:
           "Undamped simple harmonic motion where the wall-fixed spring pulls a movable block via Hooke's Law and Newton's Second Law.",
         fixedText: "Fixed for now: m = 1.0 kg, k = 15.0 N/m, A = 3.0 m",
+        legend: [
+          "k: spring constant",
+          "omega: angular frequency",
+          "Blue: velocity v",
+          "Red: restoring force F",
+          "x: displacement from equilibrium",
+          "A: amplitude"
+        ],
         Scene: SpringMassScene
       },
       double: {
@@ -29,6 +41,16 @@ export default function App() {
         description:
           "Two springs pull the mass back to center from both sides, making the restoring force stronger than a single spring.",
         fixedText: "Fixed for now: m = 1.0 kg, k = 15.0 N/m (each), A = 3.0 m",
+        legend: [
+          "v: block velocity (blue arrow)",
+          "Left spring force (red)",
+          "Right spring force (green)",
+          "k: spring constant",
+          "omega: angular frequency of oscillation",
+          "T: time period to complete one oscillation",
+          "A: amplitude",
+          "x: displacement from equilibrium"
+        ],
         Scene: DoubleSpringMassScene
       },
       pendulum: {
@@ -37,6 +59,15 @@ export default function App() {
         description:
           "Small-angle pendulum motion where a bob swings about equilibrium under gravity with a rigid support.",
         fixedText: "Fixed for now: m = 1.0 kg, L = 2.8 m, θ_max = 21°",
+        legend: [
+          "L: string length",
+          "theta: angular displacement",
+          "theta0: maximum angle",
+          "omega: angular frequency",
+          "T: time period",
+          "v: bob velocity (tangent to arc)",
+          "F_t: tangential restoring force"
+        ],
         Scene: PendulumScene
       }
     }),
@@ -45,6 +76,7 @@ export default function App() {
 
   const activeTemplate = templateConfig[templateId] ?? templateConfig.single;
   const ActiveScene = activeTemplate.Scene;
+  const legendItems = activeTemplate.legend ?? [];
 
   return (
     <main className="app-shell">
@@ -55,6 +87,81 @@ export default function App() {
           amplitude={amplitude}
           isPlaying={isPlaying}
         />
+        <div className="param-panel">
+          <span className="param-panel-title">Parameters</span>
+          <div className="param-item">
+            <span className="param-label">Mass (m)</span>
+            <div className="param-stepper">
+              <button
+                type="button"
+                className="stepper-btn"
+                onClick={() => setMass(nudgeValue(mass, -1, 0.5, 5))}
+                disabled={mass <= 0.5}
+                aria-label="Decrease mass"
+              >
+                -
+              </button>
+              <span className="param-value">{formatValue(mass, 1)}</span>
+              <button
+                type="button"
+                className="stepper-btn"
+                onClick={() => setMass(nudgeValue(mass, 1, 0.5, 5))}
+                disabled={mass >= 5}
+                aria-label="Increase mass"
+              >
+                +
+              </button>
+            </div>
+          </div>
+          <div className="param-item">
+            <span className="param-label">Spring Constant (k)</span>
+            <div className="param-stepper">
+              <button
+                type="button"
+                className="stepper-btn"
+                onClick={() => setSpringConstant(nudgeValue(springConstant, -1, 5, 30))}
+                disabled={springConstant <= 5}
+                aria-label="Decrease spring constant"
+              >
+                -
+              </button>
+              <span className="param-value">{formatValue(springConstant, 0)}</span>
+              <button
+                type="button"
+                className="stepper-btn"
+                onClick={() => setSpringConstant(nudgeValue(springConstant, 1, 5, 30))}
+                disabled={springConstant >= 30}
+                aria-label="Increase spring constant"
+              >
+                +
+              </button>
+            </div>
+          </div>
+          <div className="param-item">
+            <span className="param-label">Amplitude (A)</span>
+            <div className="param-stepper">
+              <button
+                type="button"
+                className="stepper-btn"
+                onClick={() => setAmplitude(nudgeValue(amplitude, -1, 0.5, 5))}
+                disabled={amplitude <= 0.5}
+                aria-label="Decrease amplitude"
+              >
+                -
+              </button>
+              <span className="param-value">{formatValue(amplitude, 1)}</span>
+              <button
+                type="button"
+                className="stepper-btn"
+                onClick={() => setAmplitude(nudgeValue(amplitude, 1, 0.5, 5))}
+                disabled={amplitude >= 5}
+                aria-label="Increase amplitude"
+              >
+                +
+              </button>
+            </div>
+          </div>
+        </div>
         <div className="scene-controls">
           <label className="template-select">
             <span>Template</span>
@@ -75,124 +182,20 @@ export default function App() {
               {isPlaying ? "Pause" : "Play"}
             </button>
           </div>
-          <button
-            type="button"
-            className="param-trigger"
-            onClick={() => setIsParamOpen(true)}
-          >
-            Parameters
-          </button>
+          {legendItems.length > 0 ? (
+            <div className="legend-panel">
+              <span className="legend-title">Legend</span>
+              <div className="legend-items">
+                {legendItems.map((item) => (
+                  <span key={item}>{item}</span>
+                ))}
+              </div>
+            </div>
+          ) : null}
         </div>
 
-        <div
-          className={`param-drawer-overlay ${isParamOpen ? "open" : ""}`}
-          onClick={() => setIsParamOpen(false)}
-        >
-          <aside className="param-drawer" onClick={(event) => event.stopPropagation()}>
-            <div className="param-drawer-header">
-              <span>Oscillation Parameters</span>
-              <button type="button" onClick={() => setIsParamOpen(false)}>
-                Close
-              </button>
-            </div>
-
-            <div className="param-group">
-              <div className="param-notes">
-                <p>
-                  On changing m: ⬆️ increase m and the system oscillates slower, ω
-                  decreases, and the time period T increases.
-                </p>
-              </div>
-              <label>
-                <span>Mass (m)</span>
-                <input
-                  type="range"
-                  min="0.5"
-                  max="5"
-                  step="0.1"
-                  value={mass}
-                  onChange={(event) =>
-                    setMass(clampValue(Number(event.target.value), 0.5, 5))
-                  }
-                />
-                <input
-                  type="number"
-                  min="0.5"
-                  max="5"
-                  step="0.1"
-                  value={mass}
-                  onChange={(event) =>
-                    setMass(clampValue(Number(event.target.value), 0.5, 5))
-                  }
-                />
-              </label>
-
-              <div className="param-notes">
-                <p>
-                  Spring Constant (k) measures stiffness. ⬆️ Increase k makes the
-                  restoring force stronger, the mass returns faster, ω increases,
-                  and T decreases.
-                </p>
-              </div>
-              <label>
-                <span>Spring Constant (k)</span>
-                <input
-                  type="range"
-                  min="5"
-                  max="30"
-                  step="0.5"
-                  value={springConstant}
-                  onChange={(event) =>
-                    setSpringConstant(clampValue(Number(event.target.value), 5, 30))
-                  }
-                />
-                <input
-                  type="number"
-                  min="5"
-                  max="30"
-                  step="0.5"
-                  value={springConstant}
-                  onChange={(event) =>
-                    setSpringConstant(clampValue(Number(event.target.value), 5, 30))
-                  }
-                />
-              </label>
-
-              <div className="param-notes">
-                <p>
-                  Amplitude (A) is the maximum distance from center. ⬆️ Increase A
-                  so the mass moves farther from equilibrium, speed increases
-                  (v_max = ωA), energy increases, while the time period stays the
-                  same.
-                </p>
-              </div>
-              <label>
-                <span>Amplitude (A)</span>
-                <input
-                  type="range"
-                  min="0.5"
-                  max="5"
-                  step="0.1"
-                  value={amplitude}
-                  onChange={(event) =>
-                    setAmplitude(clampValue(Number(event.target.value), 0.5, 5))
-                  }
-                />
-                <input
-                  type="number"
-                  min="0.5"
-                  max="5"
-                  step="0.1"
-                  value={amplitude}
-                  onChange={(event) =>
-                    setAmplitude(clampValue(Number(event.target.value), 0.5, 5))
-                  }
-                />
-              </label>
-            </div>
-          </aside>
-        </div>
       </div>
     </main>
   );
 }
+
