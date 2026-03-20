@@ -185,16 +185,11 @@ export default function App() {
 
   return (
     <main className="app-shell">
-      <div className="scene-panel">
-        <ActiveScene
-          mass={mass}
-          springConstant={springConstant}
-          amplitude={amplitude}
-          isPlaying={isPlaying}
-        />
-        <div className="left-stack">
-          <div className="param-panel">
-            <span className="param-panel-title">Parameters</span>
+      <div className="shm-frame">
+        <aside className="shm-left">
+          <div className="shm-left-title">Legend & Parameters</div>
+
+          <div className="shm-param-group">
             <div className="param-item">
               <span className="param-label">Mass (m)</span>
               <div className="param-stepper">
@@ -219,6 +214,7 @@ export default function App() {
                 </button>
               </div>
             </div>
+
             <div className="param-item">
               <span className="param-label">Spring Constant (k)</span>
               <div className="param-stepper">
@@ -243,10 +239,11 @@ export default function App() {
                 </button>
               </div>
             </div>
-          <div className="param-item">
-            <span className="param-label">Amplitude (A)</span>
-            <div className="param-stepper">
-              <button
+
+            <div className="param-item">
+              <span className="param-label">Amplitude (A)</span>
+              <div className="param-stepper">
+                <button
                   type="button"
                   className="stepper-btn"
                   onClick={() => setAmplitude(nudgeValue(amplitude, -1, 0.5, 5))}
@@ -264,72 +261,53 @@ export default function App() {
                   aria-label="Increase amplitude"
                 >
                   +
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div className="shm-section-divider" />
+
+          <div className="shm-left-subtitle">Legend</div>
+          <div className="shm-legend-items">
+            {legendItems.map((item) => (
+              <span key={item} className="shm-legend-item">
+                {item}
+              </span>
+            ))}
+          </div>
+        </aside>
+
+        <section className="shm-right">
+          <div className="shm-right-header">
+            <div className="shm-titleBox">{activeTemplate.title}</div>
+            <div className="shm-description">{activeTemplate.description}</div>
+          </div>
+
+          <div className="shm-simBox">
+            <div className="shm-simTop">
+              <span className="shm-simLabel">Simulation</span>
+              <button
+                type="button"
+                className={`sim-toggle-btn ${isPlaying ? "playing" : "paused"}`}
+                onClick={() => setIsPlaying((prev) => !prev)}
+              >
+                {isPlaying ? "Pause" : "Play"}
               </button>
             </div>
-          </div>
-          {effects.length > 0 ? (
-            <div className="param-notes-block">
-              <span className="param-notes-title">What Changes</span>
-              <div className="param-notes-list">
-                {effects.map((item) => (
-                  <span key={item}>{item}</span>
-                ))}
-              </div>
-            </div>
-          ) : null}
-        </div>
-          {calculations?.rows?.length ? (
-            <div className="calc-panel calc-panel-left">
-              <span className="calc-title">{calculations.title}</span>
-              <div className="calc-list">
-                {calculations.rows.map((row, index) => (
-                  <div
-                    key={`${row.latex}-${index}`}
-                    className={`calc-row ${row.value ? "has-value" : "no-value"}`}
-                  >
-                    <span
-                      className="calc-formula"
-                      dangerouslySetInnerHTML={renderFormula(row.latex)}
-                    />
-                    {row.value ? <span className="calc-value">{row.value}</span> : null}
-                  </div>
-                ))}
-              </div>
-            </div>
-          ) : null}
-        </div>
-        <div className="scene-controls">
-          <label className="template-select">
-            <span>Template</span>
-            <select value={templateId} onChange={(event) => setTemplateId(event.target.value)}>
-              <option value="single">{templateConfig.single.label}</option>
-              <option value="double">{templateConfig.double.label}</option>
-              <option value="pendulum">{templateConfig.pendulum.label}</option>
-            </select>
-          </label>
 
-          <div className="sim-toggle">
-            <span>Simulation:</span>
-            <button
-              type="button"
-              className={`sim-toggle-btn ${isPlaying ? "playing" : "paused"}`}
-              onClick={() => setIsPlaying((prev) => !prev)}
-            >
-              {isPlaying ? "Pause" : "Play"}
-            </button>
-          </div>
-          {legendItems.length > 0 ? (
-            <div className="legend-panel">
-              <span className="legend-title">Legend</span>
-              <div className="legend-items">
-                {legendItems.map((item) => (
-                  <span key={item}>{item}</span>
-                ))}
+            <div className="shm-simScene">
+              <div className="scene-panel shm-scenePanel">
+                <ActiveScene
+                  mass={mass}
+                  springConstant={springConstant}
+                  amplitude={amplitude}
+                  isPlaying={isPlaying}
+                />
               </div>
             </div>
-          ) : null}
-        </div>
-
+          </div>
+        </section>
       </div>
     </main>
   );
