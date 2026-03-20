@@ -1,4 +1,4 @@
-ï»¿import { useEffect, useRef } from "react";
+import { useEffect, useRef } from "react";
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 
@@ -21,24 +21,24 @@ function getCheckpointExplanation(checkpointCount) {
 
   if (quarter === 1) {
     return [
-      "Checkpoint 1/4 â€” Maximum Displacement (t = 0)",
+      "Checkpoint 1/4 — Maximum Displacement (t = 0)",
       "The bob is at its extreme position. Velocity is zero and the restoring force is maximum, pulling back toward equilibrium. Energy is all potential."
     ];
   }
   if (quarter === 2) {
     return [
-      "Checkpoint 2/4 â€” Equilibrium Crossing (t = T/4, moving left)",
+      "Checkpoint 2/4 — Equilibrium Crossing (t = T/4, moving left)",
       "The bob passes through equilibrium at maximum speed. Restoring force is nearly zero. Energy is all kinetic."
     ];
   }
   if (quarter === 3) {
     return [
-      "Checkpoint 3/4 â€” Opposite Extreme (t = T/2)",
+      "Checkpoint 3/4 — Opposite Extreme (t = T/2)",
       "The bob reaches the opposite turning point. Velocity is zero and the restoring force is maximum in the opposite direction."
     ];
   }
   return [
-    "Checkpoint 4/4 â€” Equilibrium Crossing (t = 3T/4, moving right)",
+    "Checkpoint 4/4 — Equilibrium Crossing (t = 3T/4, moving right)",
     "The bob passes through equilibrium at full speed. Restoring force is again near zero. The next quarter returns to the start (t = T)."
   ];
 }
@@ -352,12 +352,13 @@ function updateBottomInfoSprite(sprite, lines) {
   const texture = sprite.userData.texture;
   const payload = Array.isArray(lines) ? { textLines: lines } : lines;
   const textLines = payload?.textLines ?? [];
-  const calculationsPayload = payload?.calculationsLines ?? ["Calculations involved"];
+  const calculationsPayload = payload?.calculationsLines ?? [];
   const calculationsBlocks = Array.isArray(calculationsPayload)
     ? { summaryLines: calculationsPayload, instantLines: [] }
     : calculationsPayload ?? {};
   const summaryLines = calculationsBlocks.summaryLines ?? [];
   const instantLines = calculationsBlocks.instantLines ?? [];
+  const hasCalculations = summaryLines.length > 0 || instantLines.length > 0;
   if (!context || !Array.isArray(textLines) || textLines.length === 0) {
     return;
   }
@@ -367,7 +368,7 @@ function updateBottomInfoSprite(sprite, lines) {
   const paddingX = 28;
   const paddingY = 2;
   const lineGap = 8;
-  const leftTextWidthRatio = 0.52;
+  const leftTextWidthRatio = hasCalculations ? 0.52 : 0.98;
   const minHeight = 320;
   context.textBaseline = "top";
 
@@ -412,7 +413,7 @@ function updateBottomInfoSprite(sprite, lines) {
   const bgPaddingY = 12;
 
   const availableWidth = canvas.width - paddingX * 2;
-  const columnGap = 24;
+  const columnGap = hasCalculations ? 24 : 0;
 
   let leftMaxLineWidth = 0;
   let leftMaxTextHeight = 0;
@@ -440,13 +441,14 @@ function updateBottomInfoSprite(sprite, lines) {
     leftMaxTextHeight = Math.max(leftMaxTextHeight, tempTextHeight);
   }
 
-  const leftBoxWidth = Math.min(availableWidth * 0.56, leftMaxLineWidth + bgPaddingX * 2);
-  const rightBoxWidth = Math.max(
-    220,
-    Math.min(availableWidth - leftBoxWidth - columnGap, availableWidth * 0.38)
-  );
+  const leftBoxWidth = hasCalculations
+    ? Math.min(availableWidth * 0.56, leftMaxLineWidth + bgPaddingX * 2)
+    : Math.min(availableWidth, leftMaxLineWidth + bgPaddingX * 2);
+  const rightBoxWidth = hasCalculations
+    ? Math.max(220, Math.min(availableWidth - leftBoxWidth - columnGap, availableWidth * 0.38))
+    : 0;
 
-  const useSplitColumns = instantLines.length > 0;
+  const useSplitColumns = hasCalculations && instantLines.length > 0;
   const rightInnerWidth = Math.max(60, rightBoxWidth - bgPaddingX * 2);
   const rightColumnGap = useSplitColumns ? 18 : 0;
   const rightColumnWidth = useSplitColumns
@@ -486,12 +488,16 @@ function updateBottomInfoSprite(sprite, lines) {
   const instantHeight =
     rightWrappedInstant.reduce((total, entry) => total + entry.fontSize, 0) +
     Math.max(rightWrappedInstant.length - 1, 0) * lineGap;
-  const rightTextHeight = useSplitColumns
-    ? Math.max(summaryHeight, instantHeight)
-    : summaryHeight + instantHeight;
+  const rightTextHeight = hasCalculations
+    ? useSplitColumns
+      ? Math.max(summaryHeight, instantHeight)
+      : summaryHeight + instantHeight
+    : 0;
 
   const leftBoxHeight = Math.min(canvas.height - paddingY * 2, leftMaxTextHeight + bgPaddingY * 2);
-  const rightBoxHeight = Math.min(canvas.height - paddingY * 2, rightTextHeight + bgPaddingY * 2);
+  const rightBoxHeight = hasCalculations
+    ? Math.min(canvas.height - paddingY * 2, rightTextHeight + bgPaddingY * 2)
+    : 0;
   const boxHeight = Math.max(leftBoxHeight, rightBoxHeight);
 
   const blockYOffset = -22;
@@ -512,8 +518,10 @@ function updateBottomInfoSprite(sprite, lines) {
   context.lineWidth = 2;
   context.fillRect(leftBoxX, bgY, leftBoxWidth, boxHeight);
   context.strokeRect(leftBoxX, bgY, leftBoxWidth, boxHeight);
-  context.fillRect(rightBoxX, bgY, rightBoxWidth, boxHeight);
-  context.strokeRect(rightBoxX, bgY, rightBoxWidth, boxHeight);
+  if (hasCalculations) {
+    context.fillRect(rightBoxX, bgY, rightBoxWidth, boxHeight);
+    context.strokeRect(rightBoxX, bgY, rightBoxWidth, boxHeight);
+  }
   context.fillStyle = "#000000";
 
   wrappedLines.forEach((entry) => {
@@ -522,49 +530,51 @@ function updateBottomInfoSprite(sprite, lines) {
     leftTextY += entry.fontSize + lineGap;
   });
 
-  if (useSplitColumns) {
-    const summaryInsetX = Math.max((rightColumnWidth - summaryMaxLineWidth) * 0.5, 0);
-    const instantInsetX = Math.max((rightColumnWidth - instantMaxLineWidth) * 0.5, 0);
-    const summaryX = rightBoxX + bgPaddingX + summaryInsetX;
-    const instantX =
-      rightBoxX + bgPaddingX + rightColumnWidth + rightColumnGap + instantInsetX;
-    let summaryY = rightTextY;
-    let instantY = rightTextY;
+  if (hasCalculations) {
+    if (useSplitColumns) {
+      const summaryInsetX = Math.max((rightColumnWidth - summaryMaxLineWidth) * 0.5, 0);
+      const instantInsetX = Math.max((rightColumnWidth - instantMaxLineWidth) * 0.5, 0);
+      const summaryX = rightBoxX + bgPaddingX + summaryInsetX;
+      const instantX =
+        rightBoxX + bgPaddingX + rightColumnWidth + rightColumnGap + instantInsetX;
+      let summaryY = rightTextY;
+      let instantY = rightTextY;
 
-    rightWrappedSummary.forEach((entry) => {
-      context.font = `500 ${entry.fontSize}px "Segoe UI", "Trebuchet MS", sans-serif`;
-      context.fillStyle = "#000000";
-      context.fillText(entry.text, summaryX, summaryY);
-      summaryY += entry.fontSize + lineGap;
-    });
+      rightWrappedSummary.forEach((entry) => {
+        context.font = `500 ${entry.fontSize}px "Segoe UI", "Trebuchet MS", sans-serif`;
+        context.fillStyle = "#000000";
+        context.fillText(entry.text, summaryX, summaryY);
+        summaryY += entry.fontSize + lineGap;
+      });
 
-    rightWrappedInstant.forEach((entry) => {
-      context.font = `500 ${entry.fontSize}px "Segoe UI", "Trebuchet MS", sans-serif`;
-      context.fillStyle = "#000000";
-      context.fillText(entry.text, instantX, instantY);
-      instantY += entry.fontSize + lineGap;
-    });
+      rightWrappedInstant.forEach((entry) => {
+        context.font = `500 ${entry.fontSize}px "Segoe UI", "Trebuchet MS", sans-serif`;
+        context.fillStyle = "#000000";
+        context.fillText(entry.text, instantX, instantY);
+        instantY += entry.fontSize + lineGap;
+      });
 
-    const dividerX = rightBoxX + bgPaddingX + rightColumnWidth + rightColumnGap * 0.5;
-    context.strokeStyle = "rgba(0, 0, 0, 0.28)";
-    context.lineWidth = 2;
-    context.beginPath();
-    context.moveTo(dividerX, bgY + bgPaddingY);
-    context.lineTo(dividerX, bgY + boxHeight - bgPaddingY);
-    context.stroke();
-  } else {
-    const rightTextInsetX = Math.max(
-      (rightBoxWidth - bgPaddingX * 2 - summaryMaxLineWidth) * 0.5,
-      0
-    );
-    const rightTextX = rightBoxX + bgPaddingX + rightTextInsetX;
+      const dividerX = rightBoxX + bgPaddingX + rightColumnWidth + rightColumnGap * 0.5;
+      context.strokeStyle = "rgba(0, 0, 0, 0.28)";
+      context.lineWidth = 2;
+      context.beginPath();
+      context.moveTo(dividerX, bgY + bgPaddingY);
+      context.lineTo(dividerX, bgY + boxHeight - bgPaddingY);
+      context.stroke();
+    } else {
+      const rightTextInsetX = Math.max(
+        (rightBoxWidth - bgPaddingX * 2 - summaryMaxLineWidth) * 0.5,
+        0
+      );
+      const rightTextX = rightBoxX + bgPaddingX + rightTextInsetX;
 
-    rightWrappedSummary.forEach((entry) => {
-      context.font = `500 ${entry.fontSize}px "Segoe UI", "Trebuchet MS", sans-serif`;
-      context.fillStyle = "#000000";
-      context.fillText(entry.text, rightTextX, rightTextY);
-      rightTextY += entry.fontSize + lineGap;
-    });
+      rightWrappedSummary.forEach((entry) => {
+        context.font = `500 ${entry.fontSize}px "Segoe UI", "Trebuchet MS", sans-serif`;
+        context.fillStyle = "#000000";
+        context.fillText(entry.text, rightTextX, rightTextY);
+        rightTextY += entry.fontSize + lineGap;
+      });
+    }
   }
   context.shadowBlur = 0;
   context.shadowOffsetX = 0;
@@ -575,6 +585,7 @@ function updateBottomInfoSprite(sprite, lines) {
   sprite.userData.baseScale = baseScale;
   sprite.scale.set(canvas.width * baseScale, canvas.height * baseScale, 1);
 }
+
 function createLeaderLine() {
   const geometry = new THREE.BufferGeometry();
   geometry.setAttribute("position", new THREE.BufferAttribute(new Float32Array(9), 3));
@@ -939,7 +950,7 @@ export default function PendulumScene({ mass, amplitude, isPlaying }) {
     );
 
     const narrationSprite = createNarrationSprite([
-      "Simple Pendulum â€” Simple Harmonic Motion",
+      "Simple Pendulum — Simple Harmonic Motion",
       "A bob on a string of length L oscillates about equilibrium for small angles.",
       "\u03B8(t) = \u03B8\u2080 cos(\u03C9t), with \u03C9 = \u221A(g/L) and T = 2\u03C0\u221A(L/g).",
       "Velocity and restoring force vary through each quarter-cycle."
@@ -949,13 +960,7 @@ export default function PendulumScene({ mass, amplitude, isPlaying }) {
     camera.add(narrationSprite);
 
     const bottomInfoSprite = createBottomInfoSprite({
-      textLines: getCheckpointExplanation(1),
-      calculationsLines: getCheckpointCalculations(1, {
-        mass,
-        length: pendulumLength,
-        gravity,
-        amplitude: maxAngle
-      })
+      textLines: getCheckpointExplanation(1)
     });
     bottomInfoSprite.center.set(0.5, 0.5);
     bottomInfoSprite.position.set(0, -2.28, -6.6);
@@ -987,7 +992,8 @@ export default function PendulumScene({ mass, amplitude, isPlaying }) {
       }
 
       const bottomY = -halfViewHeight + bottomInfoSprite.scale.y * 0.5 + bottomOverlayMargin;
-      bottomInfoSprite.position.set(0, bottomY, -bottomOverlayDepth);
+      const rightX = halfViewWidth - bottomInfoSprite.scale.x * 0.5 - bottomOverlayMargin;
+      bottomInfoSprite.position.set(rightX, bottomY, -bottomOverlayDepth);
     };
 
     const axisHelper = new THREE.AxesHelper(2.6);
@@ -1051,19 +1057,13 @@ export default function PendulumScene({ mass, amplitude, isPlaying }) {
     };
 
     setNarration("intro", [
-      "Simple Pendulum â€” Simple Harmonic Motion",
+      "Simple Pendulum — Simple Harmonic Motion",
       "A bob on a string of length L oscillates about equilibrium for small angles.",
       "\u03B8(t) = \u03B8\u2080 cos(\u03C9t), with \u03C9 = \u221A(g/L) and T = 2\u03C0\u221A(L/g).",
       "Velocity and restoring force vary through each quarter-cycle."
     ]);
     setBottomInfo("intro", {
-      textLines: getCheckpointExplanation(1),
-      calculationsLines: getCheckpointCalculations(1, {
-        mass,
-        length: pendulumLength,
-        gravity,
-        amplitude: maxAngle
-      })
+      textLines: getCheckpointExplanation(1)
     });
 
     const updateVisuals = () => {
@@ -1139,13 +1139,7 @@ export default function PendulumScene({ mass, amplitude, isPlaying }) {
       const activeQuarter = (checkpointCount % 4) + 1;
       const infoKey = `${activeQuarter}`;
       setBottomInfo(infoKey, {
-        textLines: getCheckpointExplanation(activeQuarter),
-        calculationsLines: getCheckpointCalculations(activeQuarter, {
-          mass,
-          length: pendulumLength,
-          gravity,
-          amplitude: maxAngle
-        })
+        textLines: getCheckpointExplanation(activeQuarter)
       });
     };
     updateVisuals();
@@ -1205,6 +1199,13 @@ export default function PendulumScene({ mass, amplitude, isPlaying }) {
 
   return <div className="scene-canvas" ref={containerRef} />;
 }
+
+
+
+
+
+
+
 
 
 
