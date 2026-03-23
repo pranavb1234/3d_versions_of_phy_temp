@@ -97,7 +97,16 @@ export default function App() {
 
   const activeTemplate = templateConfig[templateId] ?? templateConfig.single;
   const ActiveScene = activeTemplate.Scene;
-  const legendItems = activeTemplate.legend ?? [];
+  const legendItems = useMemo(
+    () => [
+      { key: "k", label: "k - spring constant" },
+      { key: "A", label: "A - amplitude" },
+      { key: "m", label: "m - mass" },
+      { key: "v", label: "Blue arrow - velocity", tone: "legend-blue" },
+      { key: "F", label: "Red force - F", tone: "legend-red" }
+    ],
+    []
+  );
   const calculations = useMemo(() => {
     const safeMass = Math.max(mass, 0.001);
     const safeK = Math.max(springConstant, 0.001);
@@ -110,52 +119,95 @@ export default function App() {
       const vMax = omega * safeA;
       const aMax = omega * omega * safeA;
       const energy = 0.5 * kEff * safeA * safeA;
+      const massVal = formatNumber(safeMass);
+      const kVal = formatNumber(safeK);
+      const aVal = formatNumber(safeA);
+      const kEffVal = formatNumber(kEff);
+      const omegaVal = formatNumber(omega);
+      const periodVal = formatNumber(period);
+      const vMaxVal = formatNumber(vMax);
+      const aMaxVal = formatNumber(aMax);
+      const energyVal = formatNumber(energy);
       return {
         title: "Calculations",
         rows: [
           {
             title: "Effective Spring Constant",
             latex: "k_{eff} = 2k",
-            value: `${formatNumber(kEff)} N/m`,
+            value: `${kEffVal} N/m`,
             detail:
-              "Two springs act together, so their stiffness adds. We use k_eff in omega, T, and energy."
+              "Two springs act together, so their stiffness adds. We use k_eff in omega, T, and energy.",
+            steps: [
+              "k_{eff} = 2k",
+              `k_{eff} = 2 \\times ${kVal}`,
+              `k_{eff} = ${kEffVal}\\,\\text{N/m}`
+            ]
           },
           {
             title: "Angular Frequency",
             latex: "\\omega = \\sqrt{\\frac{k_{eff}}{m}}",
-            value: `${formatNumber(omega)} rad/s`,
+            value: `${omegaVal} rad/s`,
             detail:
-              "Omega sets how fast the oscillation happens. Larger k_eff increases omega; larger m decreases it."
+              "Omega sets how fast the oscillation happens. Larger k_eff increases omega; larger m decreases it.",
+            steps: [
+              "\\omega = \\sqrt{\\frac{k_{eff}}{m}}",
+              `\\omega = \\sqrt{\\frac{${kEffVal}}{${massVal}}}`,
+              `\\omega = ${omegaVal}\\,\\text{rad/s}`
+            ]
           },
           {
             title: "Period",
             latex: "T = 2\\pi\\sqrt{\\frac{m}{k_{eff}}}",
-            value: `${formatNumber(period)} s`,
-            detail: "Time for one full oscillation. T = 2*pi/omega."
+            value: `${periodVal} s`,
+            detail: "Time for one full oscillation. T = 2*pi/omega.",
+            steps: [
+              "T = 2\\pi\\sqrt{\\frac{m}{k_{eff}}}",
+              `T = 2\\pi\\sqrt{\\frac{${massVal}}{${kEffVal}}}`,
+              `T = ${periodVal}\\,\\text{s}`
+            ]
           },
           {
             title: "Displacement",
             latex: "x(t) = A\\sin(\\omega t)",
             detail:
-              "Position as a function of time. The sine form assumes x(0) = 0 and peaks at +/-A."
+              "Position as a function of time. The sine form assumes x(0) = 0 and peaks at +/-A.",
+            steps: [
+              "x(t) = A\\sin(\\omega t)",
+              `x(t) = ${aVal}\\sin(${omegaVal} t)`
+            ]
           },
           {
             title: "Maximum Speed",
             latex: "v_{max} = \\omega A",
-            value: `${formatNumber(vMax)} m/s`,
-            detail: "Maximum speed occurs at the center (equilibrium)."
+            value: `${vMaxVal} m/s`,
+            detail: "Maximum speed occurs at the center (equilibrium).",
+            steps: [
+              "v_{max} = \\omega A",
+              `v_{max} = ${omegaVal} \\times ${aVal}`,
+              `v_{max} = ${vMaxVal}\\,\\text{m/s}`
+            ]
           },
           {
             title: "Maximum Acceleration",
             latex: "a_{max} = \\omega^2 A",
-            value: `${formatNumber(aMax)} m/s^2`,
-            detail: "Maximum acceleration occurs at the extremes (x = +/-A)."
+            value: `${aMaxVal} m/s^2`,
+            detail: "Maximum acceleration occurs at the extremes (x = +/-A).",
+            steps: [
+              "a_{max} = \\omega^2 A",
+              `a_{max} = (${omegaVal})^2 \\times ${aVal}`,
+              `a_{max} = ${aMaxVal}\\,\\text{m/s^2}`
+            ]
           },
           {
             title: "Total Energy",
             latex: "E = \\frac{1}{2}k_{eff}A^2",
-            value: `${formatNumber(energy)} J`,
-            detail: "Total mechanical energy for the ideal system is constant."
+            value: `${energyVal} J`,
+            detail: "Total mechanical energy for the ideal system is constant.",
+            steps: [
+              "E = \\frac{1}{2}k_{eff}A^2",
+              `E = \\frac{1}{2} \\times ${kEffVal} \\times (${aVal})^2`,
+              `E = ${energyVal}\\,\\text{J}`
+            ]
           }
         ]
       };
@@ -170,44 +222,81 @@ export default function App() {
       const period = 2 * Math.PI * Math.sqrt(length / g);
       const vMax = omega * length * theta0;
       const energy = 0.5 * safeMass * length * length * omega * omega * theta0 * theta0;
+      const lengthVal = formatNumber(length);
+      const gVal = formatNumber(g);
+      const massVal = formatNumber(safeMass);
+      const theta0Val = formatNumber(theta0, 3);
+      const theta0DegVal = formatNumber(theta0Deg, 1);
+      const omegaVal = formatNumber(omega);
+      const periodVal = formatNumber(period);
+      const vMaxVal = formatNumber(vMax);
+      const energyVal = formatNumber(energy);
       return {
         title: "Calculations",
         rows: [
           {
             title: "Angular Frequency",
             latex: "\\omega = \\sqrt{\\frac{g}{L}}",
-            value: `${formatNumber(omega)} rad/s`,
-            detail: "Small-angle approximation: omega depends only on gravity and length."
+            value: `${omegaVal} rad/s`,
+            detail: "Small-angle approximation: omega depends only on gravity and length.",
+            steps: [
+              "\\omega = \\sqrt{\\frac{g}{L}}",
+              `\\omega = \\sqrt{\\frac{${gVal}}{${lengthVal}}}`,
+              `\\omega = ${omegaVal}\\,\\text{rad/s}`
+            ]
           },
           {
             title: "Period",
             latex: "T = 2\\pi\\sqrt{\\frac{L}{g}}",
-            value: `${formatNumber(period)} s`,
-            detail: "Time for one swing cycle. Mass does not affect T (small-angle)."
+            value: `${periodVal} s`,
+            detail: "Time for one swing cycle. Mass does not affect T (small-angle).",
+            steps: [
+              "T = 2\\pi\\sqrt{\\frac{L}{g}}",
+              `T = 2\\pi\\sqrt{\\frac{${lengthVal}}{${gVal}}}`,
+              `T = ${periodVal}\\,\\text{s}`
+            ]
           },
           {
             title: "Maximum Angle",
             latex: "\\theta_0",
-            value: `${formatNumber(theta0, 3)} rad (${formatNumber(theta0Deg, 1)} deg)`,
+            value: `${theta0Val} rad (${theta0DegVal} deg)`,
             detail:
-              "Peak angular displacement derived from the amplitude control and clamped for small angles."
+              "Peak angular displacement derived from the amplitude control and clamped for small angles.",
+            steps: [
+              `\\theta_0 = ${theta0DegVal}^{\\circ}`,
+              `\\theta_0 = ${theta0Val}\\,\\text{rad}`
+            ]
           },
           {
             title: "Angular Position",
             latex: "\\theta(t) = \\theta_0\\cos(\\omega t)",
-            detail: "Angle as a function of time for small-angle SHM."
+            detail: "Angle as a function of time for small-angle SHM.",
+            steps: [
+              "\\theta(t) = \\theta_0\\cos(\\omega t)",
+              `\\theta(t) = ${theta0Val}\\cos(${omegaVal} t)`
+            ]
           },
           {
             title: "Maximum Speed",
             latex: "v_{max} = \\omega L\\theta_0",
-            value: `${formatNumber(vMax)} m/s`,
-            detail: "Maximum speed occurs at the bottom of the swing."
+            value: `${vMaxVal} m/s`,
+            detail: "Maximum speed occurs at the bottom of the swing.",
+            steps: [
+              "v_{max} = \\omega L\\theta_0",
+              `v_{max} = ${omegaVal} \\times ${lengthVal} \\times ${theta0Val}`,
+              `v_{max} = ${vMaxVal}\\,\\text{m/s}`
+            ]
           },
           {
             title: "Total Energy",
             latex: "E = \\frac{1}{2}mL^2\\omega^2\\theta_0^2",
-            value: `${formatNumber(energy)} J`,
-            detail: "Total energy for the small-angle pendulum model."
+            value: `${energyVal} J`,
+            detail: "Total energy for the small-angle pendulum model.",
+            steps: [
+              "E = \\frac{1}{2}mL^2\\omega^2\\theta_0^2",
+              `E = \\frac{1}{2} \\times ${massVal} \\times (${lengthVal})^2 \\times (${omegaVal})^2 \\times (${theta0Val})^2`,
+              `E = ${energyVal}\\,\\text{J}`
+            ]
           }
         ]
       };
@@ -218,64 +307,110 @@ export default function App() {
     const vMax = omega * safeA;
     const aMax = omega * omega * safeA;
     const energy = 0.5 * safeK * safeA * safeA;
+    const massVal = formatNumber(safeMass);
+    const kVal = formatNumber(safeK);
+    const aVal = formatNumber(safeA);
+    const omegaVal = formatNumber(omega);
+    const periodVal = formatNumber(period);
+    const vMaxVal = formatNumber(vMax);
+    const aMaxVal = formatNumber(aMax);
+    const energyVal = formatNumber(energy);
     return {
       title: "Calculations",
       rows: [
         {
           title: "Given Values",
-          latex: `\\text{Given } m = ${formatNumber(safeMass)}\\,\\text{kg},\\; k = ${formatNumber(
-            safeK
-          )}\\,\\text{N/m},\\; A = ${formatNumber(safeA)}\\,\\text{m}`,
-          detail: `Using the current parameters: m = ${formatNumber(
-            safeMass
-          )} kg, k = ${formatNumber(safeK)} N/m, A = ${formatNumber(safeA)} m.`
+          latex: `\\text{Given } m = ${massVal}\\,\\text{kg},\\; k = ${kVal}\\,\\text{N/m},\\; A = ${aVal}\\,\\text{m}`,
+          detail: `Using the current parameters: m = ${massVal} kg, k = ${kVal} N/m, A = ${aVal} m.`,
+          steps: [
+            `m = ${massVal}\\,\\text{kg}`,
+            `k = ${kVal}\\,\\text{N/m}`,
+            `A = ${aVal}\\,\\text{m}`
+          ]
         },
         {
           title: "Angular Frequency",
           latex: "\\omega = \\sqrt{\\frac{k}{m}}",
-          value: `${formatNumber(omega)} rad/s`,
+          value: `${omegaVal} rad/s`,
           detail:
-            "Omega sets how fast the oscillation happens. Larger k increases omega; larger m decreases it."
+            "Omega sets how fast the oscillation happens. Larger k increases omega; larger m decreases it.",
+          steps: [
+            "\\omega = \\sqrt{\\frac{k}{m}}",
+            `\\omega = \\sqrt{\\frac{${kVal}}{${massVal}}}`,
+            `\\omega = ${omegaVal}\\,\\text{rad/s}`
+          ]
         },
         {
           title: "Period",
           latex: "T = 2\\pi\\sqrt{\\frac{m}{k}}",
-          value: `${formatNumber(period)} s`,
-          detail: "Time for one full oscillation. T = 2*pi/omega."
+          value: `${periodVal} s`,
+          detail: "Time for one full oscillation. T = 2*pi/omega.",
+          steps: [
+            "T = 2\\pi\\sqrt{\\frac{m}{k}}",
+            `T = 2\\pi\\sqrt{\\frac{${massVal}}{${kVal}}}`,
+            `T = ${periodVal}\\,\\text{s}`
+          ]
         },
         {
           title: "Displacement",
           latex: "x(t) = A\\sin(\\omega t)",
           detail:
-            "Position as a function of time. The sine form assumes x(0) = 0 and peaks at +/-A."
+            "Position as a function of time. The sine form assumes x(0) = 0 and peaks at +/-A.",
+          steps: [
+            "x(t) = A\\sin(\\omega t)",
+            `x(t) = ${aVal}\\sin(${omegaVal} t)`
+          ]
         },
         {
           title: "Velocity",
           latex: "v(t) = A\\omega\\cos(\\omega t)",
-          detail: "Velocity is the time-derivative of displacement."
+          detail: "Velocity is the time-derivative of displacement.",
+          steps: [
+            "v(t) = A\\omega\\cos(\\omega t)",
+            `v(t) = ${aVal} \\times ${omegaVal}\\cos(${omegaVal} t)`
+          ]
         },
         {
           title: "Acceleration",
           latex: "a(t) = -A\\omega^2\\sin(\\omega t)",
-          detail: "Acceleration is the time-derivative of velocity and equals -omega^2 x(t)."
+          detail: "Acceleration is the time-derivative of velocity and equals -omega^2 x(t).",
+          steps: [
+            "a(t) = -A\\omega^2\\sin(\\omega t)",
+            `a(t) = -${aVal}(${omegaVal})^2\\sin(${omegaVal} t)`
+          ]
         },
         {
           title: "Maximum Speed",
           latex: "v_{max} = \\omega A",
-          value: `${formatNumber(vMax)} m/s`,
-          detail: "Maximum speed occurs at the center (equilibrium)."
+          value: `${vMaxVal} m/s`,
+          detail: "Maximum speed occurs at the center (equilibrium).",
+          steps: [
+            "v_{max} = \\omega A",
+            `v_{max} = ${omegaVal} \\times ${aVal}`,
+            `v_{max} = ${vMaxVal}\\,\\text{m/s}`
+          ]
         },
         {
           title: "Maximum Acceleration",
           latex: "a_{max} = \\omega^2 A",
-          value: `${formatNumber(aMax)} m/s^2`,
-          detail: "Maximum acceleration occurs at the extremes (x = +/-A)."
+          value: `${aMaxVal} m/s^2`,
+          detail: "Maximum acceleration occurs at the extremes (x = +/-A).",
+          steps: [
+            "a_{max} = \\omega^2 A",
+            `a_{max} = (${omegaVal})^2 \\times ${aVal}`,
+            `a_{max} = ${aMaxVal}\\,\\text{m/s^2}`
+          ]
         },
         {
           title: "Total Energy",
           latex: "E = \\frac{1}{2}kA^2",
-          value: `${formatNumber(energy)} J`,
-          detail: "Total mechanical energy for the ideal system is constant."
+          value: `${energyVal} J`,
+          detail: "Total mechanical energy for the ideal system is constant.",
+          steps: [
+            "E = \\frac{1}{2}kA^2",
+            `E = \\frac{1}{2} \\times ${kVal} \\times (${aVal})^2`,
+            `E = ${energyVal}\\,\\text{J}`
+          ]
         }
       ]
     };
@@ -321,6 +456,9 @@ export default function App() {
       <div className="shm-frame">
         <aside className="shm-left shm-left-calc">
           <div className="shm-left-title">Calculations</div>
+          <div className="shm-left-note">
+            Click the triangle ▶ (play) button to view its info.
+          </div>
           <div className="shm-calc-panel">
             <div className="calc-title">{calculations.title}</div>
             <div className="calc-list">
@@ -343,9 +481,24 @@ export default function App() {
               ))}
             </div>
           </div>
+
+          <div className="shm-section-divider" />
+
+          <div className="shm-left-subtitle">Legend</div>
+          <div className="shm-legend-items shm-legend-list">
+            {legendItems.map((item) => (
+              <div key={item.key} className={`shm-legend-item ${item.tone ?? ""}`}>
+                {item.label}
+              </div>
+            ))}
+          </div>
         </aside>
 
         <section className="shm-center">
+          <div className="shm-center-header">
+            <div className="shm-center-title">{activeTemplate.title}</div>
+            <div className="shm-center-desc">{activeTemplate.description}</div>
+          </div>
           <div className="shm-simBox">
             <div className="shm-simScene">
               <div className="scene-panel shm-scenePanel">
@@ -365,9 +518,6 @@ export default function App() {
             <div className="shm-instructions-title">Quick Start</div>
             <div className="shm-instructions-text">
               Try changing the parameters to see what happens.
-            </div>
-            <div className="shm-instructions-text">
-              Click any parameter to view what it is and its info.
             </div>
           </div>
 
@@ -528,26 +678,13 @@ export default function App() {
 
           <div className="shm-section-divider" />
 
-          <div className="shm-right-section">
+          <div className="shm-right-section shm-right-highlight">
             <div className="shm-right-title">What To Notice</div>
             <div className="shm-effects-list">
               {effects.map((item) => (
                 <div key={item} className="shm-effects-item">
                   {item}
                 </div>
-              ))}
-            </div>
-          </div>
-
-          <div className="shm-section-divider" />
-
-          <div className="shm-right-section">
-            <div className="shm-right-title">Legend</div>
-            <div className="shm-legend-items">
-              {legendItems.map((item) => (
-                <span key={item} className="shm-legend-item">
-                  {item}
-                </span>
               ))}
             </div>
           </div>
@@ -571,6 +708,17 @@ export default function App() {
             />
             {activeCalc.value ? (
               <div className="calc-modal-value">= {activeCalc.value}</div>
+            ) : null}
+            {Array.isArray(activeCalc.steps) && activeCalc.steps.length > 0 ? (
+              <div className="calc-modal-steps">
+                {activeCalc.steps.map((step, index) => (
+                  <div
+                    key={`${activeCalc.title ?? "calc"}-${index}`}
+                    className="calc-modal-step"
+                    dangerouslySetInnerHTML={renderFormula(step)}
+                  />
+                ))}
+              </div>
             ) : null}
             <div className="calc-modal-detail">
               {activeCalc.detail ??
