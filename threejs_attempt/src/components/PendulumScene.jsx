@@ -949,52 +949,6 @@ export default function PendulumScene({ mass, amplitude, isPlaying }) {
       THREE.MathUtils.degToRad(35)
     );
 
-    const narrationSprite = createNarrationSprite([
-      "Simple Pendulum — Simple Harmonic Motion",
-      "A bob on a string of length L oscillates about equilibrium for small angles.",
-      "\u03B8(t) = \u03B8\u2080 cos(\u03C9t), with \u03C9 = \u221A(g/L) and T = 2\u03C0\u221A(L/g).",
-      "Velocity and restoring force vary through each quarter-cycle."
-    ]);
-    narrationSprite.center.set(0.5, 0.5);
-    narrationSprite.position.set(0, 1.1, -6.6);
-    camera.add(narrationSprite);
-
-    const bottomInfoSprite = createBottomInfoSprite({
-      textLines: getCheckpointExplanation(1)
-    });
-    bottomInfoSprite.center.set(0.5, 0.5);
-    bottomInfoSprite.position.set(0, -2.28, -6.6);
-    camera.add(bottomInfoSprite);
-
-    const bottomOverlayDepth = 6.6;
-    const bottomOverlayMargin = 0.32;
-
-    const updateBottomInfoPosition = () => {
-      const halfViewHeight =
-        Math.tan(THREE.MathUtils.degToRad(camera.fov * 0.5)) * bottomOverlayDepth;
-      const halfViewWidth = halfViewHeight * camera.aspect;
-      const baseScale = bottomInfoSprite.userData.baseScale ?? 0.00085;
-      bottomInfoSprite.scale.set(
-        bottomInfoSprite.userData.canvas.width * baseScale,
-        bottomInfoSprite.userData.canvas.height * baseScale,
-        1
-      );
-
-      const maxAllowedWidth = Math.max(0.001, 2 * halfViewWidth - 0.4);
-      const maxAllowedHeight = Math.max(0.001, 2 * halfViewHeight - 0.4);
-      const shrink = Math.min(
-        maxAllowedWidth / bottomInfoSprite.scale.x,
-        maxAllowedHeight / bottomInfoSprite.scale.y,
-        1
-      );
-      if (shrink < 1) {
-        bottomInfoSprite.scale.multiplyScalar(shrink);
-      }
-
-      const bottomY = -halfViewHeight + bottomInfoSprite.scale.y * 0.5 + bottomOverlayMargin;
-      const rightX = halfViewWidth - bottomInfoSprite.scale.x * 0.5 - bottomOverlayMargin;
-      bottomInfoSprite.position.set(rightX, bottomY, -bottomOverlayDepth);
-    };
 
     const axisHelper = new THREE.AxesHelper(2.6);
     axisHelper.position.set(-7.8, 0.01, -2.2);
@@ -1008,7 +962,6 @@ export default function PendulumScene({ mass, amplitude, isPlaying }) {
       camera.aspect = width / Math.max(height, 1);
       camera.updateProjectionMatrix();
       updateSideExplainLabelPositions();
-      updateBottomInfoPosition();
     };
     setRendererSize();
 
@@ -1024,15 +977,12 @@ export default function PendulumScene({ mass, amplitude, isPlaying }) {
 
     let phase = 0;
     let nextCheckpointPhase = quarterStep;
-    let checkpointCount = 0;
     let pausedFor = 0;
     let isPaused = false;
 
     let angle = maxAngle * Math.cos(phase);
     let angleRate = -maxAngle * omega * Math.sin(phase);
     let previousTime = performance.now() / 1000;
-    let narrationKey = "";
-    let bottomInfoKey = "";
     let animationFrameId = 0;
 
     const lineA = new THREE.Vector3();
@@ -1042,30 +992,6 @@ export default function PendulumScene({ mass, amplitude, isPlaying }) {
     const rodMidWorld = new THREE.Vector3();
     const arrowDirection = new THREE.Vector3();
     const tangentDirection = new THREE.Vector3();
-    const setNarration = (key, lines) => {
-      if (key !== narrationKey) {
-        updateNarrationSprite(narrationSprite, lines);
-        narrationKey = key;
-      }
-    };
-    const setBottomInfo = (key, lines) => {
-      if (key !== bottomInfoKey) {
-        updateBottomInfoSprite(bottomInfoSprite, lines);
-        bottomInfoKey = key;
-        updateBottomInfoPosition();
-      }
-    };
-
-    setNarration("intro", [
-      "Simple Pendulum — Simple Harmonic Motion",
-      "A bob on a string of length L oscillates about equilibrium for small angles.",
-      "\u03B8(t) = \u03B8\u2080 cos(\u03C9t), with \u03C9 = \u221A(g/L) and T = 2\u03C0\u221A(L/g).",
-      "Velocity and restoring force vary through each quarter-cycle."
-    ]);
-    setBottomInfo("intro", {
-      textLines: getCheckpointExplanation(1)
-    });
-
     const updateVisuals = () => {
       pendulumGroup.rotation.z = angle;
 
@@ -1136,11 +1062,6 @@ export default function PendulumScene({ mass, amplitude, isPlaying }) {
         velocityLabel.visible = false;
       }
 
-      const activeQuarter = (checkpointCount % 4) + 1;
-      const infoKey = `${activeQuarter}`;
-      setBottomInfo(infoKey, {
-        textLines: getCheckpointExplanation(activeQuarter)
-      });
     };
     updateVisuals();
 
@@ -1163,7 +1084,6 @@ export default function PendulumScene({ mass, amplitude, isPlaying }) {
       phase += omega * dt * playbackTimeScale;
       if (phase >= nextCheckpointPhase) {
         phase = nextCheckpointPhase;
-        checkpointCount += 1;
         nextCheckpointPhase += quarterStep;
         isPaused = true;
         pausedFor = 0;

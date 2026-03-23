@@ -865,56 +865,11 @@ export default function SpringMassScene({ mass, springConstant, amplitude, isPla
 
     const updateSideExplainLabelPositions = () => {};
 
-    const narrationSprite = createNarrationSprite([
-      "Spring-Mass Experiment",
-      "Simple Harmonic Motion (SHM): When a mass attached to a spring is displaced and released,",
-      "it oscillates back and forth about its mean position. The acceleration of the mass is always",
-      "directed towards the mean position and is proportional to its displacement — this is the",
-      "defining condition of SHM."
-    ]);
-    narrationSprite.center.set(0.5, 0.5);
-    narrationSprite.position.set(0, 1.25, -6.6);
-    camera.add(narrationSprite);
 
-    const bottomInfoSprite = createBottomInfoSprite({
-      textLines: getCheckpointExplanation(1)
-    });
-    bottomInfoSprite.center.set(0.5, 0.5);
-    bottomInfoSprite.position.set(0, -2.28, -6.6);
-    camera.add(bottomInfoSprite);
 
     const axisHelper = new THREE.AxesHelper(2.6);
     axisHelper.position.set(-5.6, 0.01, -2.2);
     scene.add(axisHelper);
-
-    const bottomOverlayDepth = 6.6;
-    const bottomOverlayMargin = 0.55;
-
-    const updateBottomInfoPosition = () => {
-      const halfViewHeight = Math.tan(THREE.MathUtils.degToRad(camera.fov * 0.5)) * bottomOverlayDepth;
-      const halfViewWidth = halfViewHeight * camera.aspect;
-      const baseScale = bottomInfoSprite.userData.baseScale ?? 0.00085;
-      bottomInfoSprite.scale.set(
-        bottomInfoSprite.userData.canvas.width * baseScale,
-        bottomInfoSprite.userData.canvas.height * baseScale,
-        1
-      );
-
-      const maxAllowedWidth = Math.max(0.001, 2 * halfViewWidth - 0.4);
-      const maxAllowedHeight = Math.max(0.001, 2 * halfViewHeight - 0.4);
-      const shrink = Math.min(
-        maxAllowedWidth / bottomInfoSprite.scale.x,
-        maxAllowedHeight / bottomInfoSprite.scale.y,
-        1
-      );
-      if (shrink < 1) {
-        bottomInfoSprite.scale.multiplyScalar(shrink);
-      }
-
-      const bottomY = -halfViewHeight + bottomInfoSprite.scale.y * 0.5 + bottomOverlayMargin;
-      const rightX = halfViewWidth - bottomInfoSprite.scale.x * 0.5 - bottomOverlayMargin;
-      bottomInfoSprite.position.set(rightX, bottomY, -bottomOverlayDepth);
-    };
 
     const setRendererSize = () => {
       const width = container.clientWidth;
@@ -924,7 +879,6 @@ export default function SpringMassScene({ mass, springConstant, amplitude, isPla
       camera.aspect = width / Math.max(height, 1);
       camera.updateProjectionMatrix();
       updateSideExplainLabelPositions();
-      updateBottomInfoPosition();
     };
     setRendererSize();
 
@@ -940,45 +894,18 @@ export default function SpringMassScene({ mass, springConstant, amplitude, isPla
 
     let theta = 0;
     let nextCheckpointTheta = quarterStep;
-    let checkpointCount = 0;
     let pausedFor = 0;
     let isPaused = false;
 
     let positionX = equilibriumX + amplitude * Math.sin(theta);
     let velocityX = amplitude * omega * Math.cos(theta);
     let previousTime = performance.now() / 1000;
-    let narrationKey = "";
-    let bottomInfoKey = "";
     let animationFrameId = 0;
 
     const lineA = new THREE.Vector3();
     const lineB = new THREE.Vector3();
     const lineC = new THREE.Vector3();
     const arrowDirection = new THREE.Vector3();
-    const setNarration = (key, lines) => {
-      if (key !== narrationKey) {
-        updateNarrationSprite(narrationSprite, lines);
-        narrationKey = key;
-      }
-    };
-    const setBottomInfo = (key, lines) => {
-      if (key !== bottomInfoKey) {
-        updateBottomInfoSprite(bottomInfoSprite, lines);
-        bottomInfoKey = key;
-        updateBottomInfoPosition();
-      }
-    };
-
-    setNarration("intro", [
-      "Spring-Mass Experiment",
-      "Simple Harmonic Motion (SHM): When a mass attached to a spring is displaced and released,",
-      "it oscillates back and forth about its mean position. The acceleration of the mass is always",
-      "directed towards the mean position and is proportional to its displacement."
-    ]);
-    setBottomInfo("intro", {
-      textLines: getCheckpointExplanation(1)
-    });
-
     const updateVisuals = () => {
       block.position.x = positionX;
       const blockAnchorX = positionX - blockWidth / 2;
@@ -1049,13 +976,6 @@ export default function SpringMassScene({ mass, springConstant, amplitude, isPla
         velocityLabel.visible = false;
       }
 
-      const activeQuarter = isPaused
-        ? ((checkpointCount - 1 + 4) % 4) + 1
-        : (checkpointCount % 4) + 1;
-      const infoKey = `${activeQuarter}`;
-      setBottomInfo(infoKey, {
-        textLines: getCheckpointExplanation(activeQuarter)
-      });
 
     };
     updateVisuals();
@@ -1079,7 +999,6 @@ export default function SpringMassScene({ mass, springConstant, amplitude, isPla
       theta += omega * dt * playbackTimeScale;
       if (theta >= nextCheckpointTheta) {
         theta = nextCheckpointTheta;
-        checkpointCount += 1;
         nextCheckpointTheta += quarterStep;
         isPaused = true;
         pausedFor = 0;
