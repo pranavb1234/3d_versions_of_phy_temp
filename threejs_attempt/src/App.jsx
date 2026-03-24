@@ -104,8 +104,8 @@ export default function App() {
         fixedText: "Fixed for now: m = 1.0 kg, k = 15.0 N/m (each), A = 3.0 m",
         legend: [
           "v: block velocity (blue arrow)",
-          "Left spring force (red)",
-          "Right spring force (green)",
+          "Red arrow: left spring restoring force (F_L)",
+          "Green arrow: right spring restoring force (F_R)",
           "k: spring constant",
           "omega: angular frequency of oscillation",
           "T: time period to complete one oscillation",
@@ -137,16 +137,21 @@ export default function App() {
 
   const activeTemplate = templateConfig[templateId] ?? templateConfig.single;
   const ActiveScene = activeTemplate.Scene;
-  const legendItems = useMemo(
-    () => [
-      { key: "k", label: "k - spring constant" },
-      { key: "A", label: "A - amplitude" },
-      { key: "m", label: "m - mass" },
-      { key: "v", label: "Blue arrow - velocity", tone: "legend-blue" },
-      { key: "F", label: "Red force - F", tone: "legend-red" }
-    ],
-    []
-  );
+  const legendItems = useMemo(() => {
+    const items = activeTemplate.legend ?? [];
+    return items.map((label) => {
+      const normalized = label.toLowerCase();
+      let tone = "";
+      if (normalized.includes("blue")) {
+        tone = "legend-blue";
+      } else if (normalized.includes("red")) {
+        tone = "legend-red";
+      } else if (normalized.includes("green")) {
+        tone = "legend-green";
+      }
+      return { key: label, label, tone };
+    });
+  }, [activeTemplate.legend]);
   const calculations = useMemo(() => {
     const safeMass = Math.max(mass, 0.001);
     const safeK = Math.max(springConstant, 0.001);
@@ -648,7 +653,7 @@ export default function App() {
           <div className="shm-left-subtitle">Legend</div>
           <div className="shm-legend-items shm-legend-list">
             {legendItems.map((item) => (
-              <div key={item.key} className={`shm-legend-item ${item.tone ?? ""}`}>
+              <div key={item.key} className={`shm-legend-item ${item.tone}`}>
                 {item.label}
               </div>
             ))}

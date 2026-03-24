@@ -728,6 +728,10 @@ body {
   color: #b91c1c;
 }
 
+.shm-legend-item.legend-green {
+  color: #15803d;
+}
+
 .shm-right-title {
   font-weight: 900;
   font-size: 0.86rem;
