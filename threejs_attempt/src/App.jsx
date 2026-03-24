@@ -13,11 +13,21 @@ export default function App() {
   const [templateId, setTemplateId] = useState("single");
   const [activeParamInfo, setActiveParamInfo] = useState(null);
   const [activeCalc, setActiveCalc] = useState(null);
+  const [activeEffectKey, setActiveEffectKey] = useState(null);
+  const [canvasNotice, setCanvasNotice] = useState(null);
   const [showTourIntro, setShowTourIntro] = useState(false);
   const [tourStepIndex, setTourStepIndex] = useState(null);
   const [tourSpotlight, setTourSpotlight] = useState(null);
   const [tourTooltip, setTourTooltip] = useState(null);
   const tourTargetRef = useRef(null);
+  const highlightTimeoutRef = useRef(null);
+  const noticeTimeoutRef = useRef(null);
+  const prevParamsRef = useRef({
+    mass,
+    springConstant,
+    amplitude,
+    templateId
+  });
 
   const clampValue = (value, min, max) => Math.min(max, Math.max(min, value));
   const nudgeValue = (value, delta, min, max) => clampValue(value + delta, min, max);
@@ -464,28 +474,187 @@ export default function App() {
   const effects = useMemo(() => {
     if (templateId === "pendulum") {
       return [
-        "Mass does not change the period (small-angle); it changes energy.",
-        "Increasing amplitude raises max speed and energy; period stays nearly the same.",
-        "Length and gravity set omega and the period in this model."
+        {
+          key: "mass",
+          text: "Mass does not change the period (small-angle); it changes energy."
+        },
+        {
+          key: "amplitude",
+          text: "Increasing amplitude raises max speed and energy; period stays nearly the same."
+        },
+        {
+          key: "system",
+          text: "Length and gravity set omega and the period in this model."
+        }
       ];
     }
     if (templateId === "double") {
       return [
-        "Increasing mass decreases omega, so the period increases.",
-        "Increasing k raises omega and shortens the period (effective stiffness is 2k).",
-        "Increasing amplitude increases max speed and total energy; period stays the same."
+        {
+          key: "mass",
+          text: "Increasing mass decreases omega, so the period increases."
+        },
+        {
+          key: "springConstant",
+          text: "Increasing k raises omega and shortens the period (effective stiffness is 2k)."
+        },
+        {
+          key: "amplitude",
+          text: "Increasing amplitude increases max speed and total energy; period stays the same."
+        }
       ];
     }
     return [
-      "Increasing mass decreases omega, so the period increases.",
-      "Increasing k raises omega and shortens the period.",
-      "Increasing amplitude increases max speed and total energy; period stays the same."
+      {
+        key: "mass",
+        text: "Increasing mass decreases omega, so the period increases."
+      },
+      {
+        key: "springConstant",
+        text: "Increasing k raises omega and shortens the period."
+      },
+      {
+        key: "amplitude",
+        text: "Increasing amplitude increases max speed and total energy; period stays the same."
+      }
     ];
   }, [templateId]);
+
+  const effectMessages = useMemo(
+    () => ({
+      single: {
+        mass: {
+          up: "Increasing mass decreases omega, so the period increases.",
+          down: "Decreasing mass increases omega, so the period decreases."
+        },
+        springConstant: {
+          up: "Increasing k raises omega and shortens the period.",
+          down: "Decreasing k lowers omega and lengthens the period."
+        },
+        amplitude: {
+          up: "Increasing amplitude increases max speed and total energy; period stays the same.",
+          down: "Decreasing amplitude lowers max speed and total energy; period stays the same."
+        }
+      },
+      double: {
+        mass: {
+          up: "Increasing mass decreases omega, so the period increases.",
+          down: "Decreasing mass increases omega, so the period decreases."
+        },
+        springConstant: {
+          up: "Increasing k raises omega and shortens the period (k_eff = 2k).",
+          down: "Decreasing k lowers omega and lengthens the period (k_eff = 2k)."
+        },
+        amplitude: {
+          up: "Increasing amplitude increases max speed and total energy; period stays the same.",
+          down: "Decreasing amplitude lowers max speed and total energy; period stays the same."
+        }
+      },
+      pendulum: {
+        mass: {
+          up: "Mass does not change the period (small-angle); it changes energy.",
+          down: "Mass does not change the period (small-angle); it changes energy."
+        },
+        springConstant: {
+          up: "Spring constant does not affect the pendulum model here.",
+          down: "Spring constant does not affect the pendulum model here."
+        },
+        amplitude: {
+          up: "Increasing amplitude raises max speed and energy; period stays nearly the same.",
+          down: "Decreasing amplitude lowers max speed and energy; period stays nearly the same."
+        }
+      }
+    }),
+    []
+  );
 
   const renderFormula = (latex) => ({
     __html: katex.renderToString(latex, { throwOnError: false })
   });
+
+  useEffect(() => {
+    return () => {
+      if (highlightTimeoutRef.current) {
+        clearTimeout(highlightTimeoutRef.current);
+      }
+      if (noticeTimeoutRef.current) {
+        clearTimeout(noticeTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    const previous = prevParamsRef.current;
+    if (previous.templateId !== templateId) {
+      prevParamsRef.current = { mass, springConstant, amplitude, templateId };
+      return;
+    }
+
+    let changedKey = null;
+    let delta = 0;
+    if (mass !== previous.mass) {
+      changedKey = "mass";
+      delta = mass - previous.mass;
+    } else if (springConstant !== previous.springConstant) {
+      changedKey = "springConstant";
+      delta = springConstant - previous.springConstant;
+    } else if (amplitude !== previous.amplitude) {
+      changedKey = "amplitude";
+      delta = amplitude - previous.amplitude;
+    }
+
+    if (changedKey && effects.some((item) => item.key === changedKey)) {
+      setActiveEffectKey(changedKey);
+      if (highlightTimeoutRef.current) {
+        clearTimeout(highlightTimeoutRef.current);
+      }
+      highlightTimeoutRef.current = setTimeout(() => {
+        setActiveEffectKey(null);
+      }, 1600);
+    }
+
+    if (changedKey) {
+      const direction = delta >= 0 ? "up" : "down";
+      const templateEffects = effectMessages[templateId] ?? effectMessages.single;
+      const effectText = templateEffects?.[changedKey]?.[direction];
+      const labelMap = {
+        mass: "Mass",
+        springConstant: "Spring constant",
+        amplitude: "Amplitude"
+      };
+      const valueText = (() => {
+        if (changedKey === "mass") {
+          return `m = ${formatValue(mass, 1)} kg`;
+        }
+        if (changedKey === "springConstant") {
+          return `k = ${formatValue(springConstant, 0)} N/m`;
+        }
+        if (changedKey === "amplitude") {
+          return `A = ${formatValue(amplitude, 1)} m`;
+        }
+        return "";
+      })();
+      const title = `${labelMap[changedKey] ?? "Parameter"} ${
+        direction === "up" ? "increased" : "decreased"
+      }`;
+      const parts = [];
+      if (valueText) {
+        parts.push(`Now ${valueText}.`);
+      }
+      if (effectText) {
+        parts.push(`Effect: ${effectText}`);
+      }
+      setCanvasNotice({ title, text: parts.join(" ") });
+      if (noticeTimeoutRef.current) {
+        clearTimeout(noticeTimeoutRef.current);
+      }
+      noticeTimeoutRef.current = setTimeout(() => {
+        setCanvasNotice(null);
+      }, 4500);
+    }
+
+    prevParamsRef.current = { mass, springConstant, amplitude, templateId };
+  }, [mass, springConstant, amplitude, templateId, effects, effectMessages]);
 
   useEffect(() => {
     const seenTour = window.localStorage.getItem("shm_tour_seen");
@@ -674,6 +843,12 @@ export default function App() {
                   amplitude={amplitude}
                   isPlaying={isPlaying}
                 />
+                {canvasNotice ? (
+                  <div className="scene-toast" role="status" aria-live="polite">
+                    <div className="scene-toast-title">{canvasNotice.title}</div>
+                    <div className="scene-toast-text">{canvasNotice.text}</div>
+                  </div>
+                ) : null}
               </div>
             </div>
           </div>
@@ -848,8 +1023,13 @@ export default function App() {
             <div className="shm-right-title">What To Notice</div>
             <div className="shm-effects-list">
               {effects.map((item) => (
-                <div key={item} className="shm-effects-item">
-                  {item}
+                <div
+                  key={item.key}
+                  className={`shm-effects-item ${
+                    item.key === activeEffectKey ? "is-highlighted" : ""
+                  }`}
+                >
+                  {item.text}
                 </div>
               ))}
             </div>
