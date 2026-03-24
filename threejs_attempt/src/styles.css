@@ -807,3 +807,142 @@ body {
     min-height: 320px;
   }
 }
+
+.tour-intro-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  z-index: 95;
+}
+
+.tour-intro-modal {
+  width: min(420px, 92vw);
+  background: #f8fbff;
+  border-radius: 16px;
+  border: 1px solid #9bb0c4;
+  box-shadow: 0 24px 60px rgba(15, 23, 42, 0.35);
+  padding: 1rem 1.1rem 1.1rem;
+  display: grid;
+  gap: 0.75rem;
+}
+
+.tour-intro-title {
+  font-weight: 800;
+  font-size: 1.05rem;
+  color: #1e2a3b;
+}
+
+.tour-intro-text {
+  font-size: 0.9rem;
+  color: #334155;
+  line-height: 1.4;
+}
+
+.tour-intro-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+
+.tour-btn {
+  border: 0;
+  border-radius: 999px;
+  padding: 0.4rem 0.9rem;
+  font-weight: 700;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: filter 120ms ease;
+}
+
+.tour-btn:hover {
+  filter: brightness(0.97);
+}
+
+.tour-btn.primary {
+  background: #1f5eb1;
+  color: #ffffff;
+}
+
+.tour-btn.ghost {
+  background: rgba(31, 94, 177, 0.12);
+  color: #1f5eb1;
+  border: 1px solid rgba(31, 94, 177, 0.35);
+}
+
+.tour-btn.small {
+  padding: 0.3rem 0.7rem;
+  font-size: 0.8rem;
+}
+
+.tour-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+}
+
+.tour-screen {
+  position: absolute;
+  inset: 0;
+  background: transparent;
+}
+
+.tour-spotlight {
+  position: fixed;
+  border-radius: 14px;
+  box-shadow: 0 0 0 9999px rgba(15, 23, 42, 0.55);
+  border: 2px solid rgba(255, 255, 255, 0.85);
+  transition: top 180ms ease, left 180ms ease, width 180ms ease, height 180ms ease;
+  pointer-events: none;
+}
+
+.tour-tooltip {
+  position: fixed;
+  width: min(280px, calc(100vw - 32px));
+  background: #f8fbff;
+  border: 1px solid #9bb0c4;
+  border-radius: 12px;
+  padding: 0.75rem 0.85rem;
+  box-shadow: 0 18px 46px rgba(15, 23, 42, 0.35);
+  display: grid;
+  gap: 0.5rem;
+}
+
+.tour-tooltip-title {
+  font-weight: 800;
+  font-size: 0.95rem;
+  color: #1e2a3b;
+}
+
+.tour-tooltip-text {
+  font-size: 0.85rem;
+  color: #334155;
+  line-height: 1.35;
+}
+
+.tour-tooltip-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.tour-step-count {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #64748b;
+}
+
+.tour-tooltip-actions {
+  display: flex;
+  gap: 0.4rem;
+}
+
+.tour-highlight {
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.9), 0 16px 32px rgba(15, 23, 42, 0.18);
+  border-radius: 12px;
+}

@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import katex from "katex";
 import "katex/dist/katex.min.css";
 import SpringMassScene from "./components/SpringMassScene";
@@ -13,6 +13,11 @@ export default function App() {
   const [templateId, setTemplateId] = useState("single");
   const [activeParamInfo, setActiveParamInfo] = useState(null);
   const [activeCalc, setActiveCalc] = useState(null);
+  const [showTourIntro, setShowTourIntro] = useState(false);
+  const [tourStepIndex, setTourStepIndex] = useState(null);
+  const [tourSpotlight, setTourSpotlight] = useState(null);
+  const [tourTooltip, setTourTooltip] = useState(null);
+  const tourTargetRef = useRef(null);
 
   const clampValue = (value, min, max) => Math.min(max, Math.max(min, value));
   const nudgeValue = (value, delta, min, max) => clampValue(value + delta, min, max);
@@ -35,6 +40,41 @@ export default function App() {
       amplitude:
         "Amplitude (A) is the starting displacement from equilibrium. Larger A increases max speed and energy."
     }),
+    []
+  );
+  const tourSteps = useMemo(
+    () => [
+      {
+        id: "calculations",
+        title: "Calculations Panel",
+        text: "Open any row to see the math for the current setup.",
+        selector: "[data-tour='calculations']"
+      },
+      {
+        id: "scene",
+        title: "Simulation Viewer",
+        text: "This is the live motion canvas. The visuals update as you change inputs.",
+        selector: "[data-tour='scene']"
+      },
+      {
+        id: "template",
+        title: "Oscillation Template",
+        text: "Switch between single, double, and pendulum systems here.",
+        selector: "[data-tour='template']"
+      },
+      {
+        id: "parameters",
+        title: "Parameters",
+        text: "Nudge the sliders to explore mass, spring constant, and amplitude.",
+        selector: "[data-tour='parameters']"
+      },
+      {
+        id: "insights",
+        title: "What To Notice",
+        text: "Quick takeaways update based on the active template.",
+        selector: "[data-tour='insights']"
+      }
+    ],
     []
   );
 
@@ -441,6 +481,102 @@ export default function App() {
   const renderFormula = (latex) => ({
     __html: katex.renderToString(latex, { throwOnError: false })
   });
+
+  useEffect(() => {
+    const seenTour = window.localStorage.getItem("shm_tour_seen");
+    if (!seenTour) {
+      setShowTourIntro(true);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (tourStepIndex === null) {
+      if (tourTargetRef.current) {
+        tourTargetRef.current.classList.remove("tour-highlight");
+        tourTargetRef.current = null;
+      }
+      setTourSpotlight(null);
+      setTourTooltip(null);
+      return;
+    }
+
+    const step = tourSteps[tourStepIndex];
+    if (!step) {
+      setTourStepIndex(null);
+      return;
+    }
+
+    const updatePositions = () => {
+      const element = document.querySelector(step.selector);
+      if (tourTargetRef.current && tourTargetRef.current !== element) {
+        tourTargetRef.current.classList.remove("tour-highlight");
+      }
+      if (element) {
+        element.classList.add("tour-highlight");
+        tourTargetRef.current = element;
+      } else {
+        tourTargetRef.current = null;
+      }
+
+      if (!element) {
+        setTourSpotlight(null);
+        setTourTooltip(null);
+        return;
+      }
+
+      const rect = element.getBoundingClientRect();
+      const padding = 10;
+      const inset = 8;
+      const spotlightTop = Math.max(rect.top - padding, inset);
+      const spotlightLeft = Math.max(rect.left - padding, inset);
+      const spotlightWidth = Math.min(
+        rect.width + padding * 2,
+        window.innerWidth - spotlightLeft - inset
+      );
+      const spotlightHeight = Math.min(
+        rect.height + padding * 2,
+        window.innerHeight - spotlightTop - inset
+      );
+      setTourSpotlight({
+        top: spotlightTop,
+        left: spotlightLeft,
+        width: spotlightWidth,
+        height: spotlightHeight,
+        radius: 14
+      });
+
+      const tooltipWidth = 280;
+      const tooltipHeight = 160;
+      const margin = 16;
+      let tooltipLeft = rect.left;
+      if (tooltipLeft + tooltipWidth > window.innerWidth - margin) {
+        tooltipLeft = window.innerWidth - tooltipWidth - margin;
+      }
+      if (tooltipLeft < margin) {
+        tooltipLeft = margin;
+      }
+      let tooltipTop = rect.bottom + margin;
+      if (tooltipTop + tooltipHeight > window.innerHeight - margin) {
+        tooltipTop = rect.top - tooltipHeight - margin;
+      }
+      if (tooltipTop < margin) {
+        tooltipTop = margin;
+      }
+      setTourTooltip({ top: tooltipTop, left: tooltipLeft });
+    };
+
+    updatePositions();
+    window.addEventListener("resize", updatePositions);
+    window.addEventListener("scroll", updatePositions, true);
+    return () => {
+      window.removeEventListener("resize", updatePositions);
+      window.removeEventListener("scroll", updatePositions, true);
+      if (tourTargetRef.current) {
+        tourTargetRef.current.classList.remove("tour-highlight");
+        tourTargetRef.current = null;
+      }
+    };
+  }, [tourStepIndex, tourSteps]);
   const toggleParamInfo = (key) => {
     setActiveParamInfo((prev) => (prev === key ? null : key));
   };
@@ -450,11 +586,36 @@ export default function App() {
   const closeCalcModal = () => {
     setActiveCalc(null);
   };
+  const startTour = () => {
+    window.localStorage.setItem("shm_tour_seen", "true");
+    setShowTourIntro(false);
+    setTourStepIndex(0);
+  };
+  const skipTour = () => {
+    window.localStorage.setItem("shm_tour_seen", "true");
+    setShowTourIntro(false);
+    setTourStepIndex(null);
+  };
+  const endTour = () => {
+    setTourStepIndex(null);
+  };
+  const advanceTour = () => {
+    setTourStepIndex((prev) => {
+      if (prev === null) {
+        return prev;
+      }
+      if (prev >= tourSteps.length - 1) {
+        return null;
+      }
+      return prev + 1;
+    });
+  };
+  const currentTourStep = tourStepIndex !== null ? tourSteps[tourStepIndex] : null;
 
   return (
     <main className="app-shell">
       <div className="shm-frame">
-        <aside className="shm-left shm-left-calc">
+        <aside className="shm-left shm-left-calc" data-tour="calculations">
           <div className="shm-left-title">Calculations</div>
           <div className="shm-left-note">
             Click the triangle ▶ (play) button to view its info.
@@ -499,7 +660,7 @@ export default function App() {
             <div className="shm-center-title">{activeTemplate.title}</div>
             <div className="shm-center-desc">{activeTemplate.description}</div>
           </div>
-          <div className="shm-simBox">
+          <div className="shm-simBox" data-tour="scene">
             <div className="shm-simScene">
               <div className="scene-panel shm-scenePanel">
                 <ActiveScene
@@ -536,7 +697,7 @@ export default function App() {
 
           <div className="shm-right-section">
             <div className="shm-right-title">Oscillation Template</div>
-            <div className="template-select">
+            <div className="template-select" data-tour="template">
               <select
                 value={templateId}
                 onChange={(event) => setTemplateId(event.target.value)}
@@ -555,7 +716,7 @@ export default function App() {
 
           <div className="shm-right-section">
             <div className="shm-right-title">Parameters</div>
-            <div className="shm-param-group">
+            <div className="shm-param-group" data-tour="parameters">
               <div className="param-item">
                 <button
                   type="button"
@@ -678,7 +839,7 @@ export default function App() {
 
           <div className="shm-section-divider" />
 
-          <div className="shm-right-section shm-right-highlight">
+          <div className="shm-right-section shm-right-highlight" data-tour="insights">
             <div className="shm-right-title">What To Notice</div>
             <div className="shm-effects-list">
               {effects.map((item) => (
@@ -723,6 +884,62 @@ export default function App() {
             <div className="calc-modal-detail">
               {activeCalc.detail ??
                 "This equation connects the current parameters to the simulation."}
+            </div>
+          </div>
+        </div>
+      ) : null}
+
+      {showTourIntro ? (
+        <div className="tour-intro-backdrop">
+          <div className="tour-intro-modal" role="dialog" aria-modal="true">
+            <div className="tour-intro-title">Welcome to the simulation lab</div>
+            <div className="tour-intro-text">
+              Want a quick walkthrough? We can highlight the key parts of the page in
+              under a minute.
+            </div>
+            <div className="tour-intro-actions">
+              <button type="button" className="tour-btn ghost" onClick={skipTour}>
+                Skip tour
+              </button>
+              <button type="button" className="tour-btn primary" onClick={startTour}>
+                Start tour
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
+
+      {currentTourStep && tourSpotlight && tourTooltip ? (
+        <div className="tour-overlay" aria-live="polite">
+          <div className="tour-screen" />
+          <div
+            className="tour-spotlight"
+            style={{
+              top: `${tourSpotlight.top}px`,
+              left: `${tourSpotlight.left}px`,
+              width: `${tourSpotlight.width}px`,
+              height: `${tourSpotlight.height}px`,
+              borderRadius: `${tourSpotlight.radius}px`
+            }}
+          />
+          <div
+            className="tour-tooltip"
+            style={{ top: `${tourTooltip.top}px`, left: `${tourTooltip.left}px` }}
+          >
+            <div className="tour-tooltip-title">{currentTourStep.title}</div>
+            <div className="tour-tooltip-text">{currentTourStep.text}</div>
+            <div className="tour-tooltip-footer">
+              <div className="tour-step-count">
+                Step {tourStepIndex + 1} of {tourSteps.length}
+              </div>
+              <div className="tour-tooltip-actions">
+                <button type="button" className="tour-btn ghost small" onClick={endTour}>
+                  Exit
+                </button>
+                <button type="button" className="tour-btn primary small" onClick={advanceTour}>
+                  {tourStepIndex >= tourSteps.length - 1 ? "Finish" : "Next"}
+                </button>
+              </div>
             </div>
           </div>
         </div>
