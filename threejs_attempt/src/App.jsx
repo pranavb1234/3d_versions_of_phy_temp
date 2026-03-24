@@ -48,10 +48,18 @@ export default function App() {
       springConstant:
         "Spring constant (k) measures stiffness. Larger k means faster oscillations and a shorter period.",
       amplitude:
-        "Amplitude (A) is the starting displacement from equilibrium. Larger A increases max speed and energy."
+        "Amplitude (A) is the starting displacement from equilibrium. Larger A increases max speed and energy.",
+      amplitudePendulum:
+        "Max angle (theta0) is the starting angular displacement. Larger theta0 increases speed and energy; period changes only slightly for small angles."
     }),
     []
   );
+  const pendulumTheta0Deg = useMemo(() => {
+    if (templateId !== "pendulum") {
+      return null;
+    }
+    return clampValue(amplitude * 7, 8, 35);
+  }, [templateId, amplitude]);
   const tourSteps = useMemo(
     () => [
       {
@@ -136,8 +144,8 @@ export default function App() {
           "theta0: maximum angle",
           "omega: angular frequency",
           "T: time period",
-          "v: bob velocity (tangent to arc)",
-          "F_t: tangential restoring force"
+          "Blue arrow: v - bob velocity (tangent to arc)",
+          "Red arrow: F_t - tangential restoring force"
         ],
         Scene: PendulumScene
       }
@@ -480,7 +488,7 @@ export default function App() {
         },
         {
           key: "amplitude",
-          text: "Increasing amplitude raises max speed and energy; period stays nearly the same."
+          text: "Increasing max angle raises max speed and energy; period stays nearly the same."
         },
         {
           key: "system",
@@ -560,8 +568,8 @@ export default function App() {
           down: "Spring constant does not affect the pendulum model here."
         },
         amplitude: {
-          up: "Increasing amplitude raises max speed and energy; period stays nearly the same.",
-          down: "Decreasing amplitude lowers max speed and energy; period stays nearly the same."
+          up: "Increasing max angle raises max speed and energy; period stays nearly the same.",
+          down: "Decreasing max angle lowers max speed and energy; period stays nearly the same."
         }
       }
     }),
@@ -620,7 +628,7 @@ export default function App() {
       const labelMap = {
         mass: "Mass",
         springConstant: "Spring constant",
-        amplitude: "Amplitude"
+        amplitude: templateId === "pendulum" ? "Max angle" : "Amplitude"
       };
       const valueText = (() => {
         if (changedKey === "mass") {
@@ -630,6 +638,9 @@ export default function App() {
           return `k = ${formatValue(springConstant, 0)} N/m`;
         }
         if (changedKey === "amplitude") {
+          if (templateId === "pendulum" && pendulumTheta0Deg !== null) {
+            return `theta0 = ${formatNumber(pendulumTheta0Deg, 1)} deg`;
+          }
           return `A = ${formatValue(amplitude, 1)} m`;
         }
         return "";
@@ -650,7 +661,7 @@ export default function App() {
       }
       noticeTimeoutRef.current = setTimeout(() => {
         setCanvasNotice(null);
-      }, 4500);
+      }, 6500);
     }
 
     prevParamsRef.current = { mass, springConstant, amplitude, templateId };
@@ -662,6 +673,12 @@ export default function App() {
       setShowTourIntro(true);
     }
   }, []);
+
+  useEffect(() => {
+    if (templateId === "pendulum" && activeParamInfo === "springConstant") {
+      setActiveParamInfo(null);
+    }
+  }, [templateId, activeParamInfo]);
 
   useEffect(() => {
     if (tourStepIndex === null) {
@@ -935,44 +952,48 @@ export default function App() {
                 </div>
               ) : null}
 
-              <div className="param-item">
-                <button
-                  type="button"
-                  className={`param-label-button ${
-                    activeParamInfo === "springConstant" ? "active" : ""
-                  }`}
-                  onClick={() => toggleParamInfo("springConstant")}
-                  aria-expanded={activeParamInfo === "springConstant"}
-                  aria-controls="param-info-spring"
-                >
-                  Spring Constant (k)
-                </button>
-                <div className="param-stepper">
-                  <button
-                    type="button"
-                    className="stepper-btn"
-                    onClick={() => setSpringConstant(nudgeValue(springConstant, -1, 5, 30))}
-                    disabled={springConstant <= 5}
-                    aria-label="Decrease spring constant"
-                  >
-                    -
-                  </button>
-                  <span className="param-value">{formatValue(springConstant, 0)}</span>
-                  <button
-                    type="button"
-                    className="stepper-btn"
-                    onClick={() => setSpringConstant(nudgeValue(springConstant, 1, 5, 30))}
-                    disabled={springConstant >= 30}
-                    aria-label="Increase spring constant"
-                  >
-                    +
-                  </button>
-                </div>
-              </div>
-              {activeParamInfo === "springConstant" ? (
-                <div id="param-info-spring" className="param-info">
-                  {paramInfo.springConstant}
-                </div>
+              {templateId !== "pendulum" ? (
+                <>
+                  <div className="param-item">
+                    <button
+                      type="button"
+                      className={`param-label-button ${
+                        activeParamInfo === "springConstant" ? "active" : ""
+                      }`}
+                      onClick={() => toggleParamInfo("springConstant")}
+                      aria-expanded={activeParamInfo === "springConstant"}
+                      aria-controls="param-info-spring"
+                    >
+                      Spring Constant (k)
+                    </button>
+                    <div className="param-stepper">
+                      <button
+                        type="button"
+                        className="stepper-btn"
+                        onClick={() => setSpringConstant(nudgeValue(springConstant, -1, 5, 30))}
+                        disabled={springConstant <= 5}
+                        aria-label="Decrease spring constant"
+                      >
+                        -
+                      </button>
+                      <span className="param-value">{formatValue(springConstant, 0)}</span>
+                      <button
+                        type="button"
+                        className="stepper-btn"
+                        onClick={() => setSpringConstant(nudgeValue(springConstant, 1, 5, 30))}
+                        disabled={springConstant >= 30}
+                        aria-label="Increase spring constant"
+                      >
+                        +
+                      </button>
+                    </div>
+                  </div>
+                  {activeParamInfo === "springConstant" ? (
+                    <div id="param-info-spring" className="param-info">
+                      {paramInfo.springConstant}
+                    </div>
+                  ) : null}
+                </>
               ) : null}
 
               <div className="param-item">
@@ -985,7 +1006,7 @@ export default function App() {
                   aria-expanded={activeParamInfo === "amplitude"}
                   aria-controls="param-info-amplitude"
                 >
-                  Amplitude (A)
+                  {templateId === "pendulum" ? "Max Angle (theta0)" : "Amplitude (A)"}
                 </button>
                 <div className="param-stepper">
                   <button
@@ -997,7 +1018,11 @@ export default function App() {
                   >
                     -
                   </button>
-                  <span className="param-value">{formatValue(amplitude, 1)}</span>
+                  <span className="param-value">
+                    {templateId === "pendulum" && pendulumTheta0Deg !== null
+                      ? `${formatNumber(pendulumTheta0Deg, 1)} deg`
+                      : formatValue(amplitude, 1)}
+                  </span>
                   <button
                     type="button"
                     className="stepper-btn"
@@ -1011,7 +1036,9 @@ export default function App() {
               </div>
               {activeParamInfo === "amplitude" ? (
                 <div id="param-info-amplitude" className="param-info">
-                  {paramInfo.amplitude}
+                  {templateId === "pendulum"
+                    ? paramInfo.amplitudePendulum
+                    : paramInfo.amplitude}
                 </div>
               ) : null}
             </div>

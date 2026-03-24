@@ -1017,14 +1017,14 @@ export default function PendulumScene({ mass, amplitude, isPlaying }) {
       tangentDirection.set(Math.cos(angle), Math.sin(angle), 0);
 
       if (forceMagnitude > 0.02) {
-        const forceLength = clamp(0.12 + forceMagnitude * 0.03, 0.18, 1.6);
+        const forceLength = clamp(0.28 + forceMagnitude * 0.06, 0.4, 2.8);
         arrowDirection.copy(tangentDirection).multiplyScalar(forceDirection || 1);
         forceArrow.position.set(bobWorld.x, bobWorld.y + 0.2, 0.42);
         forceArrow.setDirection(arrowDirection);
         forceArrow.setLength(
           forceLength,
-          Math.min(forceLength * 0.32, 0.26),
-          Math.min(forceLength * 0.24, 0.18)
+          Math.min(forceLength * 0.45, 0.7),
+          Math.min(forceLength * 0.35, 0.5)
         );
         forceArrow.visible = true;
         forceLabel.visible = true;
@@ -1040,15 +1040,15 @@ export default function PendulumScene({ mass, amplitude, isPlaying }) {
 
       const tangentialSpeed = Math.abs(pendulumLength * angleRate);
       if (tangentialSpeed > 0.02) {
-        const velocityLength = clamp(0.12 + tangentialSpeed * 0.22, 0.16, 1.6);
+        const velocityLength = clamp(0.26 + tangentialSpeed * 0.3, 0.36, 2.6);
         const velocityDirection = Math.sign(angleRate);
         arrowDirection.copy(tangentDirection).multiplyScalar(velocityDirection || 1);
         velocityArrow.position.set(bobWorld.x, bobWorld.y - 0.05, -0.42);
         velocityArrow.setDirection(arrowDirection);
         velocityArrow.setLength(
           velocityLength,
-          Math.min(velocityLength * 0.3, 0.24),
-          Math.min(velocityLength * 0.22, 0.16)
+          Math.min(velocityLength * 0.42, 0.6),
+          Math.min(velocityLength * 0.32, 0.45)
         );
         velocityArrow.visible = true;
         velocityLabel.visible = true;
