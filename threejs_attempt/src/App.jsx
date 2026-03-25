@@ -11,6 +11,8 @@ export default function App() {
   const [amplitude, setAmplitude] = useState(3.0);
   const [isPlaying, setIsPlaying] = useState(true);
   const [templateId, setTemplateId] = useState("single");
+  const [chapterId, setChapterId] = useState("oscillations");
+  const [waveSimId, setWaveSimId] = useState("basics");
   const [activeParamInfo, setActiveParamInfo] = useState(null);
   const [activeCalc, setActiveCalc] = useState(null);
   const [activeEffectKey, setActiveEffectKey] = useState(null);
@@ -76,8 +78,8 @@ export default function App() {
       },
       {
         id: "template",
-        title: "Oscillation Template",
-        text: "Switch between single, double, and pendulum systems here.",
+        title: "Simulation Selector",
+        text: "Pick the simulation for the current chapter from the top bar.",
         selector: "[data-tour='template']"
       },
       {
@@ -93,6 +95,23 @@ export default function App() {
         selector: "[data-tour='insights']"
       }
     ],
+    []
+  );
+
+  const chapterConfig = useMemo(
+    () => ({
+      oscillations: { label: "Oscillations" },
+      waves: { label: "Waves" }
+    }),
+    []
+  );
+
+  const waveSimConfig = useMemo(
+    () => ({
+      basics: { label: "Wave Basics (Coming Soon)" },
+      transverse: { label: "Transverse Wave (Coming Soon)" },
+      longitudinal: { label: "Longitudinal Wave (Coming Soon)" }
+    }),
     []
   );
 
@@ -153,6 +172,8 @@ export default function App() {
     []
   );
 
+  const isOscillationChapter = chapterId === "oscillations";
+  const activeWaveSim = waveSimConfig[waveSimId] ?? { label: "Wave Simulation" };
   const activeTemplate = templateConfig[templateId] ?? templateConfig.single;
   const ActiveScene = activeTemplate.Scene;
   const legendItems = useMemo(() => {
@@ -681,6 +702,19 @@ export default function App() {
   }, [templateId, activeParamInfo]);
 
   useEffect(() => {
+    if (chapterId === "oscillations") {
+      return;
+    }
+    setActiveCalc(null);
+    setActiveParamInfo(null);
+    setActiveEffectKey(null);
+    setCanvasNotice(null);
+    setTourStepIndex(null);
+    setTourSpotlight(null);
+    setTourTooltip(null);
+  }, [chapterId]);
+
+  useEffect(() => {
     if (tourStepIndex === null) {
       if (tourTargetRef.current) {
         tourTargetRef.current.classList.remove("tour-highlight");
@@ -801,11 +835,65 @@ export default function App() {
       return prev + 1;
     });
   };
+  const handleChapterChange = (event) => {
+    setChapterId(event.target.value);
+  };
+  const handleSimulationChange = (event) => {
+    const nextSimulation = event.target.value;
+    if (chapterId === "oscillations") {
+      setTemplateId(nextSimulation);
+      return;
+    }
+    if (chapterId === "waves") {
+      setWaveSimId(nextSimulation);
+    }
+  };
   const currentTourStep = tourStepIndex !== null ? tourSteps[tourStepIndex] : null;
 
   return (
     <main className="app-shell">
-      <div className="shm-frame">
+      <header className="shm-topbar">
+        <div className="shm-topbar-left">
+          <div className="shm-topbar-title">Physics Lab</div>
+          <div className="shm-topbar-subtitle">Chapters and simulations</div>
+        </div>
+        <div className="shm-topbar-controls">
+          <label className="shm-topbar-field">
+            <span className="shm-topbar-label">Chapter</span>
+            <select value={chapterId} onChange={handleChapterChange} aria-label="Select chapter">
+              {Object.entries(chapterConfig).map(([key, config]) => (
+                <option key={key} value={key}>
+                  {config.label}
+                </option>
+              ))}
+            </select>
+          </label>
+          {chapterId ? (
+            <label className="shm-topbar-field" data-tour="template">
+              <span className="shm-topbar-label">Simulation</span>
+              <select
+                value={isOscillationChapter ? templateId : waveSimId}
+                onChange={handleSimulationChange}
+                aria-label="Select simulation"
+              >
+                {isOscillationChapter
+                  ? Object.entries(templateConfig).map(([key, config]) => (
+                      <option key={key} value={key}>
+                        {config.label}
+                      </option>
+                    ))
+                  : Object.entries(waveSimConfig).map(([key, config]) => (
+                      <option key={key} value={key}>
+                        {config.label}
+                      </option>
+                    ))}
+              </select>
+            </label>
+          ) : null}
+        </div>
+      </header>
+      {isOscillationChapter ? (
+        <div className="shm-frame">
         <aside className="shm-left shm-left-calc" data-tour="calculations">
           <div className="shm-left-title">Calculations</div>
           <div className="shm-left-note">
@@ -888,25 +976,6 @@ export default function App() {
             >
               {isPlaying ? "Pause" : "Play"}
             </button>
-          </div>
-
-          <div className="shm-section-divider" />
-
-          <div className="shm-right-section">
-            <div className="shm-right-title">Oscillation Template</div>
-            <div className="template-select" data-tour="template">
-              <select
-                value={templateId}
-                onChange={(event) => setTemplateId(event.target.value)}
-                aria-label="Select oscillation template"
-              >
-                {Object.entries(templateConfig).map(([key, config]) => (
-                  <option key={key} value={key}>
-                    {config.label}
-                  </option>
-                ))}
-              </select>
-            </div>
           </div>
 
           <div className="shm-section-divider" />
@@ -1063,8 +1132,20 @@ export default function App() {
           </div>
         </aside>
       </div>
+      ) : (
+        <div className="waves-frame">
+          <div className="waves-card">
+            <div className="waves-title">Waves Chapter</div>
+            <div className="waves-subtitle">
+              Choose a simulation from the top bar to get started. This space is ready for the next
+              set of wave scenes.
+            </div>
+            <div className="waves-selection">Selected simulation: {activeWaveSim.label}</div>
+          </div>
+        </div>
+      )}
 
-      {activeCalc ? (
+      {isOscillationChapter && activeCalc ? (
         <div className="calc-modal-backdrop" onClick={closeCalcModal}>
           <div className="calc-modal" onClick={(event) => event.stopPropagation()}>
             <div className="calc-modal-header">
@@ -1101,7 +1182,7 @@ export default function App() {
         </div>
       ) : null}
 
-      {showTourIntro ? (
+      {isOscillationChapter && showTourIntro ? (
         <div className="tour-intro-backdrop">
           <div className="tour-intro-modal" role="dialog" aria-modal="true">
             <div className="tour-intro-title">Welcome to the simulation lab</div>
@@ -1121,7 +1202,7 @@ export default function App() {
         </div>
       ) : null}
 
-      {currentTourStep && tourSpotlight && tourTooltip ? (
+      {isOscillationChapter && currentTourStep && tourSpotlight && tourTooltip ? (
         <div className="tour-overlay" aria-live="polite">
           <div className="tour-screen" />
           <div
