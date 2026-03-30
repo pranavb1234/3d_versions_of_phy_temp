@@ -967,6 +967,76 @@ body {
   font-size: 1.08rem;
 }
 
+.wave-symbols {
+  display: grid;
+  gap: 0.55rem;
+  padding: 0.6rem 0.7rem;
+  border-radius: 12px;
+  border: 1px solid rgba(156, 178, 200, 0.6);
+  background: rgba(246, 250, 255, 0.75);
+}
+
+.wave-symbols-title {
+  font-weight: 800;
+  font-size: 1rem;
+  color: #1e2a3b;
+}
+
+.wave-symbols-list {
+  display: grid;
+  gap: 0.45rem;
+}
+
+.wave-symbol-item {
+  border-radius: 10px;
+  border: 1px solid rgba(156, 178, 200, 0.5);
+  background: rgba(255, 255, 255, 0.75);
+  padding: 0.35rem 0.5rem;
+}
+
+.wave-symbol-summary {
+  list-style: none;
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  cursor: pointer;
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: #1f2937;
+}
+
+.wave-symbol-summary::-webkit-details-marker {
+  display: none;
+}
+
+.wave-symbol-summary::before {
+  content: "▸";
+  font-size: 0.95rem;
+  color: #1e3a8a;
+  transition: transform 160ms ease;
+}
+
+.wave-symbol-item[open] .wave-symbol-summary::before {
+  transform: rotate(90deg);
+}
+
+.wave-symbol-name {
+  width: 1.2rem;
+  text-align: center;
+  font-style: italic;
+}
+
+.wave-symbol-label {
+  font-weight: 600;
+}
+
+.wave-symbol-desc {
+  margin-top: 0.35rem;
+  font-size: 0.9rem;
+  color: #334155;
+  line-height: 1.35;
+}
+
 .wave-static-center {
   gap: 0.85rem;
 }

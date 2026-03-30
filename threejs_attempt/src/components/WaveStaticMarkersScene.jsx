@@ -78,6 +78,44 @@ export default function WaveStaticMarkersScene({ title, description }) {
     []
   );
 
+  const symbolGuide = [
+    {
+      symbol: "a",
+      label: "Amplitude",
+      description: "Maximum displacement of a particle from the mean position."
+    },
+    {
+      symbol: "λ",
+      label: "Wavelength",
+      description: "Distance between two points in the same phase (crest to crest)."
+    },
+    {
+      symbol: "T",
+      label: "Time period",
+      description: "Time taken by a particle at a fixed x to complete one oscillation."
+    },
+    {
+      symbol: "f",
+      label: "Frequency",
+      description: "Number of oscillations per second. f = 1/T."
+    },
+    {
+      symbol: "ω",
+      label: "Angular frequency",
+      description: "Rate of phase change in time. ω = 2π/T."
+    },
+    {
+      symbol: "φ",
+      label: "Initial phase",
+      description: "Phase offset at x = 0 and t = 0; shifts the wave left or right."
+    },
+    {
+      symbol: "v",
+      label: "Wave speed",
+      description: "Speed of the wave pattern moving through space. v = λ/T."
+    }
+  ];
+
   const titleText = title ?? "Wave Parameters on a Static Snapshot";
   const descriptionText =
     description ??
@@ -123,7 +161,7 @@ export default function WaveStaticMarkersScene({ title, description }) {
   const axisTopY = 75;
   const axisBottomY = 320;
   const lambdaY = 300;
-  const directionArrowY = 90;
+  const directionArrowY = 70;
 
   const waveY = (x) =>
     waveCenterY - waveAmplitude * Math.sin(((x - waveStartX) / waveLambda) * TWO_PI + phase);
@@ -198,6 +236,21 @@ export default function WaveStaticMarkersScene({ title, description }) {
               dangerouslySetInnerHTML={renderFormula(latex)}
             />
           ))}
+        </div>
+
+        <div className="wave-symbols">
+          <div className="wave-symbols-title">Symbol Guide</div>
+          <div className="wave-symbols-list">
+            {symbolGuide.map((item) => (
+              <details key={item.symbol} className="wave-symbol-item">
+                <summary className="wave-symbol-summary">
+                  <span className="wave-symbol-name">{item.symbol}</span>
+                  <span className="wave-symbol-label">{item.label}</span>
+                </summary>
+                <div className="wave-symbol-desc">{item.description}</div>
+              </details>
+            ))}
+          </div>
         </div>
       </aside>
 
@@ -305,7 +358,7 @@ export default function WaveStaticMarkersScene({ title, description }) {
                 strokeWidth="1.4"
                 markerEnd="url(#axis-arrow)"
               />
-              <text x={yAxisX + 160} y={directionArrowY - 28} fill="#1f2937" fontSize="16">
+              <text x={yAxisX + 160} y={directionArrowY - 12} fill="#1f2937" fontSize="16">
                 x
               </text>
 
