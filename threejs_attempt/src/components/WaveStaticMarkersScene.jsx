@@ -31,14 +31,6 @@ const markerConfig = [
       "Wavelength is the distance between two identical points on the wave (crest to crest)."
   },
   {
-    key: "wave_number",
-    label: "Wave Number (k)",
-    color: "#8b5cf6",
-    bg: "rgba(139, 92, 246, 0.18)",
-    description:
-      "Wave number k = 2pi/lambda. Smaller wavelength means a larger k (tighter waves)."
-  },
-  {
     key: "initial_phase",
     label: "Initial Phase (φ)",
     color: "#06b6d4",
@@ -66,7 +58,7 @@ const markerConfig = [
 
 export default function WaveStaticMarkersScene({ title, description }) {
   const [activeKey, setActiveKey] = useState(null);
-  const [phase, setPhase] = useState(0);
+  const [phase, setPhase] = useState(-2.0);
   const activeMarker = markerConfig.find((marker) => marker.key === activeKey) ?? null;
   const markerByKey = useMemo(() => {
     return markerConfig.reduce((acc, marker) => {
@@ -75,18 +67,15 @@ export default function WaveStaticMarkersScene({ title, description }) {
     }, {});
   }, []);
   const lambdaDisplay = 4.0;
-  const kValue = TWO_PI / lambdaDisplay;
 
   const equations = useMemo(
     () => [
-      "y(x,t) = a\\sin(kx - \\omega t + \\phi)",
-      "k = \\frac{2\\pi}{\\lambda}",
-      `k = ${formatNumber(kValue, 2)}\\;\\text{rad/unit}`,
+      "y(x,t) = a\\sin\\left(\\frac{2\\pi}{\\lambda}x - \\omega t + \\phi\\right)",
       "\\omega = \\frac{2\\pi}{T}",
       "f = \\frac{1}{T}",
-      "v = f\\lambda = \\frac{\\omega}{k}"
+      "v = f\\lambda = \\frac{\\lambda}{T}"
     ],
-    [kValue]
+    []
   );
 
   const titleText = title ?? "Wave Parameters on a Static Snapshot";
@@ -95,9 +84,6 @@ export default function WaveStaticMarkersScene({ title, description }) {
     "Click a parameter block on the right to highlight its marker on the wave. Click again to reset.";
 
   const blockSubtext = (marker) => {
-    if (marker.key === "wave_number") {
-      return `k = ${formatNumber(kValue, 2)}`;
-    }
     if (marker.key === "initial_phase") {
       return `phi = ${formatNumber(phase, 2)} rad`;
     }
@@ -191,16 +177,13 @@ export default function WaveStaticMarkersScene({ title, description }) {
 
   const activeDescription = useMemo(() => {
     if (!activeMarker) {
-      return "Click any parameter block to highlight it on the wave.";
-    }
-    if (activeMarker.key === "wave_number") {
-      return `k = 2pi/lambda = ${formatNumber(kValue, 2)} rad/unit. Smaller lambda means larger k.`;
+      return "Click any parameter block to highlight it on the wave. The info panel will explain what the highlight means.";
     }
     if (activeMarker.key === "initial_phase") {
-      return `phi = ${formatNumber(phase, 2)} rad. Positive phi shifts the wave left.`;
+      return `phi = ${formatNumber(phase, 2)} rad. Positive phi shifts the wave left. Watch the wave slide as you adjust it.`;
     }
-    return activeMarker.description;
-  }, [activeMarker, kValue, phase]);
+    return `${activeMarker.description} Look for the matching color on the wave to locate it quickly.`;
+  }, [activeMarker, phase]);
 
   return (
     <div className="wave-shell wave-static-shell">
@@ -293,15 +276,26 @@ export default function WaveStaticMarkersScene({ title, description }) {
               y
             </text>
             <g className="wave-static-annotation">
-              <text
-                x={waveStartX + 10}
-                y={waveCenterY - 8}
-                fill="#64748b"
-                fontSize="14"
-                fontStyle="italic"
-              >
-                Mean position
-              </text>
+              <g style={{ color: "#64748b" }}>
+                <text
+                  x={waveStartX + 18}
+                  y={axisTopY - 12}
+                  fill="currentColor"
+                  fontSize="14"
+                  fontStyle="italic"
+                >
+                  Mean position
+                </text>
+                <line
+                  x1={waveStartX + 46}
+                  y1={axisTopY - 6}
+                  x2={waveStartX + 82}
+                  y2={waveCenterY}
+                  stroke="currentColor"
+                  strokeWidth="1.4"
+                  markerEnd="url(#arrow)"
+                />
+              </g>
               <line
                 x1={yAxisX + 40}
                 y1={directionArrowY}
@@ -311,7 +305,7 @@ export default function WaveStaticMarkersScene({ title, description }) {
                 strokeWidth="1.4"
                 markerEnd="url(#axis-arrow)"
               />
-              <text x={yAxisX + 160} y={directionArrowY + 6} fill="#1f2937" fontSize="16">
+              <text x={yAxisX + 160} y={directionArrowY - 28} fill="#1f2937" fontSize="16">
                 x
               </text>
 
@@ -353,7 +347,7 @@ export default function WaveStaticMarkersScene({ title, description }) {
               />
               <text
                 x={amplitudeX + 12}
-                y={amplitudeTopY + 8}
+                y={(amplitudeTopY + amplitudeBottomY) / 2 + 6}
                 fill="currentColor"
                 fontSize="18"
                 fontWeight="700"
@@ -406,21 +400,6 @@ export default function WaveStaticMarkersScene({ title, description }) {
                 fontStyle="italic"
               >
                 λ
-              </text>
-            </g>
-
-            <g
-              className={`marker-group ${activeKey === "wave_number" ? "is-active" : ""}`}
-              style={{ color: markerByKey.wave_number.color }}
-            >
-              <text
-                x={lambdaLabelX - 24}
-                y={lambdaY + 42}
-                fill="currentColor"
-                fontSize="16"
-                fontWeight="700"
-              >
-                k
               </text>
             </g>
 
