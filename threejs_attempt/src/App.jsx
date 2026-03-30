@@ -4,6 +4,7 @@ import "katex/dist/katex.min.css";
 import SpringMassScene from "./components/SpringMassScene";
 import DoubleSpringMassScene from "./components/DoubleSpringMassScene";
 import PendulumScene from "./components/PendulumScene";
+import WaveDisplacementScene from "./components/WaveDisplacementScene";
 
 export default function App() {
   const [mass, setMass] = useState(1.0);
@@ -12,7 +13,7 @@ export default function App() {
   const [isPlaying, setIsPlaying] = useState(true);
   const [templateId, setTemplateId] = useState("single");
   const [chapterId, setChapterId] = useState("oscillations");
-  const [waveSimId, setWaveSimId] = useState("basics");
+  const [waveSimId, setWaveSimId] = useState("displacement");
   const [activeParamInfo, setActiveParamInfo] = useState(null);
   const [activeCalc, setActiveCalc] = useState(null);
   const [activeEffectKey, setActiveEffectKey] = useState(null);
@@ -108,7 +109,13 @@ export default function App() {
 
   const waveSimConfig = useMemo(
     () => ({
-      basics: { label: "Wave Basics (Coming Soon)" },
+      displacement: {
+        label: "Displacement y(x,t)",
+        title: "Displacement in a Progressive Wave",
+        description:
+          "See how a traveling wave depends on both position and time, and how any single particle performs SHM.",
+        Scene: WaveDisplacementScene
+      },
       transverse: { label: "Transverse Wave (Coming Soon)" },
       longitudinal: { label: "Longitudinal Wave (Coming Soon)" }
     }),
@@ -174,6 +181,7 @@ export default function App() {
 
   const isOscillationChapter = chapterId === "oscillations";
   const activeWaveSim = waveSimConfig[waveSimId] ?? { label: "Wave Simulation" };
+  const ActiveWaveScene = activeWaveSim.Scene;
   const activeTemplate = templateConfig[templateId] ?? templateConfig.single;
   const ActiveScene = activeTemplate.Scene;
   const legendItems = useMemo(() => {
@@ -1134,14 +1142,20 @@ export default function App() {
       </div>
       ) : (
         <div className="waves-frame">
-          <div className="waves-card">
-            <div className="waves-title">Waves Chapter</div>
-            <div className="waves-subtitle">
-              Choose a simulation from the top bar to get started. This space is ready for the next
-              set of wave scenes.
+          {ActiveWaveScene ? (
+            <ActiveWaveScene title={activeWaveSim.title} description={activeWaveSim.description} />
+          ) : (
+            <div className="waves-empty">
+              <div className="waves-card">
+                <div className="waves-title">Waves Chapter</div>
+                <div className="waves-subtitle">
+                  Choose a simulation from the top bar to get started. This space is ready for the next
+                  set of wave scenes.
+                </div>
+                <div className="waves-selection">Selected simulation: {activeWaveSim.label}</div>
+              </div>
             </div>
-            <div className="waves-selection">Selected simulation: {activeWaveSim.label}</div>
-          </div>
+          )}
         </div>
       )}
 
