@@ -2,12 +2,28 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import katex from "katex";
 
 const TWO_PI = Math.PI * 2;
+const DEG_PER_RAD = 180 / Math.PI;
 
 const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
 const formatNumber = (value, digits = 2) => {
   const safe = Number.isFinite(value) ? value : 0;
   const fixed = safe.toFixed(digits);
   return fixed.replace(/\.00$/, "");
+};
+
+const formatPhasePi = (value) => {
+  const ratio = value / Math.PI;
+  const rounded = Math.round(ratio * 100) / 100;
+  if (Math.abs(rounded) < 0.01) {
+    return "0";
+  }
+  if (Math.abs(rounded - 1) < 0.01) {
+    return "π";
+  }
+  if (Math.abs(rounded + 1) < 0.01) {
+    return "-π";
+  }
+  return `${rounded}π`;
 };
 
 const renderFormula = (latex) => ({
@@ -81,8 +97,10 @@ export default function WaveDisplacementScene({ title, description }) {
   const [amplitude, setAmplitude] = useState(1.6);
   const [wavelength, setWavelength] = useState(6);
   const [omega, setOmega] = useState(2.2);
-  const [selectedRatio, setSelectedRatio] = useState(0.35);
-  const [selectMode, setSelectMode] = useState(false);
+  const [phase, setPhase] = useState(0);
+  const [selectedRatioA, setSelectedRatioA] = useState(0.3);
+  const [selectedRatioB, setSelectedRatioB] = useState(0.7);
+  const [selectTarget, setSelectTarget] = useState(null);
 
   const topCanvasRef = useRef(null);
   const bottomCanvasRef = useRef(null);
@@ -97,7 +115,9 @@ export default function WaveDisplacementScene({ title, description }) {
     amplitude,
     wavelength,
     omega,
-    selectedRatio
+    phase,
+    selectedRatioA,
+    selectedRatioB
   });
 
   useEffect(() => {
@@ -105,8 +125,8 @@ export default function WaveDisplacementScene({ title, description }) {
   }, [isPlaying]);
 
   useEffect(() => {
-    paramsRef.current = { amplitude, wavelength, omega, selectedRatio };
-  }, [amplitude, wavelength, omega, selectedRatio]);
+    paramsRef.current = { amplitude, wavelength, omega, phase, selectedRatioA, selectedRatioB };
+  }, [amplitude, wavelength, omega, phase, selectedRatioA, selectedRatioB]);
 
   useEffect(() => {
     const resize = () => {
@@ -137,8 +157,14 @@ export default function WaveDisplacementScene({ title, description }) {
         return;
       }
 
-      const { amplitude: amp, wavelength: lambda, omega: omegaValue, selectedRatio: ratio } =
-        paramsRef.current;
+      const {
+        amplitude: amp,
+        wavelength: lambda,
+        omega: omegaValue,
+        phase: phi,
+        selectedRatioA: ratioA,
+        selectedRatioB: ratioB
+      } = paramsRef.current;
 
       const safeLambda = Math.max(lambda, 0.4);
       const safeOmega = Math.max(omegaValue, 0.05);
@@ -146,11 +172,13 @@ export default function WaveDisplacementScene({ title, description }) {
       const xRange = safeLambda * 3;
       const xMin = 0;
       const xMax = xRange;
-      const x0 = clamp(ratio, 0.02, 0.98) * xRange;
+      const x1 = clamp(ratioA, 0.02, 0.98) * xRange;
+      const x2 = clamp(ratioB, 0.02, 0.98) * xRange;
       const yMax = Math.max(amp * 1.3, 0.6);
       const yMin = -yMax;
       const t = timeRef.current;
-      const phaseOffset = k * x0;
+      const phaseOffset1 = k * x1 + phi;
+      const phaseOffset2 = k * x2 + phi;
       const period = TWO_PI / safeOmega;
       const tRange = period * 2;
 
@@ -179,14 +207,14 @@ export default function WaveDisplacementScene({ title, description }) {
           plotTop + plotHeight - ((0 - yMin) / (yMax - yMin)) * plotHeight;
         drawAxes(topCtx, plotLeft, plotTop, plotWidth, plotHeight, zeroY);
 
-        const samples = Math.max(140, Math.floor(plotWidth));
+        const samples = Math.max(160, Math.floor(plotWidth));
         topCtx.strokeStyle = "#2563eb";
-        topCtx.lineWidth = 2.2;
+        topCtx.lineWidth = 2.1;
         topCtx.beginPath();
         for (let i = 0; i <= samples; i += 1) {
           const progress = i / samples;
           const x = xMin + progress * (xMax - xMin);
-          const y = amp * Math.sin(k * x - safeOmega * t);
+          const y = amp * Math.sin(k * x - safeOmega * t + phi);
           const px = plotLeft + progress * plotWidth;
           const py = plotTop + (1 - (y - yMin) / (yMax - yMin)) * plotHeight;
           if (i === 0) {
@@ -197,47 +225,86 @@ export default function WaveDisplacementScene({ title, description }) {
         }
         topCtx.stroke();
 
-        const crestPhase = safeOmega * t + Math.PI / 2;
-        let crestX = crestPhase / k;
         const lambdaStep = safeLambda;
+        const crestPhase = safeOmega * t - phi + Math.PI / 2;
+        const troughPhase = safeOmega * t - phi + (3 * Math.PI) / 2;
+        let crestX = crestPhase / k;
+        let troughX = troughPhase / k;
         while (crestX < xMin) {
           crestX += lambdaStep;
         }
-        while (crestX > xMax) {
-          crestX -= lambdaStep;
+        while (troughX < xMin) {
+          troughX += lambdaStep;
         }
-        const crestY = amp * Math.sin(k * crestX - safeOmega * t);
-        const crestPx = plotLeft + ((crestX - xMin) / (xMax - xMin)) * plotWidth;
-        const crestPy = plotTop + (1 - (crestY - yMin) / (yMax - yMin)) * plotHeight;
+
         topCtx.fillStyle = "#f97316";
-        topCtx.beginPath();
-        topCtx.arc(crestPx, crestPy, 4.2, 0, TWO_PI);
-        topCtx.fill();
+        for (let x = crestX; x <= xMax; x += lambdaStep) {
+          const y = amp * Math.sin(k * x - safeOmega * t + phi);
+          const px = plotLeft + ((x - xMin) / (xMax - xMin)) * plotWidth;
+          const py = plotTop + (1 - (y - yMin) / (yMax - yMin)) * plotHeight;
+          topCtx.beginPath();
+          topCtx.arc(px, py, 3.6, 0, TWO_PI);
+          topCtx.fill();
+        }
 
-        const selectedY = amp * Math.sin(k * x0 - safeOmega * t);
-        const selectedPx =
-          plotLeft + ((x0 - xMin) / (xMax - xMin)) * plotWidth;
-        const selectedPy =
-          plotTop + (1 - (selectedY - yMin) / (yMax - yMin)) * plotHeight;
+        topCtx.fillStyle = "#0ea5e9";
+        for (let x = troughX; x <= xMax; x += lambdaStep) {
+          const y = amp * Math.sin(k * x - safeOmega * t + phi);
+          const px = plotLeft + ((x - xMin) / (xMax - xMin)) * plotWidth;
+          const py = plotTop + (1 - (y - yMin) / (yMax - yMin)) * plotHeight;
+          topCtx.beginPath();
+          topCtx.arc(px, py, 3.6, 0, TWO_PI);
+          topCtx.fill();
+        }
 
-        topCtx.strokeStyle = "rgba(37, 99, 235, 0.65)";
-        topCtx.lineWidth = 1.2;
+        const pointAColor = "#7c3aed";
+        const pointBColor = "#10b981";
+        const selectedY1 = amp * Math.sin(k * x1 - safeOmega * t + phi);
+        const selectedY2 = amp * Math.sin(k * x2 - safeOmega * t + phi);
+        const selectedPx1 = plotLeft + ((x1 - xMin) / (xMax - xMin)) * plotWidth;
+        const selectedPx2 = plotLeft + ((x2 - xMin) / (xMax - xMin)) * plotWidth;
+        const selectedPy1 =
+          plotTop + (1 - (selectedY1 - yMin) / (yMax - yMin)) * plotHeight;
+        const selectedPy2 =
+          plotTop + (1 - (selectedY2 - yMin) / (yMax - yMin)) * plotHeight;
+
+        topCtx.lineWidth = 1.1;
         topCtx.setLineDash([6, 6]);
+        topCtx.strokeStyle = "rgba(124, 58, 237, 0.6)";
         topCtx.beginPath();
-        topCtx.moveTo(selectedPx, plotTop);
-        topCtx.lineTo(selectedPx, plotBottom);
+        topCtx.moveTo(selectedPx1, plotTop);
+        topCtx.lineTo(selectedPx1, plotBottom);
+        topCtx.stroke();
+        topCtx.strokeStyle = "rgba(16, 185, 129, 0.6)";
+        topCtx.beginPath();
+        topCtx.moveTo(selectedPx2, plotTop);
+        topCtx.lineTo(selectedPx2, plotBottom);
         topCtx.stroke();
         topCtx.setLineDash([]);
 
-        topCtx.fillStyle = "#0f172a";
+        topCtx.fillStyle = pointAColor;
         topCtx.beginPath();
-        topCtx.arc(selectedPx, selectedPy, 5.2, 0, TWO_PI);
+        topCtx.arc(selectedPx1, selectedPy1, 5, 0, TWO_PI);
         topCtx.fill();
-
         topCtx.fillStyle = "#e2e8f0";
         topCtx.beginPath();
-        topCtx.arc(selectedPx, selectedPy, 3.1, 0, TWO_PI);
+        topCtx.arc(selectedPx1, selectedPy1, 2.8, 0, TWO_PI);
         topCtx.fill();
+
+        topCtx.fillStyle = pointBColor;
+        topCtx.beginPath();
+        topCtx.arc(selectedPx2, selectedPy2, 5, 0, TWO_PI);
+        topCtx.fill();
+        topCtx.fillStyle = "#e2e8f0";
+        topCtx.beginPath();
+        topCtx.arc(selectedPx2, selectedPy2, 2.8, 0, TWO_PI);
+        topCtx.fill();
+
+        topCtx.font = "600 12px \"Segoe UI\", sans-serif";
+        topCtx.fillStyle = pointAColor;
+        topCtx.fillText("x1", selectedPx1 + 6, plotTop + 16);
+        topCtx.fillStyle = pointBColor;
+        topCtx.fillText("x2", selectedPx2 + 6, plotTop + 30);
 
         topCtx.fillStyle = "#475569";
         topCtx.font = "600 12px \"Segoe UI\", sans-serif";
@@ -255,7 +322,8 @@ export default function WaveDisplacementScene({ title, description }) {
 
         topCtx.fillStyle = "#1f2937";
         topCtx.font = "600 12px \"Segoe UI\", sans-serif";
-        topCtx.fillText(`x0 = ${formatNumber(x0, 2)}`, plotLeft + 6, plotTop + 16);
+        topCtx.fillText(`x1 = ${formatNumber(x1, 2)}`, plotLeft + 6, plotTop + 16);
+        topCtx.fillText(`x2 = ${formatNumber(x2, 2)}`, plotLeft + 6, plotTop + 30);
       };
 
       const drawParticleGraph = () => {
@@ -274,14 +342,14 @@ export default function WaveDisplacementScene({ title, description }) {
           plotTop + plotHeight - ((0 - yMin) / (yMax - yMin)) * plotHeight;
         drawAxes(bottomCtx, plotLeft, plotTop, plotWidth, plotHeight, zeroY);
 
-        const samples = Math.max(140, Math.floor(plotWidth));
-        bottomCtx.strokeStyle = "#0ea5e9";
+        const samples = Math.max(160, Math.floor(plotWidth));
+        bottomCtx.strokeStyle = "#7c3aed";
         bottomCtx.lineWidth = 2.1;
         bottomCtx.beginPath();
         for (let i = 0; i <= samples; i += 1) {
           const progress = i / samples;
           const tVal = progress * tRange;
-          const y = amp * Math.sin(phaseOffset - safeOmega * tVal);
+          const y = amp * Math.sin(phaseOffset1 - safeOmega * tVal);
           const px = plotLeft + progress * plotWidth;
           const py = plotTop + (1 - (y - yMin) / (yMax - yMin)) * plotHeight;
           if (i === 0) {
@@ -292,11 +360,33 @@ export default function WaveDisplacementScene({ title, description }) {
         }
         bottomCtx.stroke();
 
+        bottomCtx.strokeStyle = "#10b981";
+        bottomCtx.lineWidth = 1.8;
+        bottomCtx.setLineDash([8, 6]);
+        bottomCtx.beginPath();
+        for (let i = 0; i <= samples; i += 1) {
+          const progress = i / samples;
+          const tVal = progress * tRange;
+          const y = amp * Math.sin(phaseOffset2 - safeOmega * tVal);
+          const px = plotLeft + progress * plotWidth;
+          const py = plotTop + (1 - (y - yMin) / (yMax - yMin)) * plotHeight;
+          if (i === 0) {
+            bottomCtx.moveTo(px, py);
+          } else {
+            bottomCtx.lineTo(px, py);
+          }
+        }
+        bottomCtx.stroke();
+        bottomCtx.setLineDash([]);
+
         const markerT = tRange > 0 ? (t % tRange) : 0;
-        const markerY = amp * Math.sin(phaseOffset - safeOmega * markerT);
+        const markerY1 = amp * Math.sin(phaseOffset1 - safeOmega * markerT);
+        const markerY2 = amp * Math.sin(phaseOffset2 - safeOmega * markerT);
         const markerPx = plotLeft + (markerT / tRange) * plotWidth;
-        const markerPy =
-          plotTop + (1 - (markerY - yMin) / (yMax - yMin)) * plotHeight;
+        const markerPy1 =
+          plotTop + (1 - (markerY1 - yMin) / (yMax - yMin)) * plotHeight;
+        const markerPy2 =
+          plotTop + (1 - (markerY2 - yMin) / (yMax - yMin)) * plotHeight;
         bottomCtx.strokeStyle = "rgba(15, 118, 110, 0.6)";
         bottomCtx.lineWidth = 1.2;
         bottomCtx.setLineDash([6, 6]);
@@ -305,21 +395,34 @@ export default function WaveDisplacementScene({ title, description }) {
         bottomCtx.lineTo(markerPx, plotBottom);
         bottomCtx.stroke();
         bottomCtx.setLineDash([]);
-
-        bottomCtx.fillStyle = "#0f172a";
+        bottomCtx.fillStyle = "#7c3aed";
         bottomCtx.beginPath();
-        bottomCtx.arc(markerPx, markerPy, 5.1, 0, TWO_PI);
+        bottomCtx.arc(markerPx, markerPy1, 4.8, 0, TWO_PI);
         bottomCtx.fill();
-
         bottomCtx.fillStyle = "#e2e8f0";
         bottomCtx.beginPath();
-        bottomCtx.arc(markerPx, markerPy, 3.1, 0, TWO_PI);
+        bottomCtx.arc(markerPx, markerPy1, 2.6, 0, TWO_PI);
+        bottomCtx.fill();
+
+        bottomCtx.fillStyle = "#10b981";
+        bottomCtx.beginPath();
+        bottomCtx.arc(markerPx, markerPy2, 4.8, 0, TWO_PI);
+        bottomCtx.fill();
+        bottomCtx.fillStyle = "#e2e8f0";
+        bottomCtx.beginPath();
+        bottomCtx.arc(markerPx, markerPy2, 2.6, 0, TWO_PI);
         bottomCtx.fill();
 
         bottomCtx.fillStyle = "#475569";
         bottomCtx.font = "600 12px \"Segoe UI\", sans-serif";
         bottomCtx.fillText("t", plotRight - 8, plotBottom + 18);
         bottomCtx.fillText("y", plotLeft - 18, plotTop + 12);
+
+        bottomCtx.font = "600 12px \"Segoe UI\", sans-serif";
+        bottomCtx.fillStyle = "#7c3aed";
+        bottomCtx.fillText("x1", plotLeft + 6, plotTop + 16);
+        bottomCtx.fillStyle = "#10b981";
+        bottomCtx.fillText("x2", plotLeft + 6, plotTop + 32);
 
         bottomCtx.fillStyle = "#64748b";
         bottomCtx.font = "600 11px \"Segoe UI\", sans-serif";
@@ -347,7 +450,7 @@ export default function WaveDisplacementScene({ title, description }) {
   }, []);
 
   const handleSelect = (event) => {
-    if (!selectMode) {
+    if (!selectTarget) {
       return;
     }
     event.preventDefault();
@@ -362,7 +465,11 @@ export default function WaveDisplacementScene({ title, description }) {
       return;
     }
     const ratio = (x - plot.left) / (plot.right - plot.left);
-    setSelectedRatio(clamp(ratio, 0.02, 0.98));
+    if (selectTarget === "a") {
+      setSelectedRatioA(clamp(ratio, 0.02, 0.98));
+    } else {
+      setSelectedRatioB(clamp(ratio, 0.02, 0.98));
+    }
   };
 
   const derived = useMemo(() => {
@@ -373,9 +480,14 @@ export default function WaveDisplacementScene({ title, description }) {
     const frequency = safeOmega / TWO_PI;
     const speed = safeOmega / k;
     const xRange = safeLambda * 3;
-    const x0 = clamp(selectedRatio, 0.02, 0.98) * xRange;
-    return { k, period, frequency, speed, x0 };
-  }, [wavelength, omega, selectedRatio]);
+    const x1 = clamp(selectedRatioA, 0.02, 0.98) * xRange;
+    const x2 = clamp(selectedRatioB, 0.02, 0.98) * xRange;
+    const deltaX = x2 - x1;
+    const deltaPhiRaw = k * deltaX;
+    const deltaPhi =
+      ((deltaPhiRaw + Math.PI) % TWO_PI + TWO_PI) % TWO_PI - Math.PI;
+    return { k, period, frequency, speed, x1, x2, deltaX, deltaPhi };
+  }, [wavelength, omega, selectedRatioA, selectedRatioB]);
 
   const titleText = title ?? "Displacement in a Progressive Wave";
   const descriptionText =
@@ -390,11 +502,12 @@ export default function WaveDisplacementScene({ title, description }) {
         <div className="wave-formula" dangerouslySetInnerHTML={renderFormula("y(x,t) = A\\sin(kx - \\omega t + \\phi)")} />
         <div className="wave-left-list">
           <div className="wave-left-item">Top graph: wave shape (y vs x) at a moment.</div>
-          <div className="wave-left-item">Bottom graph: motion of one particle (y vs t).</div>
+          <div className="wave-left-item">Bottom graph: motion of two particles (y vs t).</div>
           <div className="wave-left-item">Each particle does SHM with a different phase.</div>
+          <div className="wave-left-item">Crests (orange) and troughs (cyan) are auto-marked.</div>
         </div>
         <div className="wave-left-hint">
-          Use Select Particle, then click the top wave to choose x0.
+          Use Pick Point 1 / 2, then click the top wave to choose x1 and x2.
         </div>
       </aside>
 
@@ -411,12 +524,14 @@ export default function WaveDisplacementScene({ title, description }) {
             <div className="wave-graph-title">Wave Shape (y vs x)</div>
             <div
               ref={topWrapRef}
-              className={`wave-canvas-wrap ${selectMode ? "is-selecting" : ""}`}
+              className={`wave-canvas-wrap ${selectTarget ? "is-selecting" : ""}`}
               onPointerDown={handleSelect}
             >
               <canvas ref={topCanvasRef} className="wave-canvas" />
-              {selectMode ? (
-                <div className="wave-select-hint">Click to select particle</div>
+              {selectTarget ? (
+                <div className="wave-select-hint">
+                  Click to set {selectTarget === "a" ? "point 1 (x1)" : "point 2 (x2)"}
+                </div>
               ) : null}
             </div>
           </div>
@@ -440,13 +555,26 @@ export default function WaveDisplacementScene({ title, description }) {
           >
             {isPlaying ? "Pause" : "Play"}
           </button>
-          <button
-            type="button"
-            className={`wave-toggle-btn ${selectMode ? "active" : ""}`}
-            onClick={() => setSelectMode((prev) => !prev)}
-          >
-            {selectMode ? "Selecting Particle" : "Select Particle"}
-          </button>
+        </div>
+
+        <div className="wave-control-block">
+          <div className="wave-control-title">Pick Points</div>
+          <div className="wave-select-row">
+            <button
+              type="button"
+              className={`wave-toggle-btn ${selectTarget === "a" ? "active" : ""}`}
+              onClick={() => setSelectTarget((prev) => (prev === "a" ? null : "a"))}
+            >
+              Pick Point 1 (x1)
+            </button>
+            <button
+              type="button"
+              className={`wave-toggle-btn ${selectTarget === "b" ? "active" : ""}`}
+              onClick={() => setSelectTarget((prev) => (prev === "b" ? null : "b"))}
+            >
+              Pick Point 2 (x2)
+            </button>
+          </div>
         </div>
 
         <div className="wave-control-block">
@@ -496,6 +624,21 @@ export default function WaveDisplacementScene({ title, description }) {
               onChange={(event) => setOmega(parseFloat(event.target.value))}
             />
           </div>
+          <div className="wave-slider-row">
+            <label htmlFor="wave-phase">
+              Initial Phase (phi)
+              <span className="wave-value">{formatNumber(phase, 2)}</span>
+            </label>
+            <input
+              id="wave-phase"
+              type="range"
+              min={-Math.PI}
+              max={Math.PI}
+              step="0.05"
+              value={phase}
+              onChange={(event) => setPhase(parseFloat(event.target.value))}
+            />
+          </div>
         </div>
 
         <div className="wave-control-block">
@@ -503,6 +646,10 @@ export default function WaveDisplacementScene({ title, description }) {
           <div className="wave-readout">
             <span>k</span>
             <span>{formatNumber(derived.k, 3)}</span>
+          </div>
+          <div className="wave-readout">
+            <span>omega</span>
+            <span>{formatNumber(omega, 2)} rad/s</span>
           </div>
           <div className="wave-readout">
             <span>Period (T)</span>
@@ -517,8 +664,28 @@ export default function WaveDisplacementScene({ title, description }) {
             <span>{formatNumber(derived.speed, 2)}</span>
           </div>
           <div className="wave-readout">
-            <span>Selected x0</span>
-            <span>{formatNumber(derived.x0, 2)}</span>
+            <span>phi</span>
+            <span>
+              {formatPhasePi(phase)} ({formatNumber(phase * DEG_PER_RAD, 0)}°)
+            </span>
+          </div>
+          <div className="wave-readout">
+            <span>Selected x1</span>
+            <span>{formatNumber(derived.x1, 2)}</span>
+          </div>
+          <div className="wave-readout">
+            <span>Selected x2</span>
+            <span>{formatNumber(derived.x2, 2)}</span>
+          </div>
+          <div className="wave-readout">
+            <span>Delta x</span>
+            <span>{formatNumber(derived.deltaX, 2)}</span>
+          </div>
+          <div className="wave-readout">
+            <span>Delta phi</span>
+            <span>
+              {formatNumber(derived.deltaPhi, 2)} rad ({formatNumber(derived.deltaPhi * DEG_PER_RAD, 0)}°)
+            </span>
           </div>
         </div>
       </aside>

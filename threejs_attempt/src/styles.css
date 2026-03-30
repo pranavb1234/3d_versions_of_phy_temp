@@ -900,6 +900,11 @@ body {
   cursor: pointer;
 }
 
+.wave-select-row {
+  display: grid;
+  gap: 0.5rem;
+}
+
 .wave-toggle-btn.active {
   background: #1f5eb1;
   color: #ffffff;
