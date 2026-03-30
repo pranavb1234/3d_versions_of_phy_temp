@@ -5,6 +5,7 @@ import SpringMassScene from "./components/SpringMassScene";
 import DoubleSpringMassScene from "./components/DoubleSpringMassScene";
 import PendulumScene from "./components/PendulumScene";
 import WaveDisplacementScene from "./components/WaveDisplacementScene";
+import WaveStaticMarkersScene from "./components/WaveStaticMarkersScene";
 
 export default function App() {
   const [mass, setMass] = useState(1.0);
@@ -13,7 +14,7 @@ export default function App() {
   const [isPlaying, setIsPlaying] = useState(true);
   const [templateId, setTemplateId] = useState("single");
   const [chapterId, setChapterId] = useState("oscillations");
-  const [waveSimId, setWaveSimId] = useState("displacement");
+  const [waveSimId, setWaveSimId] = useState("static_markers");
   const [activeParamInfo, setActiveParamInfo] = useState(null);
   const [activeCalc, setActiveCalc] = useState(null);
   const [activeEffectKey, setActiveEffectKey] = useState(null);
@@ -109,6 +110,13 @@ export default function App() {
 
   const waveSimConfig = useMemo(
     () => ({
+      static_markers: {
+        label: "Wave Markers (Static)",
+        title: "Wave Parameters on a Static Snapshot",
+        description:
+          "A still wave snapshot with labeled parameters. Click blocks on the right to highlight each parameter.",
+        Scene: WaveStaticMarkersScene
+      },
       displacement: {
         label: "Displacement y(x,t)",
         title: "Displacement in a Progressive Wave",
