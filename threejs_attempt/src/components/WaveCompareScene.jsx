@@ -100,6 +100,12 @@ const drawArrow = (ctx, x1, y1, x2, y2, color, width = 1.4) => {
   ctx.fill();
 };
 
+const drawDoubleArrow = (ctx, x1, y1, x2, y2, color, width = 1.4) => {
+  drawArrow(ctx, x1, y1, x2, y2, color, width);
+  drawArrow(ctx, x2, y2, x1, y1, color, width);
+};
+
+
 export default function WaveCompareScene({ title, description }) {
   const [isPlaying, setIsPlaying] = useState(true);
   const [amplitude, setAmplitude] = useState(1.2);
@@ -222,6 +228,25 @@ export default function WaveCompareScene({ title, description }) {
         tCtx.font = "600 12px \"Segoe UI\", sans-serif";
         tCtx.fillText("propagation", plotLeft + 118, plotTop + 16);
 
+        drawDoubleArrow(
+          tCtx,
+          plotLeft - 18,
+          plotTop + 14,
+          plotLeft - 18,
+          plotBottom - 14,
+          "#2563eb",
+          1.4
+        );
+        tCtx.fillStyle = "#1f2937";
+        tCtx.font = "700 14px \"Segoe UI\", sans-serif";
+        tCtx.textAlign = "center";
+        tCtx.fillText(
+          "Particles move vertically up and down",
+          (plotLeft + plotRight) / 2,
+          plotTop + 8
+        );
+        tCtx.textAlign = "start";
+
         const samples = Math.max(200, Math.floor(plotWidth));
         tCtx.strokeStyle = "#1d4ed8";
         tCtx.lineWidth = 2.1;
@@ -244,7 +269,7 @@ export default function WaveCompareScene({ title, description }) {
         const particleSpacing = (xMax - xMin) / (particleCount - 1);
         if (showDots) {
           if (showLines) {
-            tCtx.strokeStyle = "rgba(148, 163, 184, 0.6)";
+            tCtx.strokeStyle = "rgba(251, 146, 60, 0.6)";
             tCtx.lineWidth = 1;
             for (let i = 0; i < particleCount; i += 1) {
               const x = xMin + particleSpacing * i;
@@ -258,7 +283,7 @@ export default function WaveCompareScene({ title, description }) {
             }
           }
 
-          tCtx.fillStyle = "#94a3b8";
+          tCtx.fillStyle = "#fb923c";
           for (let i = 0; i < particleCount; i += 1) {
             const x = xMin + particleSpacing * i;
             const y = amp * Math.sin(k * x - safeOmega * t + phi);
@@ -304,6 +329,25 @@ export default function WaveCompareScene({ title, description }) {
         lCtx.fillStyle = "#1f2937";
         lCtx.font = "600 12px \"Segoe UI\", sans-serif";
         lCtx.fillText("propagation", plotLeft + 118, plotTop + 16);
+
+        drawDoubleArrow(
+          lCtx,
+          plotLeft + 80,
+          plotBottom - 16,
+          plotRight - 80,
+          plotBottom - 16,
+          "#0ea5e9",
+          1.4
+        );
+        lCtx.fillStyle = "#1f2937";
+        lCtx.font = "700 14px \"Segoe UI\", sans-serif";
+        lCtx.textAlign = "center";
+        lCtx.fillText(
+          "Particles move left and right",
+          (plotLeft + plotRight) / 2,
+          plotBottom - 24
+        );
+        lCtx.textAlign = "start";
 
         const particleCount = 15;
         const eqSpacing = (xMax - xMin) / (particleCount - 1);
