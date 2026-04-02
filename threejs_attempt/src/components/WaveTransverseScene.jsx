@@ -467,10 +467,33 @@ export default function WaveTransverseScene({ title, description }) {
           dangerouslySetInnerHTML={renderFormula("y(x,t) = A\\sin(kx - \\omega t + \\phi)")}
         />
         <div className="wave-left-list">
-          <div className="wave-left-item">Wave travels along +x; particles move perpendicular to x.</div>
-          <div className="wave-left-item">Dots show particles fixed in x, oscillating in y.</div>
-          <div className="wave-left-item">Orange probe shows one particle and its SHM graph below.</div>
-          <div className="wave-left-item">Click the top wave to move the probe along the string.</div>
+          <div className="wave-left-item">
+            Definition: A transverse wave has particle motion perpendicular to the direction of travel.
+          </div>
+          <div className="wave-left-item">
+            Here the wave travels along +x, while each particle oscillates up/down (y).
+          </div>
+          <div className="wave-left-item">
+            The orange probe is one particle fixed at x0. Its y(t) graph below is simple harmonic motion.
+          </div>
+          <div className="wave-left-item">
+            Click the top view to move x0 and see how phase changes for different particles.
+          </div>
+        </div>
+        <div className="wave-compare">
+          <div className="wave-compare-title">Compare With Longitudinal</div>
+          <div className="wave-compare-item">
+            <span className="wave-compare-label">Same</span>
+            <span>Both are traveling waves described by the same sine phase kx − ωt.</span>
+          </div>
+          <div className="wave-compare-item">
+            <span className="wave-compare-label">Different</span>
+            <span>Particle motion is perpendicular here, parallel in longitudinal waves.</span>
+          </div>
+          <div className="wave-compare-item">
+            <span className="wave-compare-label">Look For</span>
+            <span>Crests/troughs move right, but each particle only moves up/down.</span>
+          </div>
         </div>
         <div className="wave-left-hint">
           Tip: Toggle particle lines to emphasize transverse motion.

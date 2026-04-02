@@ -777,6 +777,38 @@ body {
   color: #1e3a8a;
 }
 
+.wave-compare {
+  border-radius: 12px;
+  border: 1px solid rgba(156, 178, 200, 0.6);
+  background: rgba(246, 250, 255, 0.85);
+  padding: 0.6rem 0.7rem;
+  display: grid;
+  gap: 0.45rem;
+}
+
+.wave-compare-title {
+  font-weight: 800;
+  font-size: 0.92rem;
+  color: #1f2a3b;
+}
+
+.wave-compare-item {
+  display: grid;
+  grid-template-columns: 86px minmax(0, 1fr);
+  gap: 0.4rem;
+  font-size: 0.82rem;
+  color: #334155;
+  line-height: 1.3;
+}
+
+.wave-compare-label {
+  font-weight: 800;
+  color: #1f5eb1;
+  text-transform: uppercase;
+  font-size: 0.68rem;
+  letter-spacing: 0.05em;
+}
+
 .wave-center {
   padding: 0.95rem 0.95rem 0.9rem;
   display: flex;

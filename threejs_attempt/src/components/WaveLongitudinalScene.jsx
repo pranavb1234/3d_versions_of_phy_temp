@@ -470,10 +470,33 @@ export default function WaveLongitudinalScene({ title, description }) {
           dangerouslySetInnerHTML={renderFormula("s(x,t) = A\\sin(kx - \\omega t + \\phi)")}
         />
         <div className="wave-left-list">
-          <div className="wave-left-item">Wave travels along +x; particles oscillate along x.</div>
-          <div className="wave-left-item">Blue bands show compressions and rarefactions.</div>
-          <div className="wave-left-item">Orange probe highlights one particle and its motion.</div>
-          <div className="wave-left-item">Click the top view to move the probe particle.</div>
+          <div className="wave-left-item">
+            Definition: A longitudinal wave has particle motion parallel to the direction of travel.
+          </div>
+          <div className="wave-left-item">
+            Here the wave travels along +x, and particles oscillate back and forth along x.
+          </div>
+          <div className="wave-left-item">
+            Blue bands show compressions (high density) and rarefactions (low density).
+          </div>
+          <div className="wave-left-item">
+            The orange probe is one particle fixed at x0. Its displacement s(t) is SHM.
+          </div>
+        </div>
+        <div className="wave-compare">
+          <div className="wave-compare-title">Compare With Transverse</div>
+          <div className="wave-compare-item">
+            <span className="wave-compare-label">Same</span>
+            <span>Both use the same wave parameters: A, λ, ω, T, and wave speed v.</span>
+          </div>
+          <div className="wave-compare-item">
+            <span className="wave-compare-label">Different</span>
+            <span>Particles move along x here, not up/down like transverse waves.</span>
+          </div>
+          <div className="wave-compare-item">
+            <span className="wave-compare-label">Look For</span>
+            <span>Compressions move right while each particle only shifts left/right.</span>
+          </div>
         </div>
         <div className="wave-left-hint">
           Tip: Turn off density bands to focus on individual particles.
