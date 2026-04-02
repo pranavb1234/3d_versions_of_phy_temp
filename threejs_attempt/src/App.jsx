@@ -6,6 +6,7 @@ import DoubleSpringMassScene from "./components/DoubleSpringMassScene";
 import PendulumScene from "./components/PendulumScene";
 import WaveDisplacementScene from "./components/WaveDisplacementScene";
 import WaveStaticMarkersScene from "./components/WaveStaticMarkersScene";
+import WaveTransverseScene from "./components/WaveTransverseScene";
 
 export default function App() {
   const [mass, setMass] = useState(1.0);
@@ -124,7 +125,13 @@ export default function App() {
           "See how a traveling wave depends on both position and time, and how any single particle performs SHM.",
         Scene: WaveDisplacementScene
       },
-      transverse: { label: "Transverse Wave (Coming Soon)" },
+      transverse: {
+        label: "Transverse Wave",
+        title: "Transverse Wave (Particle Motion)",
+        description:
+          "Particles oscillate perpendicular to the direction of travel. Track a probe particle and its SHM.",
+        Scene: WaveTransverseScene
+      },
       longitudinal: { label: "Longitudinal Wave (Coming Soon)" }
     }),
     []

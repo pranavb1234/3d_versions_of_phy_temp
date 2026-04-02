@@ -844,6 +844,10 @@ body {
   touch-action: none;
 }
 
+.wave-canvas-wrap.is-interactive {
+  cursor: crosshair;
+}
+
 .wave-canvas-wrap.is-selecting {
   cursor: crosshair;
   box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.35);
