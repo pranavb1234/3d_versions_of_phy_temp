@@ -7,6 +7,7 @@ import PendulumScene from "./components/PendulumScene";
 import WaveDisplacementScene from "./components/WaveDisplacementScene";
 import WaveStaticMarkersScene from "./components/WaveStaticMarkersScene";
 import WaveTransverseScene from "./components/WaveTransverseScene";
+import WaveLongitudinalScene from "./components/WaveLongitudinalScene";
 
 export default function App() {
   const [mass, setMass] = useState(1.0);
@@ -132,7 +133,13 @@ export default function App() {
           "Particles oscillate perpendicular to the direction of travel. Track a probe particle and its SHM.",
         Scene: WaveTransverseScene
       },
-      longitudinal: { label: "Longitudinal Wave (Coming Soon)" }
+      longitudinal: {
+        label: "Longitudinal Wave",
+        title: "Longitudinal Wave (Compressions and Rarefactions)",
+        description:
+          "Particles oscillate parallel to the direction of travel, producing compressions and rarefactions.",
+        Scene: WaveLongitudinalScene
+      }
     }),
     []
   );
