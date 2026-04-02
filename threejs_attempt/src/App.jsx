@@ -7,6 +7,7 @@ import PendulumScene from "./components/PendulumScene";
 import WaveDisplacementScene from "./components/WaveDisplacementScene";
 import WaveStaticMarkersScene from "./components/WaveStaticMarkersScene";
 import WaveCompareScene from "./components/WaveCompareScene";
+import WaveStandingScene from "./components/WaveStandingScene";
 
 export default function App() {
   const [mass, setMass] = useState(1.0);
@@ -131,6 +132,13 @@ export default function App() {
         description:
           "One combined view: transverse wave on top, longitudinal wave below, using the same parameters.",
         Scene: WaveCompareScene
+      },
+      standing: {
+        label: "Standing Waves on a String",
+        title: "Standing Waves on a String",
+        description:
+          "Explore how a fixed string forms nodes and antinodes. Adjust L, T, f, and the harmonic mode.",
+        Scene: WaveStandingScene
       }
     }),
     []
