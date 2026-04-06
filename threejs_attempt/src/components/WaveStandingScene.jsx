@@ -77,6 +77,36 @@ const drawAxes = (ctx, left, top, width, height, zeroY) => {
   ctx.stroke();
 };
 
+const drawArrow = (ctx, x1, y1, x2, y2, color) => {
+  const angle = Math.atan2(y2 - y1, x2 - x1);
+  const headLength = 8;
+  ctx.strokeStyle = color;
+  ctx.fillStyle = color;
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(x1, y1);
+  ctx.lineTo(x2, y2);
+  ctx.stroke();
+
+  ctx.beginPath();
+  ctx.moveTo(x2, y2);
+  ctx.lineTo(
+    x2 - headLength * Math.cos(angle - Math.PI / 6),
+    y2 - headLength * Math.sin(angle - Math.PI / 6)
+  );
+  ctx.lineTo(
+    x2 - headLength * Math.cos(angle + Math.PI / 6),
+    y2 - headLength * Math.sin(angle + Math.PI / 6)
+  );
+  ctx.closePath();
+  ctx.fill();
+};
+
+const drawDoubleArrow = (ctx, x1, y1, x2, y2, color) => {
+  drawArrow(ctx, x1, y1, x2, y2, color);
+  drawArrow(ctx, x2, y2, x1, y1, color);
+};
+
 export default function WaveStandingScene({ title, description }) {
   const [isPlaying, setIsPlaying] = useState(true);
   const [lengthL, setLengthL] = useState(6);
@@ -153,6 +183,23 @@ export default function WaveStandingScene({ title, description }) {
       const zeroY = plotTop + plotHeight / 2;
       drawAxes(ctx, plotLeft, plotTop, stringWidth, plotHeight, zeroY);
 
+      ctx.strokeStyle = "rgba(15, 23, 42, 0.85)";
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(plotRight, plotTop);
+      ctx.lineTo(plotRight, plotBottom);
+      ctx.stroke();
+
+      ctx.save();
+      ctx.setLineDash([2, 6]);
+      ctx.strokeStyle = "rgba(15, 23, 42, 0.7)";
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(stringRight, plotTop);
+      ctx.lineTo(stringRight, plotBottom);
+      ctx.stroke();
+      ctx.restore();
+
       const ampPx = plotHeight * 0.34 * (0.3 + 0.7 * resonance);
       const samples = Math.max(160, Math.floor(stringWidth));
       ctx.strokeStyle = "#2563eb";
@@ -201,7 +248,27 @@ export default function WaveStandingScene({ title, description }) {
       ctx.fillText("x", stringRight - 8, plotBottom + 18);
       ctx.fillText("y", plotLeft - 18, plotTop + 12);
       ctx.fillText("fixed end", plotLeft + 6, plotTop + 16);
-      ctx.fillText("fixed end", Math.max(plotLeft + 10, stringRight - 64), plotTop + 16);
+
+      const fixedLabelX = plotRight - 72;
+      const fixedLabelY = plotTop + 6;
+      ctx.fillText("Fixed end", fixedLabelX - 8, fixedLabelY);
+      drawArrow(
+        ctx,
+        fixedLabelX + 4,
+        fixedLabelY + 4,
+        plotRight - 4,
+        plotTop + 18,
+        "#0f172a"
+      );
+
+      const lengthArrowY = plotBottom - 10;
+      const lengthArrowStart = plotLeft + 10;
+      const lengthArrowEnd = Math.max(plotLeft + 40, stringRight - 10);
+      drawDoubleArrow(ctx, lengthArrowStart, lengthArrowY, lengthArrowEnd, lengthArrowY, "#0f172a");
+      ctx.fillStyle = "#0f172a";
+      ctx.font = "600 12px \"Segoe UI\", sans-serif";
+      ctx.fillText("length of", lengthArrowStart + 6, lengthArrowY + 18);
+      ctx.fillText("the string", lengthArrowStart + 8, lengthArrowY + 32);
     };
 
     const animate = (now) => {
