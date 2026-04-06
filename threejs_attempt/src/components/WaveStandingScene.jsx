@@ -80,7 +80,7 @@ export default function WaveStandingScene({ title, description }) {
   const [isPlaying, setIsPlaying] = useState(true);
   const [lengthL, setLengthL] = useState(6);
   const [tension, setTension] = useState(20);
-  const [frequency, setFrequency] = useState(2.2);
+  const [frequency, setFrequency] = useState(1.0);
   const [mu, setMu] = useState(0.5);
   const [mode, setMode] = useState(1);
 
@@ -226,7 +226,6 @@ export default function WaveStandingScene({ title, description }) {
   const handleModeSelect = (value) => {
     const next = clamp(value, 1, 6);
     setMode(next);
-    setFrequency(derived.harmonicF);
   };
 
   return (
