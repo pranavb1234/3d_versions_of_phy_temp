@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import katex from "katex";
 
 const TWO_PI = Math.PI * 2;
+const LENGTH_MAX = 10;
 
 const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
 const formatNumber = (value, digits = 2) => {
@@ -122,9 +123,17 @@ export default function WaveStandingScene({ title, description }) {
         return;
       }
 
-      const { lengthL: L, frequency: f, mode: n } = paramsRef.current;
+      const { lengthL: L, frequency: f, mode: n, tension: T, mu: muValue } =
+        paramsRef.current;
       const safeL = Math.max(L, 1);
       const safeN = Math.max(1, Math.round(n));
+      const safeT = Math.max(T, 0.1);
+      const safeMu = Math.max(muValue, 0.05);
+      const v = Math.sqrt(safeT / safeMu);
+      const harmonicF = (safeN * v) / (2 * safeL);
+      const bandwidth = Math.max(0.2, harmonicF * 0.2);
+      const detune = (f - harmonicF) / bandwidth;
+      const resonance = 1 / (1 + detune * detune);
       const omega = TWO_PI * Math.max(f, 0.05);
       const t = timeRef.current;
       const { width, height } = metrics;
@@ -137,13 +146,15 @@ export default function WaveStandingScene({ title, description }) {
       const plotTop = padding.top;
       const plotBottom = plotTop + plotHeight;
       const plotRight = plotLeft + plotWidth;
+      const stringWidth = plotWidth * (safeL / LENGTH_MAX);
+      const stringRight = plotLeft + stringWidth;
 
       drawGrid(ctx, plotLeft, plotTop, plotWidth, plotHeight);
       const zeroY = plotTop + plotHeight / 2;
-      drawAxes(ctx, plotLeft, plotTop, plotWidth, plotHeight, zeroY);
+      drawAxes(ctx, plotLeft, plotTop, stringWidth, plotHeight, zeroY);
 
-      const ampPx = plotHeight * 0.34;
-      const samples = Math.max(200, Math.floor(plotWidth));
+      const ampPx = plotHeight * 0.34 * (0.3 + 0.7 * resonance);
+      const samples = Math.max(160, Math.floor(stringWidth));
       ctx.strokeStyle = "#2563eb";
       ctx.lineWidth = 2.2;
       ctx.beginPath();
@@ -152,7 +163,7 @@ export default function WaveStandingScene({ title, description }) {
         const x = progress * safeL;
         const shape = Math.sin((safeN * Math.PI * x) / safeL);
         const y = ampPx * shape * Math.sin(omega * t);
-        const px = plotLeft + progress * plotWidth;
+        const px = plotLeft + (x / LENGTH_MAX) * plotWidth;
         const py = zeroY - y;
         if (i === 0) {
           ctx.moveTo(px, py);
@@ -166,7 +177,7 @@ export default function WaveStandingScene({ title, description }) {
       ctx.fillStyle = "#1d4ed8";
       for (let i = 0; i < nodeCount; i += 1) {
         const x = (safeL / safeN) * i;
-        const px = plotLeft + (x / safeL) * plotWidth;
+        const px = plotLeft + (x / LENGTH_MAX) * plotWidth;
         ctx.beginPath();
         ctx.arc(px, zeroY, 4.6, 0, TWO_PI);
         ctx.fill();
@@ -176,7 +187,7 @@ export default function WaveStandingScene({ title, description }) {
       ctx.fillStyle = "#ef4444";
       for (let i = 0; i < antinodeCount; i += 1) {
         const x = (safeL / safeN) * (i + 0.5);
-        const px = plotLeft + (x / safeL) * plotWidth;
+        const px = plotLeft + (x / LENGTH_MAX) * plotWidth;
         const shape = Math.sin((safeN * Math.PI * x) / safeL);
         const y = ampPx * shape * Math.sin(omega * t);
         const py = zeroY - y;
@@ -187,10 +198,10 @@ export default function WaveStandingScene({ title, description }) {
 
       ctx.fillStyle = "#475569";
       ctx.font = "600 12px \"Segoe UI\", sans-serif";
-      ctx.fillText("x", plotRight - 8, plotBottom + 18);
+      ctx.fillText("x", stringRight - 8, plotBottom + 18);
       ctx.fillText("y", plotLeft - 18, plotTop + 12);
       ctx.fillText("fixed end", plotLeft + 6, plotTop + 16);
-      ctx.fillText("fixed end", plotRight - 64, plotTop + 16);
+      ctx.fillText("fixed end", Math.max(plotLeft + 10, stringRight - 64), plotTop + 16);
     };
 
     const animate = (now) => {
@@ -224,8 +235,12 @@ export default function WaveStandingScene({ title, description }) {
     "Change length, tension, frequency, and mode to see nodes and antinodes on a fixed string.";
 
   const handleModeSelect = (value) => {
-    const next = clamp(value, 1, 6);
+    const next = clamp(value, 1, 5);
     setMode(next);
+  };
+
+  const handleModeStep = (delta) => {
+    setMode((prev) => clamp(Math.round(prev + delta), 1, 5));
   };
 
   return (
@@ -366,17 +381,36 @@ export default function WaveStandingScene({ title, description }) {
 
         <div className="wave-control-block">
           <div className="wave-control-title">Harmonics</div>
-          <div className="wave-select-row">
-            {[1, 2, 3, 4, 5].map((value) => (
+          <div className="wave-slider-row">
+            <label htmlFor="standing-mode">
+              Harmonic (n)
+              <span className="wave-value">{formatNumber(mode, 0)}</span>
+            </label>
+            <div className="wave-select-row">
               <button
-                key={`mode-${value}`}
                 type="button"
-                className={`wave-toggle-btn ${mode === value ? "active" : ""}`}
-                onClick={() => handleModeSelect(value)}
+                className="wave-toggle-btn"
+                onClick={() => handleModeStep(-1)}
               >
-                {value}th harmonic
+                -
               </button>
-            ))}
+              <input
+                id="standing-mode"
+                type="range"
+                min="1"
+                max="5"
+                step="1"
+                value={mode}
+                onChange={(event) => handleModeSelect(parseFloat(event.target.value))}
+              />
+              <button
+                type="button"
+                className="wave-toggle-btn"
+                onClick={() => handleModeStep(1)}
+              >
+                +
+              </button>
+            </div>
           </div>
         </div>
 
