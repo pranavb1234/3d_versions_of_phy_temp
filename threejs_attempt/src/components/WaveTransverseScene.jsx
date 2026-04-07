@@ -2,6 +2,9 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import katex from "katex";
 
 const TWO_PI = Math.PI * 2;
+const DOMAIN_LENGTH = 15;
+const AMPLITUDE_MAX = 3.0;
+const AMPLITUDE_PADDING = 1.15;
 
 const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
 const formatNumber = (value, digits = 2) => {
@@ -107,8 +110,6 @@ export default function WaveTransverseScene({ title, description }) {
   const [omega, setOmega] = useState(2.0);
   const [phase, setPhase] = useState(0);
   const [probeRatio, setProbeRatio] = useState(0.35);
-  const [showParticles, setShowParticles] = useState(true);
-  const [showVectors, setShowVectors] = useState(true);
 
   const topCanvasRef = useRef(null);
   const bottomCanvasRef = useRef(null);
@@ -124,9 +125,7 @@ export default function WaveTransverseScene({ title, description }) {
     wavelength,
     omega,
     phase,
-    probeRatio,
-    showParticles,
-    showVectors
+    probeRatio
   });
 
   useEffect(() => {
@@ -139,11 +138,9 @@ export default function WaveTransverseScene({ title, description }) {
       wavelength,
       omega,
       phase,
-      probeRatio,
-      showParticles,
-      showVectors
+      probeRatio
     };
-  }, [amplitude, wavelength, omega, phase, probeRatio, showParticles, showVectors]);
+  }, [amplitude, wavelength, omega, phase, probeRatio]);
 
   useEffect(() => {
     const resize = () => {
@@ -179,19 +176,19 @@ export default function WaveTransverseScene({ title, description }) {
         wavelength: lambda,
         omega: omegaValue,
         phase: phi,
-        probeRatio: ratio,
-        showParticles: showDots,
-        showVectors: showLines
+        probeRatio: ratio
       } = paramsRef.current;
 
+      const showDots = true;
+      const showLines = true;
       const safeLambda = Math.max(lambda, 0.4);
       const safeOmega = Math.max(omegaValue, 0.05);
       const k = TWO_PI / safeLambda;
-      const xRange = safeLambda * 3;
+      const xRange = DOMAIN_LENGTH;
       const xMin = 0;
       const xMax = xRange;
       const t = timeRef.current;
-      const yMax = Math.max(amp * 1.4, 0.8);
+      const yMax = AMPLITUDE_MAX * AMPLITUDE_PADDING;
       const yMin = -yMax;
       const probeX = clamp(ratio, 0.02, 0.98) * xRange;
       const probePhase = k * probeX - safeOmega * t + phi;
@@ -447,7 +444,7 @@ export default function WaveTransverseScene({ title, description }) {
     const period = TWO_PI / safeOmega;
     const frequency = safeOmega / TWO_PI;
     const speed = safeOmega / k;
-    const xRange = safeLambda * 3;
+    const xRange = DOMAIN_LENGTH;
     const probeX = clamp(probeRatio, 0.02, 0.98) * xRange;
     return { k, period, frequency, speed, probeX };
   }, [wavelength, omega, probeRatio]);
@@ -496,7 +493,7 @@ export default function WaveTransverseScene({ title, description }) {
           </div>
         </div>
         <div className="wave-left-hint">
-          Tip: Toggle particle lines to emphasize transverse motion.
+          Tip: Notice how particles move up/down while the wave travels to the right.
         </div>
       </aside>
 
@@ -540,26 +537,6 @@ export default function WaveTransverseScene({ title, description }) {
           >
             {isPlaying ? "Pause" : "Play"}
           </button>
-        </div>
-
-        <div className="wave-control-block">
-          <div className="wave-control-title">View</div>
-          <div className="wave-select-row">
-            <button
-              type="button"
-              className={`wave-toggle-btn ${showParticles ? "active" : ""}`}
-              onClick={() => setShowParticles((prev) => !prev)}
-            >
-              Particle dots
-            </button>
-            <button
-              type="button"
-              className={`wave-toggle-btn ${showVectors ? "active" : ""}`}
-              onClick={() => setShowVectors((prev) => !prev)}
-            >
-              Particle lines
-            </button>
-          </div>
         </div>
 
         <div className="wave-control-block">

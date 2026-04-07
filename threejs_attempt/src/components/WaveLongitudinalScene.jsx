@@ -2,6 +2,9 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import katex from "katex";
 
 const TWO_PI = Math.PI * 2;
+const DOMAIN_LENGTH = 15;
+const AMPLITUDE_MAX = 1.6;
+const AMPLITUDE_PADDING = 1.2;
 
 const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
 const formatNumber = (value, digits = 2) => {
@@ -107,8 +110,6 @@ export default function WaveLongitudinalScene({ title, description }) {
   const [omega, setOmega] = useState(2.0);
   const [phase, setPhase] = useState(0);
   const [probeRatio, setProbeRatio] = useState(0.35);
-  const [showDensity, setShowDensity] = useState(true);
-  const [showVelocity, setShowVelocity] = useState(true);
 
   const topCanvasRef = useRef(null);
   const bottomCanvasRef = useRef(null);
@@ -124,9 +125,7 @@ export default function WaveLongitudinalScene({ title, description }) {
     wavelength,
     omega,
     phase,
-    probeRatio,
-    showDensity,
-    showVelocity
+    probeRatio
   });
 
   useEffect(() => {
@@ -139,11 +138,9 @@ export default function WaveLongitudinalScene({ title, description }) {
       wavelength,
       omega,
       phase,
-      probeRatio,
-      showDensity,
-      showVelocity
+      probeRatio
     };
-  }, [amplitude, wavelength, omega, phase, probeRatio, showDensity, showVelocity]);
+  }, [amplitude, wavelength, omega, phase, probeRatio]);
 
   useEffect(() => {
     const resize = () => {
@@ -179,19 +176,19 @@ export default function WaveLongitudinalScene({ title, description }) {
         wavelength: lambda,
         omega: omegaValue,
         phase: phi,
-        probeRatio: ratio,
-        showDensity: showBands,
-        showVelocity: showArrow
+        probeRatio: ratio
       } = paramsRef.current;
 
+      const showBands = true;
+      const showArrow = true;
       const safeLambda = Math.max(lambda, 0.6);
       const safeOmega = Math.max(omegaValue, 0.05);
       const k = TWO_PI / safeLambda;
-      const xRange = safeLambda * 3;
+      const xRange = DOMAIN_LENGTH;
       const xMin = 0;
       const xMax = xRange;
       const t = timeRef.current;
-      const yMax = Math.max(amp * 1.6, 0.8);
+      const yMax = AMPLITUDE_MAX * AMPLITUDE_PADDING;
       const yMin = -yMax;
       const probeX = clamp(ratio, 0.02, 0.98) * xRange;
       const probePhase = k * probeX - safeOmega * t + phi;
@@ -450,7 +447,7 @@ export default function WaveLongitudinalScene({ title, description }) {
     const period = TWO_PI / safeOmega;
     const frequency = safeOmega / TWO_PI;
     const speed = safeOmega / k;
-    const xRange = safeLambda * 3;
+    const xRange = DOMAIN_LENGTH;
     const probeX = clamp(probeRatio, 0.02, 0.98) * xRange;
     return { k, period, frequency, speed, probeX };
   }, [wavelength, omega, probeRatio]);
@@ -499,7 +496,7 @@ export default function WaveLongitudinalScene({ title, description }) {
           </div>
         </div>
         <div className="wave-left-hint">
-          Tip: Turn off density bands to focus on individual particles.
+          Tip: Watch the orange probe slide left/right as compressions move right.
         </div>
       </aside>
 
@@ -543,26 +540,6 @@ export default function WaveLongitudinalScene({ title, description }) {
           >
             {isPlaying ? "Pause" : "Play"}
           </button>
-        </div>
-
-        <div className="wave-control-block">
-          <div className="wave-control-title">View</div>
-          <div className="wave-select-row">
-            <button
-              type="button"
-              className={`wave-toggle-btn ${showDensity ? "active" : ""}`}
-              onClick={() => setShowDensity((prev) => !prev)}
-            >
-              Density bands
-            </button>
-            <button
-              type="button"
-              className={`wave-toggle-btn ${showVelocity ? "active" : ""}`}
-              onClick={() => setShowVelocity((prev) => !prev)}
-            >
-              Velocity arrow
-            </button>
-          </div>
         </div>
 
         <div className="wave-control-block">
