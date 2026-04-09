@@ -2,6 +2,9 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import katex from "katex";
 
 const TWO_PI = Math.PI * 2;
+const DOMAIN_LENGTH = 15;
+const AMPLITUDE_MAX = 3.0;
+const AMPLITUDE_PADDING = 1.15;
 
 const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
 const formatNumber = (value, digits = 2) => {
@@ -112,9 +115,6 @@ export default function WaveCompareScene({ title, description }) {
   const [wavelength, setWavelength] = useState(6);
   const [omega, setOmega] = useState(2.0);
   const [phase, setPhase] = useState(0);
-  const [showTransverseDots, setShowTransverseDots] = useState(true);
-  const [showTransverseLines, setShowTransverseLines] = useState(true);
-  const [showDensityBands, setShowDensityBands] = useState(true);
 
   const transverseCanvasRef = useRef(null);
   const longitudinalCanvasRef = useRef(null);
@@ -128,10 +128,7 @@ export default function WaveCompareScene({ title, description }) {
     amplitude,
     wavelength,
     omega,
-    phase,
-    showTransverseDots,
-    showTransverseLines,
-    showDensityBands
+    phase
   });
 
   useEffect(() => {
@@ -143,12 +140,9 @@ export default function WaveCompareScene({ title, description }) {
       amplitude,
       wavelength,
       omega,
-      phase,
-      showTransverseDots,
-      showTransverseLines,
-      showDensityBands
+      phase
     };
-  }, [amplitude, wavelength, omega, phase, showTransverseDots, showTransverseLines, showDensityBands]);
+  }, [amplitude, wavelength, omega, phase]);
 
   useEffect(() => {
     const resize = () => {
@@ -183,20 +177,20 @@ export default function WaveCompareScene({ title, description }) {
         amplitude: amp,
         wavelength: lambda,
         omega: omegaValue,
-        phase: phi,
-        showTransverseDots: showDots,
-        showTransverseLines: showLines,
-        showDensityBands: showBands
+        phase: phi
       } = paramsRef.current;
 
+      const showDots = true;
+      const showLines = true;
+      const showBands = true;
       const safeLambda = Math.max(lambda, 0.6);
       const safeOmega = Math.max(omegaValue, 0.05);
       const k = TWO_PI / safeLambda;
-      const xRange = safeLambda * 3;
+      const xRange = DOMAIN_LENGTH;
       const xMin = 0;
       const xMax = xRange;
       const t = timeRef.current;
-      const yMax = Math.max(amp * 1.5, 0.8);
+      const yMax = AMPLITUDE_MAX * AMPLITUDE_PADDING;
       const yMin = -yMax;
 
       const drawTransverse = () => {
@@ -512,33 +506,6 @@ export default function WaveCompareScene({ title, description }) {
           >
             {isPlaying ? "Pause" : "Play"}
           </button>
-        </div>
-
-        <div className="wave-control-block">
-          <div className="wave-control-title">View</div>
-          <div className="wave-select-row">
-            <button
-              type="button"
-              className={`wave-toggle-btn ${showTransverseDots ? "active" : ""}`}
-              onClick={() => setShowTransverseDots((prev) => !prev)}
-            >
-              Transverse dots
-            </button>
-            <button
-              type="button"
-              className={`wave-toggle-btn ${showTransverseLines ? "active" : ""}`}
-              onClick={() => setShowTransverseLines((prev) => !prev)}
-            >
-              Transverse lines
-            </button>
-            <button
-              type="button"
-              className={`wave-toggle-btn ${showDensityBands ? "active" : ""}`}
-              onClick={() => setShowDensityBands((prev) => !prev)}
-            >
-              Density bands
-            </button>
-          </div>
         </div>
 
         <div className="wave-control-block">
