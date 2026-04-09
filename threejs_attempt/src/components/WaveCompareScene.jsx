@@ -115,6 +115,7 @@ export default function WaveCompareScene({ title, description }) {
   const [wavelength, setWavelength] = useState(6);
   const [omega, setOmega] = useState(2.0);
   const [phase, setPhase] = useState(0);
+  const [calcHighlight, setCalcHighlight] = useState({});
 
   const transverseCanvasRef = useRef(null);
   const longitudinalCanvasRef = useRef(null);
@@ -130,6 +131,8 @@ export default function WaveCompareScene({ title, description }) {
     omega,
     phase
   });
+  const prevParamsRef = useRef({ amplitude, wavelength, omega, phase });
+  const highlightTimerRef = useRef(null);
 
   useEffect(() => {
     isPlayingRef.current = isPlaying;
@@ -142,6 +145,46 @@ export default function WaveCompareScene({ title, description }) {
       omega,
       phase
     };
+  }, [amplitude, wavelength, omega, phase]);
+
+  useEffect(() => {
+    const prev = prevParamsRef.current;
+    const changedKeys = new Set();
+
+    if (amplitude !== prev.amplitude) {
+      changedKeys.add("amplitude");
+    }
+    if (wavelength !== prev.wavelength) {
+      changedKeys.add("lambda");
+      changedKeys.add("k");
+      changedKeys.add("speed");
+    }
+    if (omega !== prev.omega) {
+      changedKeys.add("period");
+      changedKeys.add("frequency");
+      changedKeys.add("speed");
+    }
+    if (phase !== prev.phase) {
+      changedKeys.add("phase");
+    }
+
+    if (changedKeys.size) {
+      const nextHighlight = {};
+      changedKeys.forEach((key) => {
+        nextHighlight[key] = true;
+      });
+      setCalcHighlight(nextHighlight);
+
+      if (highlightTimerRef.current) {
+        clearTimeout(highlightTimerRef.current);
+      }
+      highlightTimerRef.current = setTimeout(() => {
+        setCalcHighlight({});
+        highlightTimerRef.current = null;
+      }, 900);
+    }
+
+    prevParamsRef.current = { amplitude, wavelength, omega, phase };
   }, [amplitude, wavelength, omega, phase]);
 
   useEffect(() => {
@@ -496,7 +539,7 @@ export default function WaveCompareScene({ title, description }) {
         </div>
       </section>
 
-      <aside className="wave-right">
+      <aside className="wave-right compact">
         <div className="wave-control-block">
           <div className="wave-control-title">Simulation</div>
           <button
@@ -508,7 +551,7 @@ export default function WaveCompareScene({ title, description }) {
           </button>
         </div>
 
-        <div className="wave-control-block">
+        <div className="wave-control-block wave-params-block">
           <div className="wave-control-title">Parameters</div>
           <div className="wave-slider-row">
             <label htmlFor="compare-amplitude">
@@ -573,22 +616,62 @@ export default function WaveCompareScene({ title, description }) {
         </div>
 
         <div className="wave-control-block">
-          <div className="wave-control-title">Readouts</div>
-          <div className="wave-readout">
-            <span>k</span>
-            <span>{formatNumber(derived.k, 3)}</span>
-          </div>
-          <div className="wave-readout">
-            <span>Period (T)</span>
-            <span>{formatNumber(derived.period, 2)} s</span>
-          </div>
-          <div className="wave-readout">
-            <span>Frequency (f)</span>
-            <span>{formatNumber(derived.frequency, 2)} Hz</span>
-          </div>
-          <div className="wave-readout">
-            <span>Wave speed (v)</span>
-            <span>{formatNumber(derived.speed, 2)}</span>
+          <div className="wave-control-title">Calculations</div>
+          <div className="wave-calc-list">
+            <div
+              className={`wave-calc-row ${calcHighlight.amplitude ? "is-highlighted" : ""}`}
+              dangerouslySetInnerHTML={renderFormula(
+                `A = ${formatNumber(amplitude, 2)}`
+              )}
+            />
+            <div
+              className={`wave-calc-row ${calcHighlight.lambda ? "is-highlighted" : ""}`}
+              dangerouslySetInnerHTML={renderFormula(
+                `\\lambda = ${formatNumber(wavelength, 2)}`
+              )}
+            />
+            <div
+              className={`wave-calc-row ${calcHighlight.k ? "is-highlighted" : ""}`}
+              dangerouslySetInnerHTML={renderFormula(
+                `k = \\frac{2\\pi}{\\lambda} = \\frac{2\\pi}{${formatNumber(
+                  wavelength,
+                  2
+                )}} = ${formatNumber(derived.k, 3)}`
+              )}
+            />
+            <div
+              className={`wave-calc-row ${calcHighlight.period ? "is-highlighted" : ""}`}
+              dangerouslySetInnerHTML={renderFormula(
+                `T = \\frac{2\\pi}{\\omega} = \\frac{2\\pi}{${formatNumber(
+                  omega,
+                  2
+                )}} = ${formatNumber(derived.period, 2)}\\,s`
+              )}
+            />
+            <div
+              className={`wave-calc-row ${calcHighlight.frequency ? "is-highlighted" : ""}`}
+              dangerouslySetInnerHTML={renderFormula(
+                `f = \\frac{\\omega}{2\\pi} = \\frac{${formatNumber(
+                  omega,
+                  2
+                )}}{2\\pi} = ${formatNumber(derived.frequency, 2)}\\,Hz`
+              )}
+            />
+            <div
+              className={`wave-calc-row ${calcHighlight.speed ? "is-highlighted" : ""}`}
+              dangerouslySetInnerHTML={renderFormula(
+                `v = \\frac{\\omega}{k} = \\frac{${formatNumber(
+                  omega,
+                  2
+                )}}{${formatNumber(derived.k, 3)}} = ${formatNumber(derived.speed, 2)}`
+              )}
+            />
+            <div
+              className={`wave-calc-row ${calcHighlight.phase ? "is-highlighted" : ""}`}
+              dangerouslySetInnerHTML={renderFormula(
+                `\\phi = ${formatNumber(phase, 2)}`
+              )}
+            />
           </div>
         </div>
       </aside>

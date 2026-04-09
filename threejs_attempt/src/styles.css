@@ -1000,6 +1000,53 @@ body {
   padding: 0.2rem 0;
 }
 
+.wave-right.compact {
+  gap: 0.6rem;
+}
+
+.wave-right.compact .sim-toggle-btn {
+  padding: 0.16rem 0.65rem;
+  font-size: 0.76rem;
+  line-height: 1;
+}
+
+.wave-right.compact .wave-params-block {
+  padding: 0.5rem 0.6rem;
+}
+
+.wave-right.compact .wave-params-block .wave-slider-row {
+  gap: 0.25rem;
+}
+
+.wave-right.compact .wave-params-block label {
+  font-size: 0.78rem;
+  line-height: 1.1;
+}
+
+.wave-calc-list {
+  display: grid;
+  gap: 0.4rem;
+}
+
+.wave-calc-row {
+  font-size: 0.96rem;
+  color: #1e2a3b;
+  padding: 0.18rem 0.35rem;
+  border-radius: 8px;
+  transition: background-color 200ms ease, box-shadow 200ms ease, border-color 200ms ease;
+  border: 1px solid transparent;
+}
+
+.wave-calc-row .katex {
+  font-size: 1.02rem;
+}
+
+.wave-calc-row.is-highlighted {
+  background: rgba(219, 234, 254, 0.95);
+  border-color: rgba(59, 130, 246, 0.65);
+  box-shadow: 0 6px 16px rgba(37, 99, 235, 0.25);
+}
+
 .wave-equations {
   display: grid;
   gap: 0.5rem;

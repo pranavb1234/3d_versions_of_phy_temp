@@ -530,7 +530,7 @@ export default function WaveLongitudinalScene({ title, description }) {
         </div>
       </section>
 
-      <aside className="wave-right">
+      <aside className="wave-right compact">
         <div className="wave-control-block">
           <div className="wave-control-title">Simulation</div>
           <button
@@ -626,26 +626,44 @@ export default function WaveLongitudinalScene({ title, description }) {
         </div>
 
         <div className="wave-control-block">
-          <div className="wave-control-title">Readouts</div>
-          <div className="wave-readout">
-            <span>k</span>
-            <span>{formatNumber(derived.k, 3)}</span>
-          </div>
-          <div className="wave-readout">
-            <span>Period (T)</span>
-            <span>{formatNumber(derived.period, 2)} s</span>
-          </div>
-          <div className="wave-readout">
-            <span>Frequency (f)</span>
-            <span>{formatNumber(derived.frequency, 2)} Hz</span>
-          </div>
-          <div className="wave-readout">
-            <span>Wave speed (v)</span>
-            <span>{formatNumber(derived.speed, 2)}</span>
-          </div>
-          <div className="wave-readout">
-            <span>Probe x0</span>
-            <span>{formatNumber(derived.probeX, 2)}</span>
+          <div className="wave-control-title">Calculations</div>
+          <div className="wave-calc-list">
+            <div
+              className="wave-calc-row"
+              dangerouslySetInnerHTML={renderFormula(
+                `k = \\frac{2\\pi}{\\lambda} = \\frac{2\\pi}{${formatNumber(
+                  wavelength,
+                  2
+                )}} = ${formatNumber(derived.k, 3)}`
+              )}
+            />
+            <div
+              className="wave-calc-row"
+              dangerouslySetInnerHTML={renderFormula(
+                `T = \\frac{2\\pi}{\\omega} = \\frac{2\\pi}{${formatNumber(
+                  omega,
+                  2
+                )}} = ${formatNumber(derived.period, 2)}\\,s`
+              )}
+            />
+            <div
+              className="wave-calc-row"
+              dangerouslySetInnerHTML={renderFormula(
+                `f = \\frac{\\omega}{2\\pi} = \\frac{${formatNumber(
+                  omega,
+                  2
+                )}}{2\\pi} = ${formatNumber(derived.frequency, 2)}\\,Hz`
+              )}
+            />
+            <div
+              className="wave-calc-row"
+              dangerouslySetInnerHTML={renderFormula(
+                `v = \\frac{\\omega}{k} = \\frac{${formatNumber(
+                  omega,
+                  2
+                )}}{${formatNumber(derived.k, 3)}} = ${formatNumber(derived.speed, 2)}`
+              )}
+            />
           </div>
         </div>
       </aside>
