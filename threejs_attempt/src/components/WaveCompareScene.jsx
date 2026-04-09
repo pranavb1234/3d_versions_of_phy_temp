@@ -646,9 +646,7 @@ export default function WaveCompareScene({ title, description }) {
                   className="wave-arrow-btn"
                   aria-label="Amplitude info"
                   onClick={() => setInfoParam("amplitude")}
-                >
-                  &gt;
-                </button>
+                />
                 Amplitude (A)
               </span>
               <span className="wave-value">{formatNumber(amplitude, 2)}</span>
@@ -671,9 +669,7 @@ export default function WaveCompareScene({ title, description }) {
                   className="wave-arrow-btn"
                   aria-label="Wavelength info"
                   onClick={() => setInfoParam("wavelength")}
-                >
-                  &gt;
-                </button>
+                />
                 Wavelength (lambda)
               </span>
               <span className="wave-value">{formatNumber(wavelength, 2)}</span>
@@ -696,9 +692,7 @@ export default function WaveCompareScene({ title, description }) {
                   className="wave-arrow-btn"
                   aria-label="Angular frequency info"
                   onClick={() => setInfoParam("omega")}
-                >
-                  &gt;
-                </button>
+                />
                 Angular Frequency (omega)
               </span>
               <span className="wave-value">{formatNumber(omega, 2)}</span>
@@ -721,9 +715,7 @@ export default function WaveCompareScene({ title, description }) {
                   className="wave-arrow-btn"
                   aria-label="Phase info"
                   onClick={() => setInfoParam("phase")}
-                >
-                  &gt;
-                </button>
+                />
                 Initial Phase (phi)
               </span>
               <span className="wave-value">{formatNumber(phase, 2)}</span>
