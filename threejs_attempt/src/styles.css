@@ -982,6 +982,32 @@ body {
   color: #1e2a3b;
 }
 
+.wave-label-main {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.wave-arrow-btn {
+  width: 18px;
+  height: 18px;
+  border-radius: 999px;
+  border: 1px solid rgba(31, 94, 177, 0.45);
+  background: rgba(31, 94, 177, 0.12);
+  color: #1f5eb1;
+  font-weight: 800;
+  font-size: 0.7rem;
+  line-height: 1;
+  cursor: pointer;
+  transition: transform 120ms ease, filter 120ms ease, background-color 120ms ease;
+}
+
+.wave-arrow-btn:hover {
+  transform: translateY(-1px);
+  filter: brightness(0.98);
+  background: rgba(31, 94, 177, 0.2);
+}
+
 .wave-slider-row input[type="range"] {
   width: 100%;
 }

@@ -116,6 +116,7 @@ export default function WaveCompareScene({ title, description }) {
   const [omega, setOmega] = useState(2.0);
   const [phase, setPhase] = useState(0);
   const [calcHighlight, setCalcHighlight] = useState({});
+  const [infoParam, setInfoParam] = useState(null);
 
   const transverseCanvasRef = useRef(null);
   const longitudinalCanvasRef = useRef(null);
@@ -477,6 +478,29 @@ export default function WaveCompareScene({ title, description }) {
     description ??
     "Top: transverse (particle motion ⟂ travel). Bottom: longitudinal (particle motion ∥ travel).";
 
+  const parameterInfo = {
+    amplitude: {
+      title: "Amplitude (A)",
+      detail:
+        "Increases the maximum displacement. Higher A makes crests taller and compressions stronger."
+    },
+    wavelength: {
+      title: "Wavelength (lambda)",
+      detail:
+        "Controls spacing. Larger wavelength spreads crests/compressions apart; smaller packs them closer."
+    },
+    omega: {
+      title: "Angular Frequency (omega)",
+      detail:
+        "Controls how fast the wave oscillates in time. Higher omega means faster motion and shorter period."
+    },
+    phase: {
+      title: "Initial Phase (phi)",
+      detail:
+        "Shifts the wave left/right at t = 0. Changing phase moves where crests/compressions start."
+    }
+  };
+
   return (
     <div className="wave-shell">
       <aside className="wave-left">
@@ -510,6 +534,67 @@ export default function WaveCompareScene({ title, description }) {
           <div className="wave-compare-item">
             <span className="wave-compare-label">Same</span>
             <span>Both are traveling waves described by kx − ωt.</span>
+          </div>
+        </div>
+        <div className="wave-symbols">
+          <div className="wave-symbols-title">Symbol Guide</div>
+          <div className="wave-symbols-list">
+            <details className="wave-symbol-item">
+              <summary className="wave-symbol-summary">
+                <span className="wave-symbol-name">A</span>
+                <span className="wave-symbol-label">Amplitude</span>
+              </summary>
+              <div className="wave-symbol-desc">Maximum displacement of the medium.</div>
+            </details>
+            <details className="wave-symbol-item">
+              <summary className="wave-symbol-summary">
+                <span className="wave-symbol-name">λ</span>
+                <span className="wave-symbol-label">Wavelength</span>
+              </summary>
+              <div className="wave-symbol-desc">Distance between repeating points.</div>
+            </details>
+            <details className="wave-symbol-item">
+              <summary className="wave-symbol-summary">
+                <span className="wave-symbol-name">ω</span>
+                <span className="wave-symbol-label">Angular frequency</span>
+              </summary>
+              <div className="wave-symbol-desc">How fast the wave oscillates in time.</div>
+            </details>
+            <details className="wave-symbol-item">
+              <summary className="wave-symbol-summary">
+                <span className="wave-symbol-name">k</span>
+                <span className="wave-symbol-label">Wave number</span>
+              </summary>
+              <div className="wave-symbol-desc">Spatial frequency, equal to 2π/λ.</div>
+            </details>
+            <details className="wave-symbol-item">
+              <summary className="wave-symbol-summary">
+                <span className="wave-symbol-name">T</span>
+                <span className="wave-symbol-label">Period</span>
+              </summary>
+              <div className="wave-symbol-desc">Time for one full oscillation.</div>
+            </details>
+            <details className="wave-symbol-item">
+              <summary className="wave-symbol-summary">
+                <span className="wave-symbol-name">f</span>
+                <span className="wave-symbol-label">Frequency</span>
+              </summary>
+              <div className="wave-symbol-desc">Oscillations per second (Hz).</div>
+            </details>
+            <details className="wave-symbol-item">
+              <summary className="wave-symbol-summary">
+                <span className="wave-symbol-name">v</span>
+                <span className="wave-symbol-label">Wave speed</span>
+              </summary>
+              <div className="wave-symbol-desc">Speed of the traveling wave pattern.</div>
+            </details>
+            <details className="wave-symbol-item">
+              <summary className="wave-symbol-summary">
+                <span className="wave-symbol-name">φ</span>
+                <span className="wave-symbol-label">Phase</span>
+              </summary>
+              <div className="wave-symbol-desc">Initial shift of the wave at t = 0.</div>
+            </details>
           </div>
         </div>
       </aside>
@@ -555,7 +640,17 @@ export default function WaveCompareScene({ title, description }) {
           <div className="wave-control-title">Parameters</div>
           <div className="wave-slider-row">
             <label htmlFor="compare-amplitude">
-              Amplitude (A)
+              <span className="wave-label-main">
+                <button
+                  type="button"
+                  className="wave-arrow-btn"
+                  aria-label="Amplitude info"
+                  onClick={() => setInfoParam("amplitude")}
+                >
+                  &gt;
+                </button>
+                Amplitude (A)
+              </span>
               <span className="wave-value">{formatNumber(amplitude, 2)}</span>
             </label>
             <input
@@ -570,7 +665,17 @@ export default function WaveCompareScene({ title, description }) {
           </div>
           <div className="wave-slider-row">
             <label htmlFor="compare-wavelength">
-              Wavelength (lambda)
+              <span className="wave-label-main">
+                <button
+                  type="button"
+                  className="wave-arrow-btn"
+                  aria-label="Wavelength info"
+                  onClick={() => setInfoParam("wavelength")}
+                >
+                  &gt;
+                </button>
+                Wavelength (lambda)
+              </span>
               <span className="wave-value">{formatNumber(wavelength, 2)}</span>
             </label>
             <input
@@ -585,7 +690,17 @@ export default function WaveCompareScene({ title, description }) {
           </div>
           <div className="wave-slider-row">
             <label htmlFor="compare-omega">
-              Angular Frequency (omega)
+              <span className="wave-label-main">
+                <button
+                  type="button"
+                  className="wave-arrow-btn"
+                  aria-label="Angular frequency info"
+                  onClick={() => setInfoParam("omega")}
+                >
+                  &gt;
+                </button>
+                Angular Frequency (omega)
+              </span>
               <span className="wave-value">{formatNumber(omega, 2)}</span>
             </label>
             <input
@@ -600,7 +715,17 @@ export default function WaveCompareScene({ title, description }) {
           </div>
           <div className="wave-slider-row">
             <label htmlFor="compare-phase">
-              Initial Phase (phi)
+              <span className="wave-label-main">
+                <button
+                  type="button"
+                  className="wave-arrow-btn"
+                  aria-label="Phase info"
+                  onClick={() => setInfoParam("phase")}
+                >
+                  &gt;
+                </button>
+                Initial Phase (phi)
+              </span>
               <span className="wave-value">{formatNumber(phase, 2)}</span>
             </label>
             <input
@@ -675,6 +800,23 @@ export default function WaveCompareScene({ title, description }) {
           </div>
         </div>
       </aside>
+      {infoParam && (
+        <div className="calc-modal-backdrop" onClick={() => setInfoParam(null)}>
+          <div className="calc-modal" onClick={(event) => event.stopPropagation()}>
+            <div className="calc-modal-header">
+              <div className="calc-modal-title">{parameterInfo[infoParam].title}</div>
+              <button
+                type="button"
+                className="calc-modal-close"
+                onClick={() => setInfoParam(null)}
+              >
+                Close
+              </button>
+            </div>
+            <div className="calc-modal-detail">{parameterInfo[infoParam].detail}</div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
