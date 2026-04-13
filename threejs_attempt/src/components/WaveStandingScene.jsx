@@ -587,13 +587,6 @@ export default function WaveStandingScene({ title, description }) {
           </div>
         </div>
 
-        <div className="wave-control-block">
-          <div className="wave-control-title">Drive</div>
-          <div className="wave-readout">
-            <span>Drive f</span>
-            <span>{formatNumber(frequency, 2)} Hz</span>
-          </div>
-        </div>
       </aside>
     </div>
   );
