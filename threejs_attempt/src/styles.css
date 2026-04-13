@@ -1100,6 +1100,14 @@ body {
   font-size: 1.08rem;
 }
 
+.wave-equation.is-highlighted {
+  padding: 0.2rem 0.35rem;
+  border-radius: 8px;
+  background: rgba(219, 234, 254, 0.95);
+  border: 1px solid rgba(59, 130, 246, 0.65);
+  box-shadow: 0 6px 16px rgba(37, 99, 235, 0.22);
+}
+
 .wave-symbols {
   display: grid;
   gap: 0.55rem;

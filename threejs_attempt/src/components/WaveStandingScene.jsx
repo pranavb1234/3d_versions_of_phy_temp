@@ -114,6 +114,7 @@ export default function WaveStandingScene({ title, description }) {
   const [frequency, setFrequency] = useState(1.0);
   const [mu, setMu] = useState(0.5);
   const [mode, setMode] = useState(1);
+  const [calcHighlight, setCalcHighlight] = useState({});
 
   const canvasRef = useRef(null);
   const wrapRef = useRef(null);
@@ -121,6 +122,8 @@ export default function WaveStandingScene({ title, description }) {
   const timeRef = useRef(0);
   const isPlayingRef = useRef(isPlaying);
   const paramsRef = useRef({ lengthL, tension, frequency, mu, mode });
+  const prevParamsRef = useRef({ lengthL, tension, frequency, mu, mode });
+  const highlightTimerRef = useRef(null);
 
   useEffect(() => {
     isPlayingRef.current = isPlaying;
@@ -128,6 +131,45 @@ export default function WaveStandingScene({ title, description }) {
 
   useEffect(() => {
     paramsRef.current = { lengthL, tension, frequency, mu, mode };
+  }, [lengthL, tension, frequency, mu, mode]);
+
+  useEffect(() => {
+    const prev = prevParamsRef.current;
+    const changedKeys = new Set();
+
+    if (lengthL !== prev.lengthL) {
+      changedKeys.add("lambda");
+      changedKeys.add("harmonic");
+    }
+    if (tension !== prev.tension) {
+      changedKeys.add("v");
+      changedKeys.add("harmonic");
+    }
+    if (mu !== prev.mu) {
+      changedKeys.add("v");
+      changedKeys.add("harmonic");
+    }
+    if (mode !== prev.mode) {
+      changedKeys.add("lambda");
+      changedKeys.add("harmonic");
+    }
+    if (changedKeys.size) {
+      const nextHighlight = {};
+      changedKeys.forEach((key) => {
+        nextHighlight[key] = true;
+      });
+      setCalcHighlight(nextHighlight);
+
+      if (highlightTimerRef.current) {
+        clearTimeout(highlightTimerRef.current);
+      }
+      highlightTimerRef.current = setTimeout(() => {
+        setCalcHighlight({});
+        highlightTimerRef.current = null;
+      }, 900);
+    }
+
+    prevParamsRef.current = { lengthL, tension, frequency, mu, mode };
   }, [lengthL, tension, frequency, mu, mode]);
 
   useEffect(() => {
@@ -330,7 +372,7 @@ export default function WaveStandingScene({ title, description }) {
         </div>
         <div className="wave-equations">
           <div
-            className="wave-equation"
+            className={`wave-equation ${calcHighlight.lambda ? "is-highlighted" : ""}`}
             dangerouslySetInnerHTML={renderFormula(
               `\\lambda = \\frac{2L}{n} = \\frac{2\\times ${formatNumber(
                 lengthL,
@@ -339,7 +381,7 @@ export default function WaveStandingScene({ title, description }) {
             )}
           />
           <div
-            className="wave-equation"
+            className={`wave-equation ${calcHighlight.v ? "is-highlighted" : ""}`}
             dangerouslySetInnerHTML={renderFormula(
               `v = \\sqrt{\\frac{T}{\\mu}} = \\sqrt{\\frac{${formatNumber(
                 tension,
@@ -348,7 +390,7 @@ export default function WaveStandingScene({ title, description }) {
             )}
           />
           <div
-            className="wave-equation"
+            className={`wave-equation ${calcHighlight.harmonic ? "is-highlighted" : ""}`}
             dangerouslySetInnerHTML={renderFormula(
               `f_n = \\frac{n v}{2L} = \\frac{${derived.n}\\times ${formatNumber(
                 derived.v,
