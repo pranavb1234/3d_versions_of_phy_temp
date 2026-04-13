@@ -961,6 +961,32 @@ body {
   gap: 0.5rem;
 }
 
+.wave-harmonic-row {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.wave-harmonic-row .wave-toggle-btn {
+  min-width: 32px;
+  height: 32px;
+  padding: 0;
+  font-size: 1rem;
+  font-weight: 900;
+}
+
+.wave-harmonic-display {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #1d2a3d;
+  text-align: center;
+  padding: 0.2rem 0.4rem;
+  border-radius: 8px;
+  border: 1px solid rgba(156, 178, 200, 0.6);
+  background: rgba(246, 250, 255, 0.85);
+}
+
 .wave-toggle-btn.active {
   background: #1f5eb1;
   color: #ffffff;

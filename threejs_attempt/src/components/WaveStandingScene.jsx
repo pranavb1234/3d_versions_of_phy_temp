@@ -491,17 +491,14 @@ export default function WaveStandingScene({ title, description }) {
         <div className="wave-control-block">
           <div className="wave-control-title">Harmonics</div>
           <div className="wave-slider-row">
-            <label htmlFor="standing-mode">
-              Harmonic (n)
-              <span className="wave-value">{formatNumber(mode, 0)}</span>
-            </label>
-            <div className="wave-select-row">
+            <label htmlFor="standing-mode">Harmonic (n)</label>
+            <div className="wave-harmonic-row">
               <button
                 type="button"
                 className="wave-toggle-btn"
-                onClick={() => handleModeStep(-1)}
+                onClick={() => handleModeStep(1)}
               >
-                -
+                +
               </button>
               <input
                 id="standing-mode"
@@ -515,10 +512,13 @@ export default function WaveStandingScene({ title, description }) {
               <button
                 type="button"
                 className="wave-toggle-btn"
-                onClick={() => handleModeStep(1)}
+                onClick={() => handleModeStep(-1)}
               >
-                +
+                -
               </button>
+            </div>
+            <div className="wave-harmonic-display">
+              n = {formatNumber(mode, 0)}
             </div>
           </div>
         </div>
