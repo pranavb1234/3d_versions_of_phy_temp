@@ -1,4 +1,4 @@
-# Physics Lab - Interactive SHM and Waves Simulator
+# Physics Lab - Interactive Lab for physics simulations
 
 ## Abstract
 Physics Lab is a web-based interactive simulator that visualizes core concepts from oscillations and waves. It combines real-time 3D motion with math-driven readouts so learners can see how parameters change the motion and equations. The goal is to make abstract physics relationships intuitive through direct experimentation.
