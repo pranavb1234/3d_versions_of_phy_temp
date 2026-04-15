@@ -8,6 +8,7 @@ import WaveDisplacementScene from "./components/WaveDisplacementScene";
 import WaveStaticMarkersScene from "./components/WaveStaticMarkersScene";
 import WaveCompareScene from "./components/WaveCompareScene";
 import WaveStandingScene from "./components/WaveStandingScene";
+import RefractionScene from "./components/RefractionScene";
 
 export default function App() {
   const [mass, setMass] = useState(1.0);
@@ -17,6 +18,7 @@ export default function App() {
   const [templateId, setTemplateId] = useState("single");
   const [chapterId, setChapterId] = useState("oscillations");
   const [waveSimId, setWaveSimId] = useState("static_markers");
+  const [opticsSimId, setOpticsSimId] = useState("refraction");
   const [activeParamInfo, setActiveParamInfo] = useState(null);
   const [activeCalc, setActiveCalc] = useState(null);
   const [activeEffectKey, setActiveEffectKey] = useState(null);
@@ -105,7 +107,8 @@ export default function App() {
   const chapterConfig = useMemo(
     () => ({
       oscillations: { label: "Oscillations" },
-      waves: { label: "Waves" }
+      waves: { label: "Waves" },
+      optics: { label: "Optics" }
     }),
     []
   );
@@ -202,8 +205,31 @@ export default function App() {
   );
 
   const isOscillationChapter = chapterId === "oscillations";
-  const activeWaveSim = waveSimConfig[waveSimId] ?? { label: "Wave Simulation" };
-  const ActiveWaveScene = activeWaveSim.Scene;
+  const isWavesChapter = chapterId === "waves";
+  const isOpticsChapter = chapterId === "optics";
+  const opticsSimConfig = useMemo(
+    () => ({
+      refraction: {
+        label: "Refraction (Snell's Law)",
+        title: "Refraction Through Media Boundary",
+        description:
+          "Drag the incident ray or use controls to explore Snell's law, bending direction, and total internal reflection.",
+        Scene: RefractionScene
+      }
+    }),
+    []
+  );
+  const chapterSimConfig = isWavesChapter
+    ? waveSimConfig
+    : isOpticsChapter
+    ? opticsSimConfig
+    : null;
+  const activeChapterSimId = isWavesChapter ? waveSimId : isOpticsChapter ? opticsSimId : null;
+  const activeChapterSim =
+    (chapterSimConfig && activeChapterSimId && chapterSimConfig[activeChapterSimId]) ?? {
+      label: "Simulation"
+    };
+  const ActiveChapterScene = activeChapterSim.Scene;
   const activeTemplate = templateConfig[templateId] ?? templateConfig.single;
   const ActiveScene = activeTemplate.Scene;
   const legendItems = useMemo(() => {
@@ -876,9 +902,14 @@ export default function App() {
     }
     if (chapterId === "waves") {
       setWaveSimId(nextSimulation);
+      return;
+    }
+    if (chapterId === "optics") {
+      setOpticsSimId(nextSimulation);
     }
   };
   const currentTourStep = tourStepIndex !== null ? tourSteps[tourStepIndex] : null;
+  const selectedChapterLabel = chapterConfig[chapterId]?.label ?? "Chapter";
 
   return (
     <main className="app-shell">
@@ -902,7 +933,15 @@ export default function App() {
             <label className="shm-topbar-field" data-tour="template">
               <span className="shm-topbar-label">Simulation</span>
               <select
-                value={isOscillationChapter ? templateId : waveSimId}
+                value={
+                  isOscillationChapter
+                    ? templateId
+                    : isWavesChapter
+                    ? waveSimId
+                    : isOpticsChapter
+                    ? opticsSimId
+                    : ""
+                }
                 onChange={handleSimulationChange}
                 aria-label="Select simulation"
               >
@@ -912,7 +951,7 @@ export default function App() {
                         {config.label}
                       </option>
                     ))
-                  : Object.entries(waveSimConfig).map(([key, config]) => (
+                  : Object.entries(chapterSimConfig ?? {}).map(([key, config]) => (
                       <option key={key} value={key}>
                         {config.label}
                       </option>
@@ -1164,17 +1203,20 @@ export default function App() {
       </div>
       ) : (
         <div className="waves-frame">
-          {ActiveWaveScene ? (
-            <ActiveWaveScene title={activeWaveSim.title} description={activeWaveSim.description} />
+          {ActiveChapterScene ? (
+            <ActiveChapterScene
+              title={activeChapterSim.title}
+              description={activeChapterSim.description}
+            />
           ) : (
             <div className="waves-empty">
               <div className="waves-card">
-                <div className="waves-title">Waves Chapter</div>
+                <div className="waves-title">{selectedChapterLabel} Chapter</div>
                 <div className="waves-subtitle">
                   Choose a simulation from the top bar to get started. This space is ready for the next
-                  set of wave scenes.
+                  set of chapter scenes.
                 </div>
-                <div className="waves-selection">Selected simulation: {activeWaveSim.label}</div>
+                <div className="waves-selection">Selected simulation: {activeChapterSim.label}</div>
               </div>
             </div>
           )}
