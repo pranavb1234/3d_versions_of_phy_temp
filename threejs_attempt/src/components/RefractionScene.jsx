@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import katex from "katex";
 
 const DEG_PER_RAD = 180 / Math.PI;
 const RAD_PER_DEG = Math.PI / 180;
@@ -12,6 +13,9 @@ const formatNumber = (value, digits = 2) => {
   const fixed = safe.toFixed(digits);
   return fixed.replace(/\.00$/, "");
 };
+const renderFormula = (latex) => ({
+  __html: katex.renderToString(latex, { throwOnError: false })
+});
 
 const normalizeAngleDelta = (delta) => {
   let next = delta;
@@ -477,34 +481,78 @@ export default function RefractionScene({ title, description }) {
     "Drag the incident ray directly on the canvas, or use controls to test Snell's law and total internal reflection.";
 
   return (
-    <div className="optics-shell">
-      <section className="optics-header-card">
-        <div className="optics-title">{titleText}</div>
-        <div className="optics-description">{descriptionText}</div>
-      </section>
-
-      <section className="optics-canvas-card">
+    <div className="wave-shell">
+      <aside className="wave-left">
+        <div className="wave-left-title">{titleText}</div>
+        <div className="wave-left-desc">{descriptionText}</div>
         <div
-          ref={wrapRef}
-          className={`optics-canvas-wrap ${isDragging ? "is-dragging" : ""}`}
-          onPointerDown={handlePointerDown}
-          onPointerMove={handlePointerMove}
-          onPointerUp={handlePointerUp}
-          onPointerCancel={handlePointerUp}
-        >
-          <canvas ref={canvasRef} className="optics-canvas" />
-          <div className="optics-canvas-hint">Drag the yellow ray near the top half to change angle</div>
+          className="wave-formula"
+          dangerouslySetInnerHTML={renderFormula("n_1\\sin i = n_2\\sin r")}
+        />
+        <div className="wave-left-list">
+          <div className="wave-left-item">Incident ray: yellow</div>
+          <div className="wave-left-item">Refracted ray: green</div>
+          <div className="wave-left-item">Reflected ray: light blue (TIR only)</div>
+          <div className="wave-left-item">Normal: dashed white line</div>
+        </div>
+        <div className={`optics-status-pill ${derived.tir ? "tir" : ""}`}>{derived.status}</div>
+      </aside>
+
+      <section className="wave-center">
+        <div className="wave-center-header">
+          <div className="wave-center-title">Refraction at a Boundary</div>
+          <div className="wave-center-desc">
+            Drag on the canvas to rotate the incident angle and watch Snell's law update in real time.
+          </div>
+        </div>
+
+        <div className="wave-graphs single">
+          <div className="wave-graph-card">
+            <div className="wave-graph-title">Interactive Refraction Canvas</div>
+            <div
+              ref={wrapRef}
+              className={`wave-canvas-wrap refraction-canvas-wrap ${isDragging ? "is-dragging" : ""}`}
+              onPointerDown={handlePointerDown}
+              onPointerMove={handlePointerMove}
+              onPointerUp={handlePointerUp}
+              onPointerCancel={handlePointerUp}
+            >
+              <canvas ref={canvasRef} className="wave-canvas" />
+              <div className="refraction-canvas-hint">
+                Drag the yellow ray in the top region to change incidence angle
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 
-      <section className="optics-controls-grid">
-        <div className="optics-control-block">
-          <div className="optics-control-title">Primary Controls</div>
-          <label className="optics-slider-row" htmlFor="refraction-angle">
-            <span>Angle of incidence (i)</span>
-            <span>{formatNumber(derived.incidenceDeg, 1)} deg</span>
-          </label>
-          <div className="optics-control-row">
+      <aside className="wave-right">
+        <div className="wave-control-block">
+          <div className="wave-control-title">Simulation</div>
+          <div className="wave-select-row">
+            <button
+              type="button"
+              className={`wave-toggle-btn ${animateTrace ? "active" : ""}`}
+              onClick={() => {
+                traceProgressRef.current = 0;
+                setAnimateTrace((prev) => !prev);
+              }}
+            >
+              {animateTrace ? "Animation: On" : "Animation: Off"}
+            </button>
+            <button type="button" className="wave-toggle-btn" onClick={resetScene}>
+              Reset
+            </button>
+          </div>
+        </div>
+
+        <div className="wave-control-block">
+          <div className="wave-control-title">Parameters</div>
+          <div className="wave-slider-row">
+            <label htmlFor="refraction-angle">
+              Angle of incidence (i)
+              <span className="wave-value">{formatNumber(derived.incidenceDeg, 1)} deg</span>
+            </label>
             <input
               id="refraction-angle"
               type="range"
@@ -514,21 +562,12 @@ export default function RefractionScene({ title, description }) {
               value={incidenceDeg}
               onChange={(event) => setIncidenceDeg(sanitizeIncidence(parseFloat(event.target.value)))}
             />
-            <input
-              type="number"
-              min="0"
-              max="89.9"
-              step="0.1"
-              value={formatNumber(incidenceDeg, 1)}
-              onChange={(event) => setIncidenceDeg(sanitizeIncidence(parseFloat(event.target.value)))}
-            />
           </div>
-
-          <label className="optics-slider-row" htmlFor="refraction-n1">
-            <span>Refractive index n1</span>
-            <span>{formatNumber(derived.n1, 2)}</span>
-          </label>
-          <div className="optics-control-row">
+          <div className="wave-slider-row">
+            <label htmlFor="refraction-n1">
+              Refractive index n1
+              <span className="wave-value">{formatNumber(derived.n1, 2)}</span>
+            </label>
             <input
               id="refraction-n1"
               type="range"
@@ -538,21 +577,12 @@ export default function RefractionScene({ title, description }) {
               value={n1}
               onChange={(event) => updateIndex(setN1, event.target.value)}
             />
-            <input
-              type="number"
-              min="1"
-              max="2.5"
-              step="0.01"
-              value={formatNumber(n1, 2)}
-              onChange={(event) => updateIndex(setN1, event.target.value)}
-            />
           </div>
-
-          <label className="optics-slider-row" htmlFor="refraction-n2">
-            <span>Refractive index n2</span>
-            <span>{formatNumber(derived.n2, 2)}</span>
-          </label>
-          <div className="optics-control-row">
+          <div className="wave-slider-row">
+            <label htmlFor="refraction-n2">
+              Refractive index n2
+              <span className="wave-value">{formatNumber(derived.n2, 2)}</span>
+            </label>
             <input
               id="refraction-n2"
               type="range"
@@ -562,113 +592,86 @@ export default function RefractionScene({ title, description }) {
               value={n2}
               onChange={(event) => updateIndex(setN2, event.target.value)}
             />
-            <input
-              type="number"
-              min="1"
-              max="2.5"
-              step="0.01"
-              value={formatNumber(n2, 2)}
-              onChange={(event) => updateIndex(setN2, event.target.value)}
-            />
           </div>
         </div>
 
-        <div className="optics-control-block">
-          <div className="optics-control-title">Material Presets</div>
-          <div className="optics-preset-label">Set n1</div>
-          <div className="optics-preset-row">
-            <button type="button" className="optics-preset-btn" onClick={() => applyPreset(setN1, 1.0)}>
-              Air (1.0)
+        <div className="wave-control-block">
+          <div className="wave-control-title">Material Presets</div>
+          <div className="wave-select-row">
+            <button type="button" className="wave-toggle-btn" onClick={() => applyPreset(setN1, 1.0)}>
+              n1 Air (1.0)
             </button>
-            <button type="button" className="optics-preset-btn" onClick={() => applyPreset(setN1, 1.33)}>
-              Water (1.33)
+            <button type="button" className="wave-toggle-btn" onClick={() => applyPreset(setN1, 1.33)}>
+              n1 Water (1.33)
             </button>
-            <button type="button" className="optics-preset-btn" onClick={() => applyPreset(setN1, 1.5)}>
-              Glass (1.5)
-            </button>
-          </div>
-          <div className="optics-preset-label">Set n2</div>
-          <div className="optics-preset-row">
-            <button type="button" className="optics-preset-btn" onClick={() => applyPreset(setN2, 1.0)}>
-              Air (1.0)
-            </button>
-            <button type="button" className="optics-preset-btn" onClick={() => applyPreset(setN2, 1.33)}>
-              Water (1.33)
-            </button>
-            <button type="button" className="optics-preset-btn" onClick={() => applyPreset(setN2, 1.5)}>
-              Glass (1.5)
+            <button type="button" className="wave-toggle-btn" onClick={() => applyPreset(setN1, 1.5)}>
+              n1 Glass (1.5)
             </button>
           </div>
-          <div className="optics-actions-row">
+          <div className="wave-select-row">
+            <button type="button" className="wave-toggle-btn" onClick={() => applyPreset(setN2, 1.0)}>
+              n2 Air (1.0)
+            </button>
+            <button type="button" className="wave-toggle-btn" onClick={() => applyPreset(setN2, 1.33)}>
+              n2 Water (1.33)
+            </button>
+            <button type="button" className="wave-toggle-btn" onClick={() => applyPreset(setN2, 1.5)}>
+              n2 Glass (1.5)
+            </button>
+          </div>
+        </div>
+
+        <div className="wave-control-block">
+          <div className="wave-control-title">View + Readout</div>
+          <div className="wave-select-row">
             <button
               type="button"
-              className={`optics-toggle-btn ${animateTrace ? "active" : ""}`}
-              onClick={() => {
-                traceProgressRef.current = 0;
-                setAnimateTrace((prev) => !prev);
-              }}
+              className={`wave-toggle-btn ${showBoundary ? "active" : ""}`}
+              onClick={() => setShowBoundary((prev) => !prev)}
             >
-              {animateTrace ? "Animation: On" : "Animation: Off"}
+              {showBoundary ? "Boundary: On" : "Boundary: Off"}
             </button>
-            <button type="button" className="optics-reset-btn" onClick={resetScene}>
-              Reset
+            <button
+              type="button"
+              className={`wave-toggle-btn ${showNormal ? "active" : ""}`}
+              onClick={() => setShowNormal((prev) => !prev)}
+            >
+              {showNormal ? "Normal: On" : "Normal: Off"}
+            </button>
+            <button
+              type="button"
+              className={`wave-toggle-btn ${showArcs ? "active" : ""}`}
+              onClick={() => setShowArcs((prev) => !prev)}
+            >
+              {showArcs ? "Angle Arcs: On" : "Angle Arcs: Off"}
             </button>
           </div>
-        </div>
-
-        <div className="optics-control-block">
-          <div className="optics-control-title">View Toggles</div>
-          <label className="optics-check-row">
-            <input
-              type="checkbox"
-              checked={showBoundary}
-              onChange={(event) => setShowBoundary(event.target.checked)}
-            />
-            <span>Show medium boundary</span>
-          </label>
-          <label className="optics-check-row">
-            <input
-              type="checkbox"
-              checked={showNormal}
-              onChange={(event) => setShowNormal(event.target.checked)}
-            />
-            <span>Show normal line</span>
-          </label>
-          <label className="optics-check-row">
-            <input
-              type="checkbox"
-              checked={showArcs}
-              onChange={(event) => setShowArcs(event.target.checked)}
-            />
-            <span>Show angle arcs</span>
-          </label>
-        </div>
-
-        <div className="optics-control-block">
-          <div className="optics-control-title">Live Readout</div>
-          <div className="optics-readout-row">
-            <span>Incidence angle i</span>
+          <div className="wave-readout">
+            <span>Incidence i</span>
             <span>{formatNumber(derived.incidenceDeg, 2)} deg</span>
           </div>
-          <div className="optics-readout-row">
-            <span>Refraction angle r</span>
-            <span>{derived.refractedDeg === null ? "N/A (TIR)" : `${formatNumber(derived.refractedDeg, 2)} deg`}</span>
+          <div className="wave-readout">
+            <span>Refraction r</span>
+            <span>
+              {derived.refractedDeg === null ? "N/A (TIR)" : `${formatNumber(derived.refractedDeg, 2)} deg`}
+            </span>
           </div>
-          <div className="optics-readout-row">
-            <span>n1</span>
-            <span>{formatNumber(derived.n1, 2)}</span>
+          <div className="wave-readout">
+            <span>n1 / n2</span>
+            <span>
+              {formatNumber(derived.n1, 2)} / {formatNumber(derived.n2, 2)}
+            </span>
           </div>
-          <div className="optics-readout-row">
-            <span>n2</span>
-            <span>{formatNumber(derived.n2, 2)}</span>
-          </div>
-          <div className="optics-readout-row">
+          <div className="wave-readout">
             <span>Critical angle</span>
-            <span>{derived.criticalDeg === null ? "Not applicable" : `${formatNumber(derived.criticalDeg, 2)} deg`}</span>
+            <span>
+              {derived.criticalDeg === null
+                ? "Not applicable"
+                : `${formatNumber(derived.criticalDeg, 2)} deg`}
+            </span>
           </div>
-          <div className={`optics-status-pill ${derived.tir ? "tir" : ""}`}>{derived.status}</div>
         </div>
-      </section>
+      </aside>
     </div>
   );
 }
