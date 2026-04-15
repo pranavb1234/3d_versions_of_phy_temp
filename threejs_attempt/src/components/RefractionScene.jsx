@@ -197,6 +197,7 @@ export default function RefractionScene({ title, description }) {
   const [showNormal, setShowNormal] = useState(true);
   const [animateTrace, setAnimateTrace] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
+  const [showPresetModal, setShowPresetModal] = useState(false);
 
   const canvasRef = useRef(null);
   const wrapRef = useRef(null);
@@ -465,6 +466,7 @@ export default function RefractionScene({ title, description }) {
     "Drag the incident ray directly on the canvas, or use controls to test Snell's law and total internal reflection.";
 
   return (
+    <>
     <div className="wave-shell">
       <aside className="wave-left">
         <div className="wave-left-title">{titleText}</div>
@@ -474,12 +476,12 @@ export default function RefractionScene({ title, description }) {
           dangerouslySetInnerHTML={renderFormula("n_1\\sin i = n_2\\sin r")}
         />
         <div className="wave-left-list">
-          <div className="wave-left-item refraction-incident-text">Incident ray: yellow</div>
-          <div className="wave-left-item refraction-refracted-text">Refracted ray: green</div>
-          <div className="wave-left-item refraction-reflected-text">
+          <div className="wave-left-item refraction-legend-text">Incident ray: yellow</div>
+          <div className="wave-left-item refraction-legend-text">Refracted ray: green</div>
+          <div className="wave-left-item refraction-legend-text">
             Reflected ray: light blue (TIR only)
           </div>
-          <div className="wave-left-item refraction-normal-text">Normal: dashed white line</div>
+          <div className="wave-left-item refraction-legend-text">Normal: dashed white line</div>
         </div>
         <div className="wave-symbols">
           <div className="wave-symbols-title">Symbol Guide</div>
@@ -559,6 +561,15 @@ export default function RefractionScene({ title, description }) {
 
       <aside className="wave-right">
         <div className="wave-control-block">
+          <div className="wave-control-title">Material Presets</div>
+          <div className="wave-select-row">
+            <button type="button" className="wave-toggle-btn active" onClick={() => setShowPresetModal(true)}>
+              Open Material Presets
+            </button>
+          </div>
+        </div>
+
+        <div className="wave-control-block">
           <div className="wave-control-title">Simulation</div>
           <div className="wave-select-row">
             <button
@@ -573,6 +584,29 @@ export default function RefractionScene({ title, description }) {
             </button>
             <button type="button" className="wave-toggle-btn" onClick={resetScene}>
               Reset
+            </button>
+          </div>
+          <div className="wave-select-row">
+            <button
+              type="button"
+              className={`wave-toggle-btn ${showBoundary ? "active" : ""}`}
+              onClick={() => setShowBoundary((prev) => !prev)}
+            >
+              {showBoundary ? "Boundary: On" : "Boundary: Off"}
+            </button>
+            <button
+              type="button"
+              className={`wave-toggle-btn ${showNormal ? "active" : ""}`}
+              onClick={() => setShowNormal((prev) => !prev)}
+            >
+              {showNormal ? "Normal: On" : "Normal: Off"}
+            </button>
+            <button
+              type="button"
+              className={`wave-toggle-btn ${showArcs ? "active" : ""}`}
+              onClick={() => setShowArcs((prev) => !prev)}
+            >
+              {showArcs ? "Angle Arcs: On" : "Angle Arcs: Off"}
             </button>
           </div>
         </div>
@@ -626,83 +660,64 @@ export default function RefractionScene({ title, description }) {
           </div>
         </div>
 
-        <div className="wave-control-block">
-          <div className="wave-control-title">Material Presets</div>
-          <div className="wave-select-row">
-            <button type="button" className="wave-toggle-btn" onClick={() => applyPreset(setN1, 1.0)}>
-              n1 Air (1.0)
-            </button>
-            <button type="button" className="wave-toggle-btn" onClick={() => applyPreset(setN1, 1.33)}>
-              n1 Water (1.33)
-            </button>
-            <button type="button" className="wave-toggle-btn" onClick={() => applyPreset(setN1, 1.5)}>
-              n1 Glass (1.5)
-            </button>
-          </div>
-          <div className="wave-select-row">
-            <button type="button" className="wave-toggle-btn" onClick={() => applyPreset(setN2, 1.0)}>
-              n2 Air (1.0)
-            </button>
-            <button type="button" className="wave-toggle-btn" onClick={() => applyPreset(setN2, 1.33)}>
-              n2 Water (1.33)
-            </button>
-            <button type="button" className="wave-toggle-btn" onClick={() => applyPreset(setN2, 1.5)}>
-              n2 Glass (1.5)
-            </button>
-          </div>
-        </div>
-
-        <div className="wave-control-block">
-          <div className="wave-control-title">View + Readout</div>
-          <div className="wave-select-row">
-            <button
-              type="button"
-              className={`wave-toggle-btn ${showBoundary ? "active" : ""}`}
-              onClick={() => setShowBoundary((prev) => !prev)}
-            >
-              {showBoundary ? "Boundary: On" : "Boundary: Off"}
-            </button>
-            <button
-              type="button"
-              className={`wave-toggle-btn ${showNormal ? "active" : ""}`}
-              onClick={() => setShowNormal((prev) => !prev)}
-            >
-              {showNormal ? "Normal: On" : "Normal: Off"}
-            </button>
-            <button
-              type="button"
-              className={`wave-toggle-btn ${showArcs ? "active" : ""}`}
-              onClick={() => setShowArcs((prev) => !prev)}
-            >
-              {showArcs ? "Angle Arcs: On" : "Angle Arcs: Off"}
-            </button>
-          </div>
-          <div className="wave-readout">
-            <span>Incidence i</span>
-            <span>{formatNumber(derived.incidenceDeg, 2)} deg</span>
-          </div>
-          <div className="wave-readout">
-            <span>Refraction r</span>
-            <span>
-              {derived.refractedDeg === null ? "N/A (TIR)" : `${formatNumber(derived.refractedDeg, 2)} deg`}
-            </span>
-          </div>
-          <div className="wave-readout">
-            <span>n1 / n2</span>
-            <span>
-              {formatNumber(derived.n1, 2)} / {formatNumber(derived.n2, 2)}
-            </span>
-          </div>
-          <div className="wave-readout">
-            <span>Critical angle</span>
-            <span>
-              {derived.criticalDeg === null
-                ? "Not applicable"
-                : `${formatNumber(derived.criticalDeg, 2)} deg`}
-            </span>
-          </div>
-        </div>
       </aside>
     </div>
+    {showPresetModal ? (
+      <div className="refraction-modal-backdrop" onClick={() => setShowPresetModal(false)}>
+        <div
+          className="refraction-modal"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Material presets"
+          onClick={(event) => event.stopPropagation()}
+        >
+          <div className="refraction-modal-header">
+            <div className="refraction-modal-title">Material Presets</div>
+            <button
+              type="button"
+              className="refraction-modal-close"
+              onClick={() => setShowPresetModal(false)}
+            >
+              Close
+            </button>
+          </div>
+          <div className="refraction-modal-subtitle">
+            <strong>n1</strong> is Medium 1 (upper medium) and <strong>n2</strong> is Medium 2 (lower
+            medium).
+          </div>
+          <div className="refraction-modal-grid">
+            <div className="refraction-modal-section">
+              <div className="refraction-modal-section-title">Set n1 (Medium 1)</div>
+              <div className="refraction-modal-actions">
+                <button type="button" className="wave-toggle-btn" onClick={() => applyPreset(setN1, 1.0)}>
+                  Air (1.0)
+                </button>
+                <button type="button" className="wave-toggle-btn" onClick={() => applyPreset(setN1, 1.33)}>
+                  Water (1.33)
+                </button>
+                <button type="button" className="wave-toggle-btn" onClick={() => applyPreset(setN1, 1.5)}>
+                  Glass (1.5)
+                </button>
+              </div>
+            </div>
+            <div className="refraction-modal-section">
+              <div className="refraction-modal-section-title">Set n2 (Medium 2)</div>
+              <div className="refraction-modal-actions">
+                <button type="button" className="wave-toggle-btn" onClick={() => applyPreset(setN2, 1.0)}>
+                  Air (1.0)
+                </button>
+                <button type="button" className="wave-toggle-btn" onClick={() => applyPreset(setN2, 1.33)}>
+                  Water (1.33)
+                </button>
+                <button type="button" className="wave-toggle-btn" onClick={() => applyPreset(setN2, 1.5)}>
+                  Glass (1.5)
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    ) : null}
+    </>
   );
 }
