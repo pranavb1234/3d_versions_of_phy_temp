@@ -349,22 +349,6 @@ export default function RefractionScene({ title, description }) {
           ctx.fillText(`Single Medium (n = ${formatNumber(refraction.n1, 2)})`, 14, 22);
         }
 
-        const statusBg = refraction.tir
-          ? "rgba(124, 45, 18, 0.75)"
-          : refraction.status.includes("towards")
-          ? "rgba(21, 101, 74, 0.72)"
-          : refraction.status.includes("away")
-          ? "rgba(30, 64, 175, 0.72)"
-          : "rgba(71, 85, 105, 0.68)";
-        const statusWidth = Math.min(320, width - 24);
-        const statusX = width - statusWidth - 12;
-        ctx.fillStyle = statusBg;
-        ctx.fillRect(statusX, 12, statusWidth, 28);
-        ctx.fillStyle = "#f8fafc";
-        ctx.font = '700 12px "Segoe UI", Tahoma, sans-serif';
-        ctx.textAlign = "center";
-        ctx.fillText(refraction.status, statusX + statusWidth / 2, 26);
-
         const normalUp = { x: 0, y: -1 };
         const normalDown = { x: 0, y: 1 };
         const incidentFromPoint = sourceDir;
@@ -490,12 +474,59 @@ export default function RefractionScene({ title, description }) {
           dangerouslySetInnerHTML={renderFormula("n_1\\sin i = n_2\\sin r")}
         />
         <div className="wave-left-list">
-          <div className="wave-left-item">Incident ray: yellow</div>
-          <div className="wave-left-item">Refracted ray: green</div>
-          <div className="wave-left-item">Reflected ray: light blue (TIR only)</div>
-          <div className="wave-left-item">Normal: dashed white line</div>
+          <div className="wave-left-item refraction-incident-text">Incident ray: yellow</div>
+          <div className="wave-left-item refraction-refracted-text">Refracted ray: green</div>
+          <div className="wave-left-item refraction-reflected-text">
+            Reflected ray: light blue (TIR only)
+          </div>
+          <div className="wave-left-item refraction-normal-text">Normal: dashed white line</div>
         </div>
-        <div className={`optics-status-pill ${derived.tir ? "tir" : ""}`}>{derived.status}</div>
+        <div className="wave-symbols">
+          <div className="wave-symbols-title">Symbol Guide</div>
+          <div className="wave-symbols-list">
+            <details className="wave-symbol-item">
+              <summary className="wave-symbol-summary">
+                <span className="wave-symbol-name">i</span>
+                <span className="wave-symbol-label">Angle of incidence</span>
+              </summary>
+              <div className="wave-symbol-desc">
+                Angle between incident ray and normal in medium 1.
+              </div>
+            </details>
+            <details className="wave-symbol-item">
+              <summary className="wave-symbol-summary">
+                <span className="wave-symbol-name">r</span>
+                <span className="wave-symbol-label">Angle of refraction</span>
+              </summary>
+              <div className="wave-symbol-desc">
+                Angle between refracted ray and normal in medium 2.
+              </div>
+            </details>
+            <details className="wave-symbol-item">
+              <summary className="wave-symbol-summary">
+                <span className="wave-symbol-name">i'</span>
+                <span className="wave-symbol-label">Reflected angle</span>
+              </summary>
+              <div className="wave-symbol-desc">
+                Reflection angle in medium 1 (equal to incidence angle).
+              </div>
+            </details>
+            <details className="wave-symbol-item">
+              <summary className="wave-symbol-summary">
+                <span className="wave-symbol-name">n1</span>
+                <span className="wave-symbol-label">Refractive index 1</span>
+              </summary>
+              <div className="wave-symbol-desc">Refractive index of the top medium.</div>
+            </details>
+            <details className="wave-symbol-item">
+              <summary className="wave-symbol-summary">
+                <span className="wave-symbol-name">n2</span>
+                <span className="wave-symbol-label">Refractive index 2</span>
+              </summary>
+              <div className="wave-symbol-desc">Refractive index of the bottom medium.</div>
+            </details>
+          </div>
+        </div>
       </aside>
 
       <section className="wave-center">
