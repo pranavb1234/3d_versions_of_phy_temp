@@ -1878,6 +1878,18 @@ body {
   font-size: 0.92rem;
 }
 
+.refraction-check-box {
+  margin-top: 0.3rem;
+  padding: 0.48rem 0.58rem;
+  border-radius: 10px;
+  border: 2px solid rgba(37, 99, 235, 0.62);
+  background: rgba(219, 234, 254, 0.95);
+  box-shadow: 0 10px 20px rgba(37, 99, 235, 0.18);
+  color: #1e3a8a;
+  font-weight: 800;
+  gap: 0.65rem;
+}
+
 .refraction-modal-backdrop {
   position: fixed;
   inset: 0;

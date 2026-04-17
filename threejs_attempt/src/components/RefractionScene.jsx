@@ -412,10 +412,10 @@ export default function RefractionScene({ title }) {
         const leftBoxX = 12;
         const rightBoxX = width - boxWidth - 12;
         const boxY = 46;
-        drawCanvasInfoBox(ctx, leftBoxX, boxY, boxWidth, "Incoming Ray Intuition", [
+        drawCanvasInfoBox(ctx, leftBoxX, boxY, boxWidth, "Incoming Ray ", [
           "Light enters boundary from Medium 1.",
           "Incident angle i is measured from normal.",
-          "Rule: n1 sin(i) = n2 sin(r)."
+          
         ]);
 
         let rightTitle = "Refraction Outcome";
@@ -437,7 +437,7 @@ export default function RefractionScene({ title }) {
           rightLines = [
             "Going to rarer medium (n2 < n1).",
             "Light speeds up and bends away from normal.",
-            "So r > i (if below critical angle)."
+            
           ];
         } else {
           rightLines = [
@@ -578,6 +578,15 @@ export default function RefractionScene({ title }) {
             "\\theta_c = \\sin^{-1}\\!\\left(\\frac{n_2}{n_1}\\right),\\;\\text{valid only when }n_1>n_2"
           )}
         />
+        
+        <div
+          className="wave-formula refraction-critical-formula"
+          dangerouslySetInnerHTML={renderFormula(criticalCalcLatex)}
+        />
+        <div className="wave-readout refraction-check-box">
+          <span>Refraction check</span>
+          <span>{refractionDecisionText}</span>
+        </div>
         <div className="wave-left-hint">
           If incidence angle i is greater than{" "}
           <span
@@ -700,22 +709,6 @@ export default function RefractionScene({ title }) {
               value={n2}
               onChange={(event) => updateIndex(setN2, event.target.value)}
             />
-          </div>
-          <div className="wave-readout">
-            <span>Critical angle (θc)</span>
-            <span>
-              {derived.criticalDeg === null
-                ? "Defined only when n1 > n2"
-                : `${formatNumber(derived.criticalDeg, 2)} deg`}
-            </span>
-          </div>
-          <div
-            className="wave-formula refraction-critical-formula"
-            dangerouslySetInnerHTML={renderFormula(criticalCalcLatex)}
-          />
-          <div className="wave-readout">
-            <span>Refraction check</span>
-            <span>{refractionDecisionText}</span>
           </div>
         </div>
 
