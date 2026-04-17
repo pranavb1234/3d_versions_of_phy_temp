@@ -192,9 +192,9 @@ export default function RefractionScene({ title, description }) {
   const [incidentSide, setIncidentSide] = useState(-1);
   const [n1, setN1] = useState(1.0);
   const [n2, setN2] = useState(1.5);
-  const [showBoundary, setShowBoundary] = useState(true);
-  const [showArcs, setShowArcs] = useState(true);
-  const [showNormal, setShowNormal] = useState(true);
+  const showBoundary = true;
+  const showArcs = true;
+  const showNormal = true;
   const [animateTrace, setAnimateTrace] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const [showPresetModal, setShowPresetModal] = useState(false);
@@ -231,7 +231,7 @@ export default function RefractionScene({ title, description }) {
       showNormal,
       animateTrace
     };
-  }, [incidenceDeg, incidentSide, n1, n2, showBoundary, showArcs, showNormal, animateTrace]);
+  }, [incidenceDeg, incidentSide, n1, n2, animateTrace]);
 
   useEffect(() => {
     const resize = () => {
@@ -453,9 +453,6 @@ export default function RefractionScene({ title, description }) {
     setIncidentSide(-1);
     setN1(1.0);
     setN2(1.5);
-    setShowBoundary(true);
-    setShowArcs(true);
-    setShowNormal(true);
     setAnimateTrace(false);
     traceProgressRef.current = 1;
   };
@@ -475,6 +472,10 @@ export default function RefractionScene({ title, description }) {
           className="wave-formula"
           dangerouslySetInnerHTML={renderFormula("n_1\\sin i = n_2\\sin r")}
         />
+        <div className="wave-left-hint">
+          This experiment shows how light changes direction at a boundary because of different optical
+          densities.
+        </div>
         <div className="wave-left-list">
           <div className="wave-left-item refraction-legend-text">Incident ray: yellow</div>
           <div className="wave-left-item refraction-legend-text">Refracted ray: green</div>
@@ -586,28 +587,23 @@ export default function RefractionScene({ title, description }) {
               Reset
             </button>
           </div>
-          <div className="wave-select-row">
-            <button
-              type="button"
-              className={`wave-toggle-btn ${showBoundary ? "active" : ""}`}
-              onClick={() => setShowBoundary((prev) => !prev)}
-            >
-              {showBoundary ? "Boundary: On" : "Boundary: Off"}
-            </button>
-            <button
-              type="button"
-              className={`wave-toggle-btn ${showNormal ? "active" : ""}`}
-              onClick={() => setShowNormal((prev) => !prev)}
-            >
-              {showNormal ? "Normal: On" : "Normal: Off"}
-            </button>
-            <button
-              type="button"
-              className={`wave-toggle-btn ${showArcs ? "active" : ""}`}
-              onClick={() => setShowArcs((prev) => !prev)}
-            >
-              {showArcs ? "Angle Arcs: On" : "Angle Arcs: Off"}
-            </button>
+        </div>
+
+        <div className="wave-control-block">
+          <div className="wave-control-title">Experiment Guide</div>
+          <div className="wave-left-list">
+            <div className="wave-left-item">
+              A ray travels from Medium 1 to Medium 2 and bends at the boundary.
+            </div>
+            <div className="wave-left-item">
+              If n2 {'>'} n1, light bends towards the normal. If n2 {'<'} n1, it bends away.
+            </div>
+            <div className="wave-left-item">
+              If n1 {'>'} n2 and incidence angle is above critical angle, total internal reflection occurs.
+            </div>
+            <div className="wave-left-item">
+              Current behavior: {derived.status}
+            </div>
           </div>
         </div>
 
