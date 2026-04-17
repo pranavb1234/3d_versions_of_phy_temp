@@ -298,7 +298,7 @@ export default function RefractionScene({ title }) {
         const width = metrics.width;
         const height = metrics.height;
         const point = getIncidencePoint(width, height);
-        const rayLength = Math.max(80, Math.min(width, height) * 0.42);
+        const rayLength = Math.max(56, Math.min(width, height) * 0.3);
 
         drawMediumBackground(ctx, width, height, point.y, snapshot.showBoundary);
 
@@ -623,7 +623,7 @@ export default function RefractionScene({ title }) {
         </div>
       </section>
 
-      <aside className="wave-right">
+      <aside className="wave-right refraction-right">
         <div className="wave-control-block">
           <div className="wave-control-title">Material Presets</div>
           <div className="wave-select-row">
@@ -649,24 +649,6 @@ export default function RefractionScene({ title }) {
             <button type="button" className="wave-toggle-btn" onClick={resetScene}>
               Reset
             </button>
-          </div>
-        </div>
-
-        <div className="wave-control-block">
-          <div className="wave-control-title">Experiment Guide</div>
-          <div className="wave-left-list">
-            <div className="wave-left-item">
-              A ray travels from Medium 1 to Medium 2 and bends at the boundary.
-            </div>
-            <div className="wave-left-item">
-              If n2 {'>'} n1, light bends towards the normal. If n2 {'<'} n1, it bends away.
-            </div>
-            <div className="wave-left-item">
-              If n1 {'>'} n2 and incidence angle is above critical angle, total internal reflection occurs.
-            </div>
-            <div className="wave-left-item">
-              Current behavior: {derived.status}
-            </div>
           </div>
         </div>
 

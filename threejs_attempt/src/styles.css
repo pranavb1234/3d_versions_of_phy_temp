@@ -1839,6 +1839,11 @@ body {
   font-weight: 600;
 }
 
+.refraction-right {
+  align-content: start;
+  grid-auto-rows: max-content;
+}
+
 .refraction-legend-text {
   color: #111827;
   font-size: 0.95rem;
