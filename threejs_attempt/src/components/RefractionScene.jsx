@@ -187,7 +187,34 @@ const drawAngleArc = (ctx, center, radius, fromVec, toVec, color, label) => {
   ctx.fillText(label, labelPos.x, labelPos.y);
 };
 
-export default function RefractionScene({ title, description }) {
+const drawCanvasInfoBox = (ctx, x, y, width, title, lines) => {
+  const safeLines = Array.isArray(lines) ? lines : [];
+  const lineHeight = 14;
+  const paddingX = 10;
+  const paddingY = 8;
+  const titleHeight = 14;
+  const boxHeight = paddingY * 2 + titleHeight + safeLines.length * lineHeight + 4;
+
+  ctx.fillStyle = "rgba(15, 23, 42, 0.6)";
+  ctx.fillRect(x, y, width, boxHeight);
+  ctx.strokeStyle = "rgba(191, 219, 254, 0.5)";
+  ctx.lineWidth = 1;
+  ctx.strokeRect(x, y, width, boxHeight);
+
+  ctx.fillStyle = "#e2e8f0";
+  ctx.font = '700 12px "Segoe UI", Tahoma, sans-serif';
+  ctx.textAlign = "left";
+  ctx.textBaseline = "top";
+  ctx.fillText(title, x + paddingX, y + paddingY);
+
+  ctx.fillStyle = "#cbd5e1";
+  ctx.font = '600 11px "Segoe UI", Tahoma, sans-serif';
+  safeLines.forEach((line, index) => {
+    ctx.fillText(line, x + paddingX, y + paddingY + titleHeight + 4 + index * lineHeight);
+  });
+};
+
+export default function RefractionScene({ title }) {
   const [incidenceDeg, setIncidenceDeg] = useState(34);
   const [incidentSide, setIncidentSide] = useState(-1);
   const [n1, setN1] = useState(1.0);
@@ -350,6 +377,46 @@ export default function RefractionScene({ title, description }) {
           ctx.fillText(`Single Medium (n = ${formatNumber(refraction.n1, 2)})`, 14, 22);
         }
 
+        const boxWidth = Math.min(320, width * 0.42);
+        const leftBoxX = 12;
+        const rightBoxX = width - boxWidth - 12;
+        const boxY = 46;
+        drawCanvasInfoBox(ctx, leftBoxX, boxY, boxWidth, "Incoming Ray Intuition", [
+          "Light enters boundary from Medium 1.",
+          "Incident angle i is measured from normal.",
+          "Rule: n1 sin(i) = n2 sin(r)."
+        ]);
+
+        let rightTitle = "Refraction Outcome";
+        let rightLines = [];
+        if (refraction.tir) {
+          rightTitle = "Total Internal Reflection";
+          rightLines = [
+            "n1 > n2 and i > critical angle.",
+            "No refracted ray appears in Medium 2.",
+            "Ray reflects back inside Medium 1."
+          ];
+        } else if (refraction.n2 > refraction.n1) {
+          rightLines = [
+            "Going to denser medium (n2 > n1).",
+            "Light slows down and bends towards normal.",
+            "So r < i (for example: air to glass)."
+          ];
+        } else if (refraction.n2 < refraction.n1) {
+          rightLines = [
+            "Going to rarer medium (n2 < n1).",
+            "Light speeds up and bends away from normal.",
+            "So r > i (if below critical angle)."
+          ];
+        } else {
+          rightLines = [
+            "n1 and n2 are equal.",
+            "No bending due to equal optical density.",
+            "Ray continues straight through boundary."
+          ];
+        }
+        drawCanvasInfoBox(ctx, rightBoxX, boxY, boxWidth, rightTitle, rightLines);
+
         const normalUp = { x: 0, y: -1 };
         const normalDown = { x: 0, y: 1 };
         const incidentFromPoint = sourceDir;
@@ -458,24 +525,20 @@ export default function RefractionScene({ title, description }) {
   };
 
   const titleText = title ?? "Refraction Through Media Boundary";
-  const descriptionText =
-    description ??
-    "Drag the incident ray directly on the canvas, or use controls to test Snell's law and total internal reflection.";
 
   return (
     <>
     <div className="wave-shell">
       <aside className="wave-left">
         <div className="wave-left-title">{titleText}</div>
-        <div className="wave-left-desc">{descriptionText}</div>
-        <div
-          className="wave-formula"
-          dangerouslySetInnerHTML={renderFormula("n_1\\sin i = n_2\\sin r")}
-        />
         <div className="wave-left-hint">
           This experiment shows how light changes direction at a boundary because of different optical
           densities.
         </div>
+        <div
+          className="wave-formula"
+          dangerouslySetInnerHTML={renderFormula("n_1\\sin i = n_2\\sin r")}
+        />
         <div className="wave-left-list">
           <div className="wave-left-item refraction-legend-text">Incident ray: yellow</div>
           <div className="wave-left-item refraction-legend-text">Refracted ray: green</div>
