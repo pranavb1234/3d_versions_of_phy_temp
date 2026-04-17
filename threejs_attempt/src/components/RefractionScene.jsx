@@ -222,7 +222,7 @@ export default function RefractionScene({ title }) {
   const showBoundary = true;
   const showArcs = true;
   const showNormal = true;
-  const [animateTrace, setAnimateTrace] = useState(false);
+  const [animateTrace, setAnimateTrace] = useState(true);
   const [isDragging, setIsDragging] = useState(false);
   const [showPresetModal, setShowPresetModal] = useState(false);
 
@@ -230,7 +230,8 @@ export default function RefractionScene({ title }) {
   const wrapRef = useRef(null);
   const metricsRef = useRef({ width: 0, height: 0, dpr: 1, ctx: null });
   const dragActiveRef = useRef(false);
-  const traceProgressRef = useRef(1);
+  const traceProgressRef = useRef(0);
+  const tracePauseRemainingRef = useRef(0);
   const stateRef = useRef({
     incidenceDeg,
     incidentSide,
@@ -246,6 +247,25 @@ export default function RefractionScene({ title }) {
     () => computeRefraction({ incidenceDeg, n1, n2, showBoundary }),
     [incidenceDeg, n1, n2, showBoundary]
   );
+  const criticalCalcLatex =
+    derived.criticalDeg === null
+      ? "\\theta_c\\;\\text{is not defined because}\\;n_1\\le n_2"
+      : `\\theta_c = \\sin^{-1}\\!\\left(\\frac{n_2}{n_1}\\right) = \\sin^{-1}\\!\\left(\\frac{${formatNumber(
+          derived.n2,
+          2
+        )}}{${formatNumber(derived.n1, 2)}}\\right) = ${formatNumber(derived.criticalDeg, 2)}^{\\circ}`;
+  const refractionDecisionText =
+    derived.criticalDeg === null
+      ? "Refracts (no TIR condition)"
+      : derived.tir
+      ? `No refraction: i (${formatNumber(derived.incidenceDeg, 2)} deg) > θc (${formatNumber(
+          derived.criticalDeg,
+          2
+        )} deg)`
+      : `Refracts: i (${formatNumber(derived.incidenceDeg, 2)} deg) <= θc (${formatNumber(
+          derived.criticalDeg,
+          2
+        )} deg)`;
 
   useEffect(() => {
     stateRef.current = {
@@ -286,12 +306,23 @@ export default function RefractionScene({ title }) {
         const snapshot = stateRef.current;
         const refraction = computeRefraction(snapshot);
         if (snapshot.animateTrace) {
-          traceProgressRef.current += dt * 0.28;
-          if (traceProgressRef.current > 1) {
-            traceProgressRef.current = 0;
+          if (tracePauseRemainingRef.current > 0) {
+            tracePauseRemainingRef.current = Math.max(0, tracePauseRemainingRef.current - dt);
+            if (tracePauseRemainingRef.current <= 0) {
+              traceProgressRef.current = 0;
+            } else {
+              traceProgressRef.current = 1;
+            }
+          } else {
+            traceProgressRef.current += dt * 0.28;
+            if (traceProgressRef.current >= 1) {
+              traceProgressRef.current = 1;
+              tracePauseRemainingRef.current = 3;
+            }
           }
         } else {
           traceProgressRef.current = 1;
+          tracePauseRemainingRef.current = 0;
         }
         const trace = traceProgressRef.current;
 
@@ -420,7 +451,8 @@ export default function RefractionScene({ title }) {
         const normalUp = { x: 0, y: -1 };
         const normalDown = { x: 0, y: 1 };
         const incidentFromPoint = sourceDir;
-        if (snapshot.showArcs) {
+        const shouldShowArcs = snapshot.showArcs && (!snapshot.animateTrace || trace > 0.88);
+        if (shouldShowArcs) {
           drawAngleArc(ctx, point, 32, normalUp, incidentFromPoint, "#facc15", "i");
           if (snapshot.showBoundary) {
             drawAngleArc(ctx, point, 46, normalUp, reflectedDir, "#7dd3fc", "i'");
@@ -520,8 +552,9 @@ export default function RefractionScene({ title }) {
     setIncidentSide(-1);
     setN1(1.0);
     setN2(1.5);
-    setAnimateTrace(false);
-    traceProgressRef.current = 1;
+    setAnimateTrace(true);
+    traceProgressRef.current = 0;
+    tracePauseRemainingRef.current = 0;
   };
 
   const titleText = title ?? "Refraction Through Media Boundary";
@@ -539,6 +572,20 @@ export default function RefractionScene({ title }) {
           className="wave-formula"
           dangerouslySetInnerHTML={renderFormula("n_1\\sin i = n_2\\sin r")}
         />
+        <div
+          className="wave-formula refraction-critical-formula"
+          dangerouslySetInnerHTML={renderFormula(
+            "\\theta_c = \\sin^{-1}\\!\\left(\\frac{n_2}{n_1}\\right),\\;\\text{valid only when }n_1>n_2"
+          )}
+        />
+        <div className="wave-left-hint">
+          If incidence angle i is greater than{" "}
+          <span
+            className="refraction-inline-symbol"
+            dangerouslySetInnerHTML={renderFormula("\\theta_c")}
+          />
+          , the ray does not refract into medium 2. It undergoes Total Internal Reflection in medium 1.
+        </div>
         <div className="wave-left-list">
           <div className="wave-left-item refraction-legend-text">Incident ray: yellow</div>
           <div className="wave-left-item refraction-legend-text">Refracted ray: green</div>
@@ -546,52 +593,6 @@ export default function RefractionScene({ title }) {
             Reflected ray: light blue (TIR only)
           </div>
           <div className="wave-left-item refraction-legend-text">Normal: dashed white line</div>
-        </div>
-        <div className="wave-symbols">
-          <div className="wave-symbols-title">Symbol Guide</div>
-          <div className="wave-symbols-list">
-            <details className="wave-symbol-item">
-              <summary className="wave-symbol-summary">
-                <span className="wave-symbol-name">i</span>
-                <span className="wave-symbol-label">Angle of incidence</span>
-              </summary>
-              <div className="wave-symbol-desc">
-                Angle between incident ray and normal in medium 1.
-              </div>
-            </details>
-            <details className="wave-symbol-item">
-              <summary className="wave-symbol-summary">
-                <span className="wave-symbol-name">r</span>
-                <span className="wave-symbol-label">Angle of refraction</span>
-              </summary>
-              <div className="wave-symbol-desc">
-                Angle between refracted ray and normal in medium 2.
-              </div>
-            </details>
-            <details className="wave-symbol-item">
-              <summary className="wave-symbol-summary">
-                <span className="wave-symbol-name">i'</span>
-                <span className="wave-symbol-label">Reflected angle</span>
-              </summary>
-              <div className="wave-symbol-desc">
-                Reflection angle in medium 1 (equal to incidence angle).
-              </div>
-            </details>
-            <details className="wave-symbol-item">
-              <summary className="wave-symbol-summary">
-                <span className="wave-symbol-name">n1</span>
-                <span className="wave-symbol-label">Refractive index 1</span>
-              </summary>
-              <div className="wave-symbol-desc">Refractive index of the top medium.</div>
-            </details>
-            <details className="wave-symbol-item">
-              <summary className="wave-symbol-summary">
-                <span className="wave-symbol-name">n2</span>
-                <span className="wave-symbol-label">Refractive index 2</span>
-              </summary>
-              <div className="wave-symbol-desc">Refractive index of the bottom medium.</div>
-            </details>
-          </div>
         </div>
       </aside>
 
@@ -641,6 +642,7 @@ export default function RefractionScene({ title }) {
               className={`wave-toggle-btn ${animateTrace ? "active" : ""}`}
               onClick={() => {
                 traceProgressRef.current = 0;
+                tracePauseRemainingRef.current = 0;
                 setAnimateTrace((prev) => !prev);
               }}
             >
@@ -698,6 +700,81 @@ export default function RefractionScene({ title }) {
               value={n2}
               onChange={(event) => updateIndex(setN2, event.target.value)}
             />
+          </div>
+          <div className="wave-readout">
+            <span>Critical angle (θc)</span>
+            <span>
+              {derived.criticalDeg === null
+                ? "Defined only when n1 > n2"
+                : `${formatNumber(derived.criticalDeg, 2)} deg`}
+            </span>
+          </div>
+          <div
+            className="wave-formula refraction-critical-formula"
+            dangerouslySetInnerHTML={renderFormula(criticalCalcLatex)}
+          />
+          <div className="wave-readout">
+            <span>Refraction check</span>
+            <span>{refractionDecisionText}</span>
+          </div>
+        </div>
+
+        <div className="wave-control-block">
+          <div className="wave-control-title">Symbol Guide</div>
+          <div className="wave-symbols-list">
+            <details className="wave-symbol-item">
+              <summary className="wave-symbol-summary">
+                <span className="wave-symbol-name">i</span>
+                <span className="wave-symbol-label">Angle of incidence</span>
+              </summary>
+              <div className="wave-symbol-desc">
+                Angle between incident ray and normal in medium 1.
+              </div>
+            </details>
+            <details className="wave-symbol-item">
+              <summary className="wave-symbol-summary">
+                <span className="wave-symbol-name">r</span>
+                <span className="wave-symbol-label">Angle of refraction</span>
+              </summary>
+              <div className="wave-symbol-desc">
+                Angle between refracted ray and normal in medium 2.
+              </div>
+            </details>
+            <details className="wave-symbol-item">
+              <summary className="wave-symbol-summary">
+                <span className="wave-symbol-name">i'</span>
+                <span className="wave-symbol-label">Reflected angle</span>
+              </summary>
+              <div className="wave-symbol-desc">
+                Reflection angle in medium 1 (equal to incidence angle).
+              </div>
+            </details>
+            <details className="wave-symbol-item">
+              <summary className="wave-symbol-summary">
+                <span className="wave-symbol-name">n1</span>
+                <span className="wave-symbol-label">Refractive index 1</span>
+              </summary>
+              <div className="wave-symbol-desc">Refractive index of the top medium.</div>
+            </details>
+            <details className="wave-symbol-item">
+              <summary className="wave-symbol-summary">
+                <span className="wave-symbol-name">n2</span>
+                <span className="wave-symbol-label">Refractive index 2</span>
+              </summary>
+              <div className="wave-symbol-desc">Refractive index of the bottom medium.</div>
+            </details>
+            <details className="wave-symbol-item">
+              <summary className="wave-symbol-summary">
+                <span
+                  className="wave-symbol-name refraction-symbol-latex"
+                  dangerouslySetInnerHTML={renderFormula("\\theta_c")}
+                />
+                <span className="wave-symbol-label">Critical angle</span>
+              </summary>
+              <div className="wave-symbol-desc">
+                Maximum incidence angle for refraction when n1 {'>'} n2.
+              </div>
+            </details>
           </div>
         </div>
 
