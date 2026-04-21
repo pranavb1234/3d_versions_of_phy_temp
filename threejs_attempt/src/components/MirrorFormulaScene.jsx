@@ -557,7 +557,7 @@ const MirrorFormulaScene = ({ title, description }) => {
 
   return (
     <div className="wave-shell">
-      <aside className="wave-left">
+      <aside className="wave-left mirror-left">
         <div className="wave-left-title">{titleText}</div>
         <div className="wave-left-hint">{subtitleText}</div>
         <div
@@ -583,17 +583,19 @@ const MirrorFormulaScene = ({ title, description }) => {
             <span>{derived.isInfinity ? "infinity" : formatNumber(derived.mDisplay, 3)}</span>
           </div>
         </div>
-        <div className="wave-readout mirror-readout-box">
-          <span>Nature</span>
-          <span>{derived.natureText}</span>
-        </div>
-        <div className="wave-readout mirror-readout-box">
-          <span>Orientation</span>
-          <span>{derived.orientationText}</span>
-        </div>
-        <div className="wave-readout mirror-readout-box">
-          <span>Size</span>
-          <span>{derived.sizeText}</span>
+        <div className="mirror-status-box">
+          <div className="mirror-status-row">
+            <span>Nature</span>
+            <span>{derived.natureText}</span>
+          </div>
+          <div className="mirror-status-row">
+            <span>Orientation</span>
+            <span>{derived.orientationText}</span>
+          </div>
+          <div className="mirror-status-row">
+            <span>Size</span>
+            <span>{derived.sizeText}</span>
+          </div>
         </div>
         <div className="wave-left-hint mirror-intuition-note">{intuitionNote}</div>
         <div className="wave-left-list">
@@ -691,16 +693,58 @@ const MirrorFormulaScene = ({ title, description }) => {
           </button>
         </div>
 
-        <div className="wave-control-block">
-          <div className="wave-control-title">Edge Cases</div>
-          <div className="wave-left-hint">
-            Concave: when object reaches focus (u = f), image tends to infinity.
-          </div>
-          <div className="wave-left-hint">
-            Concave: object between F and mirror produces virtual, upright image behind mirror.
-          </div>
-          <div className="wave-left-hint">
-            Convex: image is always virtual, upright, and diminished.
+        <div className="wave-control-block mirror-symbols">
+          <div className="wave-control-title">Symbol Guide</div>
+          <div className="wave-symbols-list">
+            <details className="wave-symbol-item">
+              <summary className="wave-symbol-summary">
+                <span className="wave-symbol-name">P</span>
+                <span className="wave-symbol-label">Pole</span>
+              </summary>
+              <div className="wave-symbol-desc">Reference point on mirror where principal axis meets the surface.</div>
+            </details>
+            <details className="wave-symbol-item">
+              <summary className="wave-symbol-summary">
+                <span className="wave-symbol-name">F</span>
+                <span className="wave-symbol-label">Focus</span>
+              </summary>
+              <div className="wave-symbol-desc">Point related to parallel-ray reflection (real for concave, virtual for convex).</div>
+            </details>
+            <details className="wave-symbol-item">
+              <summary className="wave-symbol-summary">
+                <span className="wave-symbol-name">C</span>
+                <span className="wave-symbol-label">Center of Curvature</span>
+              </summary>
+              <div className="wave-symbol-desc">Center of the sphere from which mirror is a part; C is at 2f from pole.</div>
+            </details>
+            <details className="wave-symbol-item">
+              <summary className="wave-symbol-summary">
+                <span className="wave-symbol-name">u</span>
+                <span className="wave-symbol-label">Object Distance</span>
+              </summary>
+              <div className="wave-symbol-desc">Signed distance from pole to object along principal axis.</div>
+            </details>
+            <details className="wave-symbol-item">
+              <summary className="wave-symbol-summary">
+                <span className="wave-symbol-name">v</span>
+                <span className="wave-symbol-label">Image Distance</span>
+              </summary>
+              <div className="wave-symbol-desc">Signed distance from pole to image position.</div>
+            </details>
+            <details className="wave-symbol-item">
+              <summary className="wave-symbol-summary">
+                <span className="wave-symbol-name">f</span>
+                <span className="wave-symbol-label">Focal Length</span>
+              </summary>
+              <div className="wave-symbol-desc">Signed distance from pole to focus, used in mirror formula.</div>
+            </details>
+            <details className="wave-symbol-item">
+              <summary className="wave-symbol-summary">
+                <span className="wave-symbol-name">m</span>
+                <span className="wave-symbol-label">Magnification</span>
+              </summary>
+              <div className="wave-symbol-desc">m = v/u, indicates image size scaling and sign behavior.</div>
+            </details>
           </div>
         </div>
       </aside>

@@ -1853,18 +1853,83 @@ body {
   grid-auto-rows: max-content;
 }
 
+.mirror-left {
+  gap: 0.52rem;
+}
+
+.mirror-left .wave-left-title {
+  font-size: 1.2rem;
+  font-weight: 900;
+}
+
+.mirror-left .wave-left-hint {
+  font-size: 0.9rem;
+  font-weight: 700;
+  line-height: 1.28;
+  padding: 0.35rem 0.5rem;
+}
+
+.mirror-left .wave-formula {
+  font-size: 1.1rem;
+  padding: 0.38rem 0.55rem;
+}
+
+.mirror-left .wave-control-block {
+  gap: 0.32rem;
+  padding: 0.52rem 0.62rem;
+}
+
+.mirror-left .wave-control-title {
+  font-size: 0.8rem;
+  font-weight: 900;
+}
+
+.mirror-left .wave-readout {
+  font-size: 0.88rem;
+  font-weight: 800;
+  padding: 0.08rem 0;
+}
+
+.mirror-left .wave-left-list {
+  gap: 0.28rem;
+}
+
+.mirror-left .wave-left-item {
+  font-size: 0.89rem;
+  font-weight: 700;
+  line-height: 1.25;
+  padding: 0.3rem 0.45rem;
+}
+
 .mirror-values-block {
   margin-top: 0.25rem;
 }
 
-.mirror-readout-box {
-  margin-top: 0.2rem;
-  padding: 0.4rem 0.52rem;
+.mirror-status-box {
+  margin-top: 0.15rem;
   border-radius: 10px;
-  border: 1px solid rgba(56, 189, 248, 0.42);
-  background: rgba(224, 242, 254, 0.84);
+  border: 1px solid rgba(56, 189, 248, 0.5);
+  background: rgba(224, 242, 254, 0.78);
+  overflow: visible;
+  display: grid;
+  grid-auto-rows: minmax(0, auto);
+}
+
+.mirror-status-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.65rem;
+  min-height: 30px;
+  padding: 0.36rem 0.52rem;
+  font-size: 1rem;
+  font-weight: 800;
+  line-height: 1.2;
   color: #0f172a;
-  font-weight: 700;
+}
+
+.mirror-status-row + .mirror-status-row {
+  border-top: 1px solid rgba(56, 189, 248, 0.45);
 }
 
 .mirror-intuition-note {
@@ -1873,6 +1938,22 @@ body {
   border: 1px solid rgba(56, 189, 248, 0.4);
   background: rgba(219, 234, 254, 0.8);
   padding: 0.45rem 0.55rem;
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.mirror-symbols .wave-symbol-name {
+  font-style: normal;
+  font-weight: 800;
+}
+
+.mirror-symbols .wave-symbol-label {
+  font-weight: 700;
+}
+
+.mirror-symbols .wave-symbol-desc {
+  font-size: 0.88rem;
+  line-height: 1.3;
 }
 
 .refraction-canvas-hint {
