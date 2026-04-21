@@ -220,7 +220,7 @@ export default function App() {
         Scene: RefractionScene
       },
       mirror_formula: {
-        label: "Spherical Mirrors (u-v-f)",
+        label: "Spherical Mirrors",
         title: "Mirror Formula Visualizer",
         description:
           "Interactive ray diagram for concave and convex mirrors with live mirror-formula values and image nature.",

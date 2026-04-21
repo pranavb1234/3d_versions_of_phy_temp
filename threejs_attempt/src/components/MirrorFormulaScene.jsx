@@ -374,10 +374,12 @@ const MirrorFormulaScene = ({ title, description }) => {
           ctx.font = '700 12px "Segoe UI", Tahoma, sans-serif';
           ctx.textAlign = "center";
           ctx.textBaseline = "top";
-          ctx.fillText(label, x, layout.axisY + 12);
+          if (label) {
+            ctx.fillText(label, x, layout.axisY + 12);
+          }
         };
 
-        drawAxisMarker(pole.x, "P", "#ffffff");
+        drawAxisMarker(pole.x, "", "#ffffff");
         drawAxisMarker(
           focus.x,
           snapshot.mirrorType === "concave" ? "F (-)" : "F (+)",
@@ -390,24 +392,40 @@ const MirrorFormulaScene = ({ title, description }) => {
           "#fde68a",
           snapshot.mirrorType === "convex"
         );
+        const poleTag = {
+          x: clamp(pole.x - 130, layout.leftPad + 58, width - layout.rightPad - 170),
+          y: Math.max(10, layout.axisY - mirrorHalfHeight - 22)
+        };
+        ctx.fillStyle = "#ffffff";
+        ctx.font = '700 14px "Segoe UI", Tahoma, sans-serif';
+        ctx.textAlign = "left";
+        ctx.textBaseline = "middle";
+        ctx.fillText("P (Pole)", poleTag.x, poleTag.y);
+        drawSegment(
+          ctx,
+          { x: poleTag.x + 72, y: poleTag.y + 2 },
+          { x: pole.x, y: layout.axisY - 2 },
+          { color: "rgba(255, 255, 255, 0.92)", width: 1.7, dash: [5, 4], arrow: true }
+        );
 
-        const signBoxW = Math.min(240, width * 0.36);
+        const signBoxW = Math.min(240, width * 0.18);
         const signBoxH = 78;
         const signBoxX = width - layout.rightPad - signBoxW;
-        const signBoxY = 12;
+        const signBoxY = 3;
         ctx.fillStyle = "rgba(15, 23, 42, 0.65)";
         ctx.fillRect(signBoxX, signBoxY, signBoxW, signBoxH);
         ctx.strokeStyle = "rgba(147, 197, 253, 0.62)";
         ctx.lineWidth = 1;
         ctx.strokeRect(signBoxX, signBoxY, signBoxW, signBoxH);
         ctx.fillStyle = "rgba(224, 242, 254, 0.96)";
-        ctx.font = '700 11px "Segoe UI", Tahoma, sans-serif';
+        ctx.font = '700 16px "Segoe UI", Tahoma, sans-serif';
         ctx.textAlign = "left";
         ctx.fillText("Sign convention", signBoxX + 8, signBoxY + 14);
-        ctx.font = '600 11px "Segoe UI", Tahoma, sans-serif';
-        ctx.fillText("left of P: negative, right of P: positive", signBoxX + 8, signBoxY + 30);
-        ctx.fillText(`u ${formatSigned(data.u, 1)}, f ${formatSigned(data.f, 1)}, v ${data.isInfinity ? "infinity" : formatSigned(data.v, 1)}`, signBoxX + 8, signBoxY + 46);
-        ctx.fillText("F/C labels include sign in brackets", signBoxX + 8, signBoxY + 62);
+        ctx.font = '600 16px "Segoe UI", Tahoma, sans-serif';
+        ctx.fillText("left of P: negative", signBoxX + 8, signBoxY + 33);
+        ctx.fillText("right of P: positive", signBoxX + 8, signBoxY + 53);
+
+        
 
         drawArrow(ctx, objectBase.x, layout.axisY, layout.objectHeight, "#facc15", "Object");
 
