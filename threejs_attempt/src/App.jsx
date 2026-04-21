@@ -122,6 +122,7 @@ export default function App() {
           "A still wave snapshot with labeled parameters. Click blocks on the right to highlight each parameter.",
         Scene: WaveStaticMarkersScene
       },
+      /*
       displacement: {
         label: "Displacement y(x,t)",
         title: "Displacement in a Progressive Wave",
@@ -129,6 +130,7 @@ export default function App() {
           "See how a traveling wave depends on both position and time, and how any single particle performs SHM.",
         Scene: WaveDisplacementScene
       },
+      */
       compare: {
         label: "Transverse vs Longitudinal",
         title: "Transverse and Longitudinal Waves",
