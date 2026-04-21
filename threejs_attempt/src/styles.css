@@ -1827,6 +1827,53 @@ body {
   cursor: grabbing;
 }
 
+.mirror-canvas-wrap {
+  cursor: grab;
+  background: radial-gradient(circle at 30% 18%, #13233e 0%, #081326 62%, #050b18 100%);
+}
+
+.mirror-canvas-wrap.is-dragging {
+  cursor: grabbing;
+}
+
+.mirror-canvas-hint {
+  position: absolute;
+  left: 0.6rem;
+  bottom: 0.55rem;
+  border-radius: 999px;
+  padding: 0.2rem 0.5rem;
+  background: rgba(15, 23, 42, 0.72);
+  color: #f8fafc;
+  font-size: 0.72rem;
+  font-weight: 600;
+}
+
+.mirror-right {
+  align-content: start;
+  grid-auto-rows: max-content;
+}
+
+.mirror-formula-live {
+  padding: 0.5rem 0.58rem;
+  border-radius: 10px;
+  border: 2px solid rgba(56, 189, 248, 0.52);
+  background: rgba(219, 234, 254, 0.94);
+}
+
+.mirror-readout-box {
+  margin-top: 0.2rem;
+  padding: 0.4rem 0.52rem;
+  border-radius: 10px;
+  border: 1px solid rgba(56, 189, 248, 0.42);
+  background: rgba(224, 242, 254, 0.84);
+  color: #0f172a;
+  font-weight: 700;
+}
+
+.mirror-sign-note {
+  margin-top: 0.25rem;
+}
+
 .refraction-canvas-hint {
   position: absolute;
   left: 0.6rem;

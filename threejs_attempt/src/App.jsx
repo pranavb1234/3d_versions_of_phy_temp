@@ -9,6 +9,7 @@ import WaveStaticMarkersScene from "./components/WaveStaticMarkersScene";
 import WaveCompareScene from "./components/WaveCompareScene";
 import WaveStandingScene from "./components/WaveStandingScene";
 import RefractionScene from "./components/RefractionScene";
+import MirrorFormulaScene from "./components/MirrorFormulaScene";
 
 export default function App() {
   const [mass, setMass] = useState(1.0);
@@ -217,6 +218,13 @@ export default function App() {
         description:
           "Drag the incident ray or use controls to explore Snell's law, bending direction, and total internal reflection.",
         Scene: RefractionScene
+      },
+      mirror_formula: {
+        label: "Spherical Mirrors (u-v-f)",
+        title: "Mirror Formula Visualizer",
+        description:
+          "Interactive ray diagram for concave and convex mirrors with live mirror-formula values and image nature.",
+        Scene: MirrorFormulaScene
       }
     }),
     []
