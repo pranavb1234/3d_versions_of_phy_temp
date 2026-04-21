@@ -1853,11 +1853,8 @@ body {
   grid-auto-rows: max-content;
 }
 
-.mirror-formula-live {
-  padding: 0.5rem 0.58rem;
-  border-radius: 10px;
-  border: 2px solid rgba(56, 189, 248, 0.52);
-  background: rgba(219, 234, 254, 0.94);
+.mirror-values-block {
+  margin-top: 0.25rem;
 }
 
 .mirror-readout-box {
@@ -1870,8 +1867,12 @@ body {
   font-weight: 700;
 }
 
-.mirror-sign-note {
-  margin-top: 0.25rem;
+.mirror-intuition-note {
+  margin-top: 0.35rem;
+  border-radius: 10px;
+  border: 1px solid rgba(56, 189, 248, 0.4);
+  background: rgba(219, 234, 254, 0.8);
+  padding: 0.45rem 0.55rem;
 }
 
 .refraction-canvas-hint {

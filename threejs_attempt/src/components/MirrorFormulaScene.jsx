@@ -21,6 +21,11 @@ const renderFormula = (latex) => ({
   __html: katex.renderToString(latex, { throwOnError: false })
 });
 
+const DEFAULT_OBJECT_BOUNDS = {
+  min: 34,
+  max: 320
+};
+
 const setupCanvas = (canvas, wrapper, metricsRef) => {
   if (!canvas || !wrapper) {
     return;
@@ -177,18 +182,31 @@ const computeMirrorData = ({ objectDistance, focalLength, mirrorType }) => {
   };
 };
 
-const formatLatexValue = (value, digits = 2) => {
-  if (!Number.isFinite(value)) {
-    return "\\infty";
+const getIntuitionNote = ({ mirrorType, objectDistance, focalLength, isInfinity }) => {
+  const twoF = 2 * focalLength;
+  if (mirrorType === "convex") {
+    return "Convex mirror always gives a virtual upright image behind the mirror. Moving object farther shrinks the image toward F.";
   }
-  const rounded = Number(value.toFixed(digits));
-  return rounded >= 0 ? `+${rounded}` : `${rounded}`;
+  if (isInfinity) {
+    return "At focus, reflected rays become nearly parallel, so the image shifts to infinity.";
+  }
+  if (objectDistance > twoF) {
+    return "Object beyond C: image forms between F and C, real, inverted, and diminished.";
+  }
+  if (Math.abs(objectDistance - twoF) < 4) {
+    return "Object at C: image forms at C and is roughly same size (real, inverted).";
+  }
+  if (objectDistance > focalLength) {
+    return "Object between F and C: image forms beyond C, real, inverted, and magnified.";
+  }
+  return "Object between mirror and F: reflected rays diverge; backward extensions meet behind mirror, giving a virtual upright image.";
 };
 
 const MirrorFormulaScene = ({ title, description }) => {
   const [mirrorType, setMirrorType] = useState("concave");
   const [focalLength, setFocalLength] = useState(120);
   const [objectDistance, setObjectDistance] = useState(220);
+  const [objectBounds, setObjectBounds] = useState(DEFAULT_OBJECT_BOUNDS);
   const [isDragging, setIsDragging] = useState(false);
 
   const canvasRef = useRef(null);
@@ -213,25 +231,36 @@ const MirrorFormulaScene = ({ title, description }) => {
     () => computeMirrorData({ mirrorType, focalLength, objectDistance }),
     [mirrorType, focalLength, objectDistance]
   );
+  const intuitionNote = useMemo(
+    () =>
+      getIntuitionNote({
+        mirrorType,
+        objectDistance,
+        focalLength,
+        isInfinity: derived.isInfinity
+      }),
+    [mirrorType, objectDistance, focalLength, derived.isInfinity]
+  );
 
   const titleText = title ?? "Mirror Formula Visualizer";
   const subtitleText =
     description ??
     "Drag the object on the principal axis and watch ray geometry plus mirror-formula values update live.";
 
-  const formulaSubstitutionLatex = derived.isInfinity
-    ? `\\frac{1}{v}+\\frac{1}{u}=\\frac{1}{f}\\Rightarrow\\frac{1}{\\infty}+\\frac{1}{${formatLatexValue(
-        derived.u,
-        2
-      )}}=\\frac{1}{${formatLatexValue(derived.f, 2)}},\\;v\\to\\infty`
-    : `\\frac{1}{${formatLatexValue(derived.v, 2)}}+\\frac{1}{${formatLatexValue(
-        derived.u,
-        2
-      )}}=\\frac{1}{${formatLatexValue(derived.f, 2)}}`;
-
   useEffect(() => {
     const resize = () => {
       setupCanvas(canvasRef.current, wrapRef.current, metricsRef);
+      const metrics = metricsRef.current;
+      if (!metrics.width || !metrics.height) {
+        return;
+      }
+      const layout = getLayout(metrics.width, metrics.height);
+      const nextBounds = {
+        min: layout.minObjectDistance,
+        max: layout.maxObjectDistance
+      };
+      setObjectBounds(nextBounds);
+      setObjectDistance((prev) => clamp(prev, nextBounds.min, nextBounds.max));
     };
     resize();
     const observer = new ResizeObserver(resize);
@@ -304,6 +333,13 @@ const MirrorFormulaScene = ({ title, description }) => {
         ctx.fillStyle = "rgba(226, 232, 240, 0.92)";
         ctx.font = '700 12px "Segoe UI", Tahoma, sans-serif';
         ctx.fillText("Principal axis", layout.leftPad + 6, layout.axisY - 10);
+        ctx.font = '700 11px "Segoe UI", Tahoma, sans-serif';
+        ctx.fillStyle = "rgba(191, 219, 254, 0.95)";
+        ctx.textAlign = "left";
+        ctx.textBaseline = "top";
+        ctx.fillText("(-) left side", layout.leftPad + 6, layout.axisY + 14);
+        ctx.textAlign = "right";
+        ctx.fillText("(+) right side", width - layout.rightPad - 6, layout.axisY + 14);
 
         const mirrorHalfHeight = Math.min(128, height * 0.36);
         const shellX = snapshot.mirrorType === "concave" ? pole.x - 24 : pole.x + 24;
@@ -342,8 +378,36 @@ const MirrorFormulaScene = ({ title, description }) => {
         };
 
         drawAxisMarker(pole.x, "P", "#ffffff");
-        drawAxisMarker(focus.x, "F", "#fca5a5", snapshot.mirrorType === "convex");
-        drawAxisMarker(center.x, "C", "#fde68a", snapshot.mirrorType === "convex");
+        drawAxisMarker(
+          focus.x,
+          snapshot.mirrorType === "concave" ? "F (-)" : "F (+)",
+          "#fca5a5",
+          snapshot.mirrorType === "convex"
+        );
+        drawAxisMarker(
+          center.x,
+          snapshot.mirrorType === "concave" ? "C (-)" : "C (+)",
+          "#fde68a",
+          snapshot.mirrorType === "convex"
+        );
+
+        const signBoxW = Math.min(240, width * 0.36);
+        const signBoxH = 78;
+        const signBoxX = width - layout.rightPad - signBoxW;
+        const signBoxY = 12;
+        ctx.fillStyle = "rgba(15, 23, 42, 0.65)";
+        ctx.fillRect(signBoxX, signBoxY, signBoxW, signBoxH);
+        ctx.strokeStyle = "rgba(147, 197, 253, 0.62)";
+        ctx.lineWidth = 1;
+        ctx.strokeRect(signBoxX, signBoxY, signBoxW, signBoxH);
+        ctx.fillStyle = "rgba(224, 242, 254, 0.96)";
+        ctx.font = '700 11px "Segoe UI", Tahoma, sans-serif';
+        ctx.textAlign = "left";
+        ctx.fillText("Sign convention", signBoxX + 8, signBoxY + 14);
+        ctx.font = '600 11px "Segoe UI", Tahoma, sans-serif';
+        ctx.fillText("left of P: negative, right of P: positive", signBoxX + 8, signBoxY + 30);
+        ctx.fillText(`u ${formatSigned(data.u, 1)}, f ${formatSigned(data.f, 1)}, v ${data.isInfinity ? "infinity" : formatSigned(data.v, 1)}`, signBoxX + 8, signBoxY + 46);
+        ctx.fillText("F/C labels include sign in brackets", signBoxX + 8, signBoxY + 62);
 
         drawArrow(ctx, objectBase.x, layout.axisY, layout.objectHeight, "#facc15", "Object");
 
@@ -470,7 +534,7 @@ const MirrorFormulaScene = ({ title, description }) => {
   const resetScene = () => {
     setMirrorType("concave");
     setFocalLength(120);
-    setObjectDistance(220);
+    setObjectDistance(clamp(220, objectBounds.min, objectBounds.max));
   };
 
   return (
@@ -482,10 +546,25 @@ const MirrorFormulaScene = ({ title, description }) => {
           className="wave-formula"
           dangerouslySetInnerHTML={renderFormula("\\frac{1}{v}+\\frac{1}{u}=\\frac{1}{f}")}
         />
-        <div
-          className="wave-formula mirror-formula-live"
-          dangerouslySetInnerHTML={renderFormula(formulaSubstitutionLatex)}
-        />
+        <div className="wave-control-block mirror-values-block">
+          <div className="wave-control-title">Values</div>
+          <div className="wave-readout">
+            <span>u (signed)</span>
+            <span>{formatSigned(derived.u, 2)}</span>
+          </div>
+          <div className="wave-readout">
+            <span>v (signed)</span>
+            <span>{derived.isInfinity ? "infinity" : formatSigned(derived.v, 2)}</span>
+          </div>
+          <div className="wave-readout">
+            <span>f (signed)</span>
+            <span>{formatSigned(derived.f, 2)}</span>
+          </div>
+          <div className="wave-readout">
+            <span>m = v/u</span>
+            <span>{derived.isInfinity ? "infinity" : formatNumber(derived.mDisplay, 3)}</span>
+          </div>
+        </div>
         <div className="wave-readout mirror-readout-box">
           <span>Nature</span>
           <span>{derived.natureText}</span>
@@ -498,6 +577,7 @@ const MirrorFormulaScene = ({ title, description }) => {
           <span>Size</span>
           <span>{derived.sizeText}</span>
         </div>
+        <div className="wave-left-hint mirror-intuition-note">{intuitionNote}</div>
         <div className="wave-left-list">
           <div className="wave-left-item">Ray 1: parallel to axis reflects through/away from F.</div>
           <div className="wave-left-item">Ray 2: directed through C retraces after reflection.</div>
@@ -570,37 +650,27 @@ const MirrorFormulaScene = ({ title, description }) => {
             />
           </div>
           <div className="wave-slider-row">
-            <label>
+            <label htmlFor="mirror-object-distance">
               Object distance |u|
               <span className="wave-value">{formatNumber(objectDistance, 1)} units</span>
             </label>
+            <input
+              id="mirror-object-distance"
+              type="range"
+              min={objectBounds.min}
+              max={objectBounds.max}
+              step="1"
+              value={clamp(objectDistance, objectBounds.min, objectBounds.max)}
+              onChange={(event) =>
+                setObjectDistance(
+                  clamp(parseFloat(event.target.value), objectBounds.min, objectBounds.max)
+                )
+              }
+            />
           </div>
           <button type="button" className="wave-toggle-btn" onClick={resetScene}>
             Reset
           </button>
-        </div>
-
-        <div className="wave-control-block">
-          <div className="wave-control-title">Live Data</div>
-          <div className="wave-readout">
-            <span>u (signed)</span>
-            <span>{formatSigned(derived.u, 2)}</span>
-          </div>
-          <div className="wave-readout">
-            <span>v (signed)</span>
-            <span>{derived.isInfinity ? "infinity" : formatSigned(derived.v, 2)}</span>
-          </div>
-          <div className="wave-readout">
-            <span>f (signed)</span>
-            <span>{formatSigned(derived.f, 2)}</span>
-          </div>
-          <div className="wave-readout">
-            <span>m = v/u</span>
-            <span>{derived.isInfinity ? "infinity" : formatNumber(derived.mDisplay, 3)}</span>
-          </div>
-          <div className="wave-left-hint mirror-sign-note">
-            Sign convention used: pole at origin, right side positive, left side negative.
-          </div>
         </div>
 
         <div className="wave-control-block">
