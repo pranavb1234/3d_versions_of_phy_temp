@@ -10,6 +10,7 @@ import WaveCompareScene from "./components/WaveCompareScene";
 import WaveStandingScene from "./components/WaveStandingScene";
 import RefractionScene from "./components/RefractionScene";
 import MirrorFormulaScene from "./components/MirrorFormulaScene";
+import TemplateRagChat from "./components/TemplateRagChat";
 
 export default function App() {
   const [mass, setMass] = useState(1.0);
@@ -920,6 +921,16 @@ export default function App() {
   };
   const currentTourStep = tourStepIndex !== null ? tourSteps[tourStepIndex] : null;
   const selectedChapterLabel = chapterConfig[chapterId]?.label ?? "Chapter";
+  const activeSimulationId = isOscillationChapter
+    ? templateId
+    : isWavesChapter
+    ? waveSimId
+    : isOpticsChapter
+    ? opticsSimId
+    : "";
+  const activeSimulationLabel = isOscillationChapter
+    ? activeTemplate.label
+    : activeChapterSim.label ?? "Simulation";
 
   return (
     <main className="app-shell">
@@ -1325,6 +1336,12 @@ export default function App() {
           </div>
         </div>
       ) : null}
+
+      <TemplateRagChat
+        chapterId={chapterId}
+        templateId={activeSimulationId}
+        templateLabel={activeSimulationLabel}
+      />
     </main>
   );
 }

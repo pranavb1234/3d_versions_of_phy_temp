@@ -36,3 +36,38 @@ This application is organized into two chapters: Oscillations and Waves. The Osc
 - Expand adjustable parameters (for example, pendulum length and gravity)
 - Add damping or driven oscillation modes and energy-time graphs
 - Add measurement tools or exportable data for lab-style analysis
+
+## Local Offline RAG (ChromaDB + Local Embeddings)
+
+This repo now includes a fully local retrieval pipeline:
+- Local embeddings via `sentence-transformers`
+- Local vector storage via `ChromaDB` persistent directory
+- Template-scoped chat API (`chapterId` + `templateId` filters)
+- Optional local generation with Ollama if `OLLAMA_MODEL` is set
+
+### 1) Start frontend
+```bash
+npm install
+npm run dev
+```
+
+### 2) Start local RAG API
+```bash
+cd rag_local
+python -m venv .venv
+.venv\Scripts\activate
+pip install -r requirements.txt
+python build_index.py
+uvicorn server:app --host 127.0.0.1 --port 8001 --reload
+```
+
+The UI chat panel calls `http://127.0.0.1:8001` by default.
+
+### 3) Optional local LLM generation (still offline)
+If you use Ollama locally:
+```bash
+set OLLAMA_MODEL=llama3.1
+uvicorn server:app --host 127.0.0.1 --port 8001 --reload
+```
+
+Without `OLLAMA_MODEL`, the API still runs in retrieval-only mode and returns answer snippets from indexed local chunks.

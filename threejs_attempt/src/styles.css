@@ -2329,6 +2329,133 @@ body {
   color: #fee2e2;
 }
 
+.rag-chat-widget {
+  position: fixed;
+  right: 1rem;
+  bottom: 1rem;
+  width: min(370px, calc(100vw - 2rem));
+  max-height: min(62vh, 560px);
+  border-radius: 14px;
+  border: 1px solid #9bb0c4;
+  background: rgba(248, 251, 255, 0.97);
+  box-shadow: 0 24px 50px rgba(15, 23, 42, 0.28);
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto auto;
+  gap: 0.5rem;
+  padding: 0.7rem;
+  z-index: 100;
+}
+
+.rag-chat-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.7rem;
+}
+
+.rag-chat-title {
+  font-weight: 900;
+  color: #1f2a3b;
+  font-size: 0.92rem;
+}
+
+.rag-chat-scope {
+  color: #526172;
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.rag-chat-index-btn {
+  border: 0;
+  border-radius: 999px;
+  padding: 0.3rem 0.7rem;
+  background: #1f5eb1;
+  color: #ffffff;
+  font-weight: 700;
+  font-size: 0.75rem;
+  cursor: pointer;
+}
+
+.rag-chat-log {
+  min-height: 140px;
+  max-height: 320px;
+  overflow: auto;
+  display: grid;
+  gap: 0.45rem;
+  padding-right: 0.15rem;
+}
+
+.rag-chat-msg {
+  border-radius: 10px;
+  border: 1px solid rgba(156, 178, 200, 0.5);
+  background: rgba(246, 250, 255, 0.82);
+  padding: 0.42rem 0.52rem;
+  display: grid;
+  gap: 0.22rem;
+}
+
+.rag-chat-msg.user {
+  border-color: rgba(31, 94, 177, 0.42);
+  background: rgba(219, 234, 254, 0.72);
+}
+
+.rag-chat-role {
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: #1f5eb1;
+}
+
+.rag-chat-text {
+  font-size: 0.84rem;
+  color: #1f2937;
+  line-height: 1.35;
+}
+
+.rag-chat-sources {
+  font-size: 0.72rem;
+  color: #475569;
+}
+
+.rag-chat-input-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0.45rem;
+}
+
+.rag-chat-input-row input {
+  border-radius: 10px;
+  border: 1px solid #9bb0c4;
+  background: #f8fbff;
+  color: #1d2a3d;
+  font-size: 0.84rem;
+  padding: 0.45rem 0.52rem;
+}
+
+.rag-chat-input-row button {
+  border: 0;
+  border-radius: 10px;
+  background: #1f5eb1;
+  color: #ffffff;
+  font-weight: 800;
+  font-size: 0.78rem;
+  min-width: 52px;
+  cursor: pointer;
+}
+
+.rag-chat-input-row button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.rag-chat-status {
+  font-size: 0.72rem;
+  color: #475569;
+  border-top: 1px solid rgba(156, 178, 200, 0.45);
+  padding-top: 0.35rem;
+}
+
 @media (max-width: 1180px) {
   .optics-controls-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -2347,6 +2474,14 @@ body {
 
   .optics-controls-grid {
     grid-template-columns: 1fr;
+  }
+
+  .rag-chat-widget {
+    right: 0.65rem;
+    bottom: 0.65rem;
+    width: calc(100vw - 1.3rem);
+    max-height: 52vh;
+    padding: 0.55rem;
   }
 }
 

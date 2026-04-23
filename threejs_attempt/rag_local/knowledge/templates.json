@@ -1,0 +1,58 @@
+[
+  {
+    "chapterId": "oscillations",
+    "templateId": "single",
+    "title": "Single Spring-Mass",
+    "source": "physics_lab_notes",
+    "content": "Single spring-mass motion follows simple harmonic motion when damping is ignored. The restoring force is F = -k x, where x is displacement from equilibrium. Angular frequency is omega = sqrt(k/m), and the period is T = 2 pi sqrt(m/k). If k increases and m stays fixed, the oscillation gets faster. If m increases and k stays fixed, the oscillation gets slower. Displacement can be written as x(t) = A sin(omega t). Maximum speed is v_max = omega A and maximum acceleration is a_max = omega^2 A. Total mechanical energy is constant for the ideal case and equals E = (1/2) k A^2."
+  },
+  {
+    "chapterId": "oscillations",
+    "templateId": "double",
+    "title": "Double Spring-Mass",
+    "source": "physics_lab_notes",
+    "content": "In the double spring setup, the block is connected to two springs that both pull toward center. For identical springs, the effective spring constant is k_eff = 2k. The angular frequency becomes omega = sqrt(k_eff/m) = sqrt(2k/m). The period is T = 2 pi sqrt(m/k_eff). Compared with a single spring at the same mass and spring constant value, this setup oscillates faster due to larger effective stiffness. Maximum speed is v_max = omega A and maximum acceleration is a_max = omega^2 A. Energy for the ideal model is E = (1/2) k_eff A^2."
+  },
+  {
+    "chapterId": "oscillations",
+    "templateId": "pendulum",
+    "title": "Simple Pendulum",
+    "source": "physics_lab_notes",
+    "content": "For small angles, pendulum motion is approximated as simple harmonic. The angular frequency is omega = sqrt(g/L), and the period is T = 2 pi sqrt(L/g). In this approximation, period does not depend on bob mass. The simulation uses a maximum angle control and treats motion close to small-angle behavior. Angular displacement can be modeled as theta(t) = theta0 cos(omega t). Maximum speed near the bottom is approximately v_max = omega L theta0 for small angles in radians. As initial angle grows, exact motion departs from the linear approximation, and period becomes slightly longer than the simple formula."
+  },
+  {
+    "chapterId": "waves",
+    "templateId": "static_markers",
+    "title": "Wave Markers Static Snapshot",
+    "source": "physics_lab_notes",
+    "content": "A static wave snapshot helps identify geometric quantities without time evolution. Amplitude is the maximum displacement from equilibrium line. Wavelength lambda is the distance between two consecutive points in the same phase, such as crest to crest. Crest is the highest point and trough is the lowest point on the waveform. Equilibrium is the undisturbed center line. Frequency and period are linked by f = 1/T. Wave speed in a medium is v = f lambda. This view is useful for recognizing what each symbol means before studying motion over time."
+  },
+  {
+    "chapterId": "waves",
+    "templateId": "compare",
+    "title": "Transverse vs Longitudinal",
+    "source": "physics_lab_notes",
+    "content": "Transverse and longitudinal waves differ by direction of particle vibration relative to propagation direction. In a transverse wave, particles oscillate perpendicular to propagation. In a longitudinal wave, particles oscillate parallel to propagation, creating compressions and rarefactions. Both wave types follow the same speed relation v = f lambda in a given medium. Frequency is source-controlled, while wavelength adapts with speed in the medium. Energy is transported even though medium particles mainly oscillate around equilibrium positions. The comparison view is meant to map analogous features between the two representations."
+  },
+  {
+    "chapterId": "waves",
+    "templateId": "standing",
+    "title": "Standing Waves on a String",
+    "source": "physics_lab_notes",
+    "content": "Standing waves form from superposition of two waves of equal amplitude and frequency moving in opposite directions. On a string fixed at both ends, displacement must be zero at boundaries, so nodes occur at ends. Antinodes are points of maximum oscillation between nodes. Allowed wavelengths are lambda_n = 2L / n for harmonic number n = 1, 2, 3 and so on. Frequency values are f_n = n v / (2L), where v is wave speed on the string. For a stretched string, wave speed is v = sqrt(T/mu), where T is tension and mu is linear mass density. Increasing tension raises speed and raises harmonic frequencies."
+  },
+  {
+    "chapterId": "optics",
+    "templateId": "refraction",
+    "title": "Refraction and Snell Law",
+    "source": "physics_lab_notes",
+    "content": "Refraction occurs when light crosses a boundary between media with different refractive indices. Snell law is n1 sin(theta1) = n2 sin(theta2), with angles measured from the normal. Light bends toward the normal when entering a medium with higher refractive index. It bends away from the normal when entering a lower refractive index medium. If n1 > n2 and theta1 exceeds the critical angle, total internal reflection occurs and no refracted ray propagates into medium two. Critical angle obeys sin(theta_c) = n2 / n1 for n1 > n2. Frequency stays constant across boundary while speed and wavelength change."
+  },
+  {
+    "chapterId": "optics",
+    "templateId": "mirror_formula",
+    "title": "Spherical Mirrors",
+    "source": "physics_lab_notes",
+    "content": "For spherical mirrors in paraxial approximation, mirror formula is 1/f = 1/v + 1/u using a chosen sign convention. Magnification is m = -v/u. A concave mirror can form real and inverted images when object is beyond focal point, and virtual enlarged images when object is between pole and focus. A convex mirror forms virtual, erect, and diminished images for real objects. Principal rays include a ray parallel to principal axis reflecting through focus for concave mirrors, and a ray through focus reflecting parallel to axis. Visual behavior depends strongly on object distance relative to focal length."
+  }
+]

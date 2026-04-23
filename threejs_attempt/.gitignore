@@ -1,3 +1,7 @@
 node_modules
 dist
 build
+rag_local/chroma_store
+rag_local/.venv
+__pycache__
+*.pyc
