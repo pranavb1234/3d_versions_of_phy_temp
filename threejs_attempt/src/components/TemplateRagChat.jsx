@@ -5,7 +5,13 @@ const LOCAL_RAG_API = import.meta.env.VITE_LOCAL_RAG_API ?? "http://127.0.0.1:80
 const createGreeting = (label) =>
   `Ask me about "${label}". I answer using only local notes indexed for this simulation.`;
 
-export default function TemplateRagChat({ chapterId, templateId, templateLabel }) {
+export default function TemplateRagChat({
+  chapterId,
+  templateId,
+  templateLabel,
+  isOpen,
+  onClose = () => {}
+}) {
   const [messages, setMessages] = useState(() => [
     { role: "assistant", text: createGreeting(templateLabel), sources: [] }
   ]);
@@ -19,6 +25,19 @@ export default function TemplateRagChat({ chapterId, templateId, templateLabel }
     setQuestion("");
     setStatusText("Switched to a new simulation scope.");
   }, [chapterId, templateId, templateLabel]);
+
+  useEffect(() => {
+    if (!isOpen) {
+      return undefined;
+    }
+    const onKeyDown = (event) => {
+      if (event.key === "Escape") {
+        onClose?.();
+      }
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [isOpen, onClose]);
 
   const askQuestion = async () => {
     const nextQuestion = question.trim();
@@ -102,50 +121,64 @@ export default function TemplateRagChat({ chapterId, templateId, templateLabel }
   };
 
   return (
-    <section className="rag-chat-widget" aria-label="Template RAG chat">
-      <div className="rag-chat-head">
-        <div>
-          <div className="rag-chat-title">Local Template Chat</div>
-          <div className="rag-chat-scope">
-            {chapterId} / {templateId}
+    <section className={`rag-chat-widget ${isOpen ? "open" : ""}`} aria-label="Template RAG chat">
+      <div className={`rag-chat-backdrop ${isOpen ? "open" : ""}`} onClick={onClose} />
+      <aside
+        id="template-query-panel"
+        className={`rag-chat-panel ${isOpen ? "open" : ""}`}
+        role="dialog"
+        aria-modal="true"
+        aria-hidden={!isOpen}
+      >
+        <div className="rag-chat-head">
+          <div>
+            <div className="rag-chat-title">Local Template Chat</div>
+            <div className="rag-chat-scope">
+              {chapterId} / {templateId}
+            </div>
+          </div>
+          <div className="rag-chat-head-actions">
+            <button type="button" className="rag-chat-index-btn" onClick={runIndexing}>
+              {isIndexing ? "Indexing..." : "Reindex"}
+            </button>
+            <button type="button" className="rag-chat-close-btn" onClick={onClose}>
+              Close
+            </button>
           </div>
         </div>
-        <button type="button" className="rag-chat-index-btn" onClick={runIndexing}>
-          {isIndexing ? "Indexing..." : "Reindex"}
-        </button>
-      </div>
 
-      <div className="rag-chat-log">
-        {messages.map((entry, index) => (
-          <div key={`${entry.role}-${index}`} className={`rag-chat-msg ${entry.role}`}>
-            <div className="rag-chat-role">{entry.role === "user" ? "You" : "Local RAG"}</div>
-            <div className="rag-chat-text">{entry.text}</div>
-            {entry.role === "assistant" && entry.sources?.length > 0 ? (
-              <div className="rag-chat-sources">
-                Sources:{" "}
-                {entry.sources
-                  .slice(0, 3)
-                  .map((source) => source.title || source.templateId || "chunk")
-                  .join(" | ")}
-              </div>
-            ) : null}
-          </div>
-        ))}
-      </div>
+        <div className="rag-chat-log">
+          {messages.map((entry, index) => (
+            <div key={`${entry.role}-${index}`} className={`rag-chat-msg ${entry.role}`}>
+              <div className="rag-chat-role">{entry.role === "user" ? "You" : "Local RAG"}</div>
+              <div className="rag-chat-text">{entry.text}</div>
+              {entry.role === "assistant" && entry.sources?.length > 0 ? (
+                <div className="rag-chat-sources">
+                  Sources:{" "}
+                  {entry.sources
+                    .slice(0, 3)
+                    .map((source) => source.title || source.templateId || "chunk")
+                    .join(" | ")}
+                </div>
+              ) : null}
+            </div>
+          ))}
+        </div>
 
-      <form className="rag-chat-input-row" onSubmit={handleSubmit}>
-        <input
-          type="text"
-          value={question}
-          onChange={(event) => setQuestion(event.target.value)}
-          placeholder={`Ask about ${templateLabel}`}
-          disabled={isLoading}
-        />
-        <button type="submit" disabled={isLoading || !question.trim()}>
-          {isLoading ? "..." : "Ask"}
-        </button>
-      </form>
-      <div className="rag-chat-status">{statusText}</div>
+        <form className="rag-chat-input-row" onSubmit={handleSubmit}>
+          <input
+            type="text"
+            value={question}
+            onChange={(event) => setQuestion(event.target.value)}
+            placeholder={`Ask about ${templateLabel}`}
+            disabled={isLoading}
+          />
+          <button type="submit" disabled={isLoading || !question.trim()}>
+            {isLoading ? "..." : "Ask"}
+          </button>
+        </form>
+        <div className="rag-chat-status">{statusText}</div>
+      </aside>
     </section>
   );
 }

@@ -25,6 +25,7 @@ export default function App() {
   const [activeCalc, setActiveCalc] = useState(null);
   const [activeEffectKey, setActiveEffectKey] = useState(null);
   const [canvasNotice, setCanvasNotice] = useState(null);
+  const [isQueryPanelOpen, setIsQueryPanelOpen] = useState(false);
   const [showTourIntro, setShowTourIntro] = useState(false);
   const [tourStepIndex, setTourStepIndex] = useState(null);
   const [tourSpotlight, setTourSpotlight] = useState(null);
@@ -980,6 +981,15 @@ export default function App() {
               </select>
             </label>
           ) : null}
+          <button
+            type="button"
+            className={`ask-query-btn ${isQueryPanelOpen ? "active" : ""}`}
+            onClick={() => setIsQueryPanelOpen((prev) => !prev)}
+            aria-expanded={isQueryPanelOpen}
+            aria-controls="template-query-panel"
+          >
+            Ask Query
+          </button>
         </div>
       </header>
       {isOscillationChapter ? (
@@ -1341,6 +1351,8 @@ export default function App() {
         chapterId={chapterId}
         templateId={activeSimulationId}
         templateLabel={activeSimulationLabel}
+        isOpen={isQueryPanelOpen}
+        onClose={() => setIsQueryPanelOpen(false)}
       />
     </main>
   );
