@@ -23,7 +23,7 @@ ALLOWED_ORIGINS = [
   origin.strip()
   for origin in os.getenv(
     "RAG_ALLOWED_ORIGINS",
-    "http://localhost:5173,http://127.0.0.1:5173"
+    "http://localhost:5173,http://127.0.0.1:5173,https://3d-versions-of-phy-temp.vercel.app"
   ).split(",")
   if origin.strip()
 ]

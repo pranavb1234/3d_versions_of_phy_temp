@@ -65,6 +65,7 @@ The UI chat panel calls `http://127.0.0.1:8001` by default.
 Allowed frontend origins for CORS default to:
 - `http://localhost:5173`
 - `http://127.0.0.1:5173`
+- `https://3d-versions-of-phy-temp.vercel.app`
 
 To customize, set `RAG_ALLOWED_ORIGINS` (comma-separated) before starting uvicorn.
 
