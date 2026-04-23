@@ -19,6 +19,14 @@ COLLECTION_NAME = os.getenv("RAG_COLLECTION", "physics_lab_templates")
 EMBED_MODEL = os.getenv("RAG_EMBED_MODEL", "all-MiniLM-L6-v2")
 OLLAMA_HOST = os.getenv("OLLAMA_HOST", "http://127.0.0.1:11434")
 OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "").strip()
+ALLOWED_ORIGINS = [
+  origin.strip()
+  for origin in os.getenv(
+    "RAG_ALLOWED_ORIGINS",
+    "http://localhost:5173,http://127.0.0.1:5173"
+  ).split(",")
+  if origin.strip()
+]
 
 CHROMA_DIR.mkdir(parents=True, exist_ok=True)
 
@@ -127,11 +135,18 @@ def query_chunks(question, chapter_id, template_id, top_k):
   if collection.count() == 0:
     return []
 
+  where_filter = {
+    "$and": [
+      {"chapterId": {"$eq": chapter_id}},
+      {"templateId": {"$eq": template_id}}
+    ]
+  }
+
   query_embedding = embedder.encode([question], normalize_embeddings=True).tolist()
   result = collection.query(
     query_embeddings=query_embedding,
     n_results=top_k,
-    where={"chapterId": chapter_id, "templateId": template_id},
+    where=where_filter,
     include=["documents", "metadatas", "distances"]
   )
 
@@ -197,8 +212,8 @@ def build_fallback_answer(chunks):
 app = FastAPI(title="Local Physics RAG API", version="0.1.0")
 app.add_middleware(
   CORSMiddleware,
-  allow_origins=["*"],
-  allow_credentials=True,
+  allow_origins=ALLOWED_ORIGINS,
+  allow_credentials=False,
   allow_methods=["*"],
   allow_headers=["*"]
 )
@@ -211,7 +226,8 @@ def health():
     "collection": COLLECTION_NAME,
     "count": collection.count(),
     "embedding_model": EMBED_MODEL,
-    "knowledge_path": str(KNOWLEDGE_PATH)
+    "knowledge_path": str(KNOWLEDGE_PATH),
+    "allowed_origins": ALLOWED_ORIGINS
   }
 
 

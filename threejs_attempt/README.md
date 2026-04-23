@@ -62,6 +62,11 @@ uvicorn server:app --host 127.0.0.1 --port 8001 --reload
 ```
 
 The UI chat panel calls `http://127.0.0.1:8001` by default.
+Allowed frontend origins for CORS default to:
+- `http://localhost:5173`
+- `http://127.0.0.1:5173`
+
+To customize, set `RAG_ALLOWED_ORIGINS` (comma-separated) before starting uvicorn.
 
 ### 3) Optional local LLM generation (still offline)
 If you use Ollama locally:
