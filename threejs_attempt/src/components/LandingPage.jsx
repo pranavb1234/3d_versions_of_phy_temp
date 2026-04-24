@@ -1,3 +1,5 @@
+import heroBackgroundVideo from "../../5373-183629075 (1).mp4";
+
 const HOW_IT_WORKS_STEPS = [
   {
     title: "1. Select a Module",
@@ -41,6 +43,19 @@ export default function LandingPage({ onStart }) {
       </header>
 
       <section className="landing-hero" id="about">
+        <div className="landing-hero-bg" aria-hidden="true">
+          <video
+            className="landing-hero-video"
+            autoPlay
+            muted
+            loop
+            playsInline
+            preload="metadata"
+          >
+            <source src={heroBackgroundVideo} type="video/mp4" />
+          </video>
+          <div className="landing-hero-overlay" />
+        </div>
         <div className="landing-hero-inner">
           <div className="landing-hero-kicker">A physics learning/simulation lab</div>
           <h1>Unfold : Physics</h1>

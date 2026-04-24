@@ -2674,12 +2674,42 @@ body {
   align-items: center;
   justify-content: center;
   padding: 3rem 1.2rem 4.1rem;
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.landing-hero-bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.landing-hero-video {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+  object-position: center;
+  filter: saturate(1.05) contrast(1.08);
+  transform: scale(1.03);
+}
+
+.landing-hero-overlay {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at center, rgba(17, 39, 67, 0.16) 0%, rgba(17, 39, 67, 0.52) 58%, rgba(17, 39, 67, 0.76) 100%),
+    linear-gradient(180deg, rgba(8, 24, 46, 0.56) 0%, rgba(8, 24, 46, 0.62) 100%);
 }
 
 .landing-hero-inner {
   width: min(860px, 100%);
   text-align: center;
   animation: landing-rise 520ms ease;
+  position: relative;
+  z-index: 2;
 }
 
 .landing-hero-inner h1 {
@@ -2687,7 +2717,8 @@ body {
   font-size: clamp(2rem, 5.2vw, 3.45rem);
   line-height: 1.08;
   letter-spacing: -0.02em;
-  color: #15345b;
+  color: #f4f9ff;
+  text-shadow: 0 12px 28px rgba(3, 12, 28, 0.45);
 }
 
 .landing-hero-kicker {
@@ -2696,14 +2727,15 @@ body {
   font-weight: 600;
   letter-spacing: 0.04em;
   text-transform: uppercase;
-  color: #355776;
+  color: #d2e7ff;
 }
 
 .landing-hero-inner p {
   margin: 1.05rem auto 0;
   width: min(640px, 92%);
-  color: var(--landing-muted);
+  color: #e9f3ff;
   line-height: 1.6;
+  text-shadow: 0 8px 22px rgba(3, 12, 28, 0.32);
 }
 
 .landing-hero-actions {
@@ -3003,6 +3035,10 @@ body {
 
   .landing-hero {
     min-height: 56vh;
+  }
+
+  .landing-hero-video {
+    object-position: center;
   }
 
   .landing-feature-grid.reverse .landing-media-card {
