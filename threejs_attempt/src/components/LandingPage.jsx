@@ -24,7 +24,6 @@ export default function LandingPage({ onStart }) {
   return (
     <div className="landing-page">
       <header className="landing-nav">
-        <div className="landing-brand">Physics Lab</div>
         <nav className="landing-links" aria-label="Primary">
           <button type="button" onClick={() => scrollToSection("simulations")}>
             Simulations
@@ -43,12 +42,11 @@ export default function LandingPage({ onStart }) {
 
       <section className="landing-hero" id="about">
         <div className="landing-hero-inner">
-          <h1>
-            Experience Physics <span>Like Never Before</span>
-          </h1>
+          <div className="landing-hero-kicker">A physics learning/simulation lab</div>
+          <h1>Unfold : Physics</h1>
           <p>
-            Transform static formulas into interactive 3D simulations. Learn by doing, not just
-            reading.
+            Experience physics like never before. Transform static formulas into interactive 3D
+            simulations, and learn by doing instead of only reading.
           </p>
           <div className="landing-hero-actions">
             <button type="button" className="landing-primary-btn" onClick={onStart}>
@@ -137,8 +135,8 @@ export default function LandingPage({ onStart }) {
 
       <footer className="landing-footer">
         <div>
-          <strong>Physics Lab</strong>
-          <p>Precision in learning.</p>
+          <strong>Unfold : Physics</strong>
+          <p>A physics learning/simulation lab.</p>
         </div>
         <div className="landing-footer-links">
           <button type="button">Privacy Policy</button>

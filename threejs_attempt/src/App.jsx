@@ -937,8 +937,8 @@ export default function App({ onBackToHome }) {
     <main className="app-shell">
       <header className="shm-topbar">
         <div className="shm-topbar-left">
-          <div className="shm-topbar-title">Physics Lab</div>
-          <div className="shm-topbar-subtitle">Chapters and simulations</div>
+          <div className="shm-topbar-title">Unfold : Physics</div>
+          <div className="shm-topbar-subtitle">A physics learning/simulation lab</div>
         </div>
         <div className="shm-topbar-controls">
           <label className="shm-topbar-field">

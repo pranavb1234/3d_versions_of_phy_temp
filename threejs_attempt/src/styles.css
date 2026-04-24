@@ -2595,23 +2595,24 @@ body {
 }
 
 .landing-page {
-  --landing-bg: #f8fafd;
-  --landing-panel: #eef1f6;
-  --landing-line: #d5dde8;
-  --landing-text: #0f172a;
-  --landing-muted: #4b5563;
-  --landing-accent: #b10f5f;
-  --landing-accent-strong: #8d0f4d;
-  --landing-btn-alt: #dbe4f8;
-  --landing-navy: #030f2f;
+  --landing-bg: #d6dde6;
+  --landing-panel: #ced7e3;
+  --landing-line: #8fa8c1;
+  --landing-text: #102746;
+  --landing-muted: #334e68;
+  --landing-accent: #1f5eb1;
+  --landing-accent-strong: #0f4ea0;
+  --landing-btn-alt: #e3eaf4;
+  --landing-navy: #081630;
+  --landing-highlight: #a61b52;
 
   min-height: 100%;
   color: var(--landing-text);
   background:
-    radial-gradient(circle at 1px 1px, rgba(147, 160, 183, 0.38) 1px, transparent 0),
-    linear-gradient(180deg, #fbfdff 0%, var(--landing-bg) 100%);
+    radial-gradient(circle at 1px 1px, rgba(122, 145, 170, 0.34) 1px, transparent 0),
+    linear-gradient(180deg, #e8eef5 0%, var(--landing-bg) 100%);
   background-size: 26px 26px, cover;
-  font-family: "Sora", "Avenir Next", "Segoe UI", sans-serif;
+  font-family: "Roboto", "Segoe UI", sans-serif;
 }
 
 .landing-nav {
@@ -2619,32 +2620,27 @@ body {
   top: 0;
   z-index: 25;
   padding: 0.85rem 1.15rem;
-  border-bottom: 1px solid rgba(148, 163, 184, 0.4);
-  background: rgba(251, 253, 255, 0.86);
+  border-bottom: 1px solid rgba(143, 168, 193, 0.55);
+  background: rgba(234, 241, 248, 0.88);
   backdrop-filter: blur(7px);
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-end;
   gap: 1rem;
-}
-
-.landing-brand {
-  font-size: 1.06rem;
-  font-weight: 800;
-  letter-spacing: 0.01em;
 }
 
 .landing-links {
   display: flex;
   align-items: center;
   gap: 1.3rem;
+  margin-right: auto;
 }
 
 .landing-links button,
 .landing-footer-links button {
   border: 0;
   background: transparent;
-  color: #1f2937;
+  color: #1b3554;
   font-size: 0.86rem;
   cursor: pointer;
   transition: color 120ms ease;
@@ -2656,11 +2652,11 @@ body {
 }
 
 .landing-nav-cta {
-  border: 1px solid rgba(177, 15, 95, 0.45);
+  border: 1px solid rgba(31, 94, 177, 0.45);
   border-radius: 10px;
   padding: 0.46rem 0.9rem;
-  background: #ffffff;
-  color: var(--landing-accent);
+  background: linear-gradient(180deg, #f4f8ff 0%, #dde8f5 100%);
+  color: #18427d;
   font-weight: 700;
   font-size: 0.83rem;
   cursor: pointer;
@@ -2691,13 +2687,16 @@ body {
   font-size: clamp(2rem, 5.2vw, 3.45rem);
   line-height: 1.08;
   letter-spacing: -0.02em;
+  color: #15345b;
 }
 
-.landing-hero-inner span {
-  background: linear-gradient(90deg, #ec4899 0%, #c026d3 100%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
+.landing-hero-kicker {
+  margin: 0 0 0.7rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #355776;
 }
 
 .landing-hero-inner p {
@@ -2730,12 +2729,13 @@ body {
 .landing-primary-btn {
   background: linear-gradient(135deg, var(--landing-accent-strong) 0%, var(--landing-accent) 100%);
   color: #ffffff;
-  box-shadow: 0 12px 22px rgba(177, 15, 95, 0.25);
+  box-shadow: 0 12px 22px rgba(31, 94, 177, 0.28);
 }
 
 .landing-secondary-btn {
   background: var(--landing-btn-alt);
-  color: #1e293b;
+  color: #173357;
+  border: 1px solid rgba(143, 168, 193, 0.6);
 }
 
 .landing-primary-btn:hover,
@@ -2750,8 +2750,8 @@ body {
 
 .landing-steps {
   background: var(--landing-panel);
-  border-top: 1px solid rgba(148, 163, 184, 0.35);
-  border-bottom: 1px solid rgba(148, 163, 184, 0.35);
+  border-top: 1px solid rgba(143, 168, 193, 0.42);
+  border-bottom: 1px solid rgba(143, 168, 193, 0.42);
 }
 
 .landing-section-head {
@@ -2779,9 +2779,9 @@ body {
 .landing-step-card {
   border-radius: 14px;
   border: 1px solid var(--landing-line);
-  background: rgba(255, 255, 255, 0.8);
+  background: rgba(235, 241, 248, 0.88);
   padding: 1.1rem 1rem;
-  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.06);
+  box-shadow: 0 12px 30px rgba(16, 39, 70, 0.08);
 }
 
 .landing-step-icon {
@@ -2789,8 +2789,8 @@ body {
   height: 36px;
   border-radius: 9px;
   background:
-    radial-gradient(circle at 30% 30%, #eff6ff 0%, #dbeafe 48%, #c7d2fe 100%);
-  border: 1px solid #bfdbfe;
+    radial-gradient(circle at 30% 30%, #eef4fb 0%, #d6e2f0 48%, #bfd0e3 100%);
+  border: 1px solid #9fb7ce;
 }
 
 .landing-step-card h3 {
@@ -2822,9 +2822,9 @@ body {
   align-items: center;
   padding: 0.2rem 0.58rem;
   border-radius: 999px;
-  border: 1px solid #bfdbfe;
-  background: #eff6ff;
-  color: #1d4ed8;
+  border: 1px solid #9eb5cc;
+  background: #dde8f5;
+  color: #1d4f88;
   font-size: 0.74rem;
   font-weight: 700;
 }
@@ -2851,9 +2851,9 @@ body {
 .landing-pro-tip {
   margin-top: 0.95rem;
   border-radius: 10px;
-  border: 1px solid #bfdbfe;
-  background: #eff6ff;
-  color: #334155;
+  border: 1px solid #9eb5cc;
+  background: #dde8f5;
+  color: #29445f;
   padding: 0.56rem 0.75rem;
   font-size: 0.88rem;
   line-height: 1.5;
@@ -2870,9 +2870,9 @@ body {
 
 .landing-media-card.formula {
   background:
-    radial-gradient(circle at 72% 40%, rgba(239, 68, 68, 0.38), rgba(0, 0, 0, 0)),
-    radial-gradient(circle at 30% 18%, rgba(59, 130, 246, 0.35), rgba(0, 0, 0, 0)),
-    linear-gradient(145deg, #020617 0%, #111827 100%);
+    radial-gradient(circle at 70% 38%, rgba(166, 27, 82, 0.24), rgba(0, 0, 0, 0)),
+    radial-gradient(circle at 30% 18%, rgba(96, 165, 250, 0.28), rgba(0, 0, 0, 0)),
+    linear-gradient(145deg, #0a1831 0%, #122648 100%);
 }
 
 .formula-overlay {
@@ -2893,7 +2893,7 @@ body {
   width: fit-content;
   border-radius: 999px;
   padding: 0.1rem 0.35rem;
-  background: #ef4444;
+  background: var(--landing-highlight);
   color: #ffffff;
   font-size: 0.67rem;
   font-weight: 700;
@@ -2906,8 +2906,8 @@ body {
 
 .landing-media-card.scene {
   background:
-    radial-gradient(circle at 38% 48%, rgba(56, 189, 248, 0.44), rgba(0, 0, 0, 0)),
-    linear-gradient(135deg, #082f49 0%, #0f172a 100%);
+    radial-gradient(circle at 38% 48%, rgba(147, 197, 253, 0.34), rgba(0, 0, 0, 0)),
+    linear-gradient(135deg, #102746 0%, #1c385b 100%);
 }
 
 .scene-hud {
@@ -2935,7 +2935,7 @@ body {
 .landing-final-cta {
   margin-top: 2.2rem;
   text-align: center;
-  background: linear-gradient(180deg, #031337 0%, #010a1f 100%);
+  background: linear-gradient(180deg, #0a203f 0%, #07152c 100%);
   color: #f8fafc;
   padding: 4rem 1.2rem;
 }
@@ -2953,9 +2953,9 @@ body {
 }
 
 .landing-footer {
-  border-top: 1px solid rgba(148, 163, 184, 0.35);
+  border-top: 1px solid rgba(143, 168, 193, 0.55);
   padding: 1.25rem 1.2rem 1.5rem;
-  background: #f8fafc;
+  background: #d8e1ec;
   display: flex;
   align-items: center;
   justify-content: space-between;
