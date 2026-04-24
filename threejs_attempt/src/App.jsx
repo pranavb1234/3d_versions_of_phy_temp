@@ -12,7 +12,7 @@ import RefractionScene from "./components/RefractionScene";
 import MirrorFormulaScene from "./components/MirrorFormulaScene";
 import TemplateRagChat from "./components/TemplateRagChat";
 
-export default function App() {
+export default function App({ onBackToHome }) {
   const [mass, setMass] = useState(1.0);
   const [springConstant, setSpringConstant] = useState(15.0);
   const [amplitude, setAmplitude] = useState(3.0);
@@ -990,6 +990,11 @@ export default function App() {
           >
             Ask Query
           </button>
+          {typeof onBackToHome === "function" ? (
+            <button type="button" className="back-home-btn" onClick={onBackToHome}>
+              Back to Main Page
+            </button>
+          ) : null}
         </div>
       </header>
       {isOscillationChapter ? (

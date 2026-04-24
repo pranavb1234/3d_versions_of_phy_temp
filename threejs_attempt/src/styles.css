@@ -114,6 +114,25 @@ body {
   box-shadow: 0 10px 22px rgba(15, 23, 42, 0.3);
 }
 
+.back-home-btn {
+  border: 1px solid rgba(31, 94, 177, 0.42);
+  border-radius: 999px;
+  padding: 0.52rem 1rem;
+  background: rgba(219, 234, 254, 0.72);
+  color: #1f5eb1;
+  font-weight: 800;
+  font-size: 0.81rem;
+  letter-spacing: 0.01em;
+  cursor: pointer;
+  transition: transform 140ms ease, filter 140ms ease, box-shadow 140ms ease;
+}
+
+.back-home-btn:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.02);
+  box-shadow: 0 8px 18px rgba(31, 94, 177, 0.18);
+}
+
 .scene-panel {
   min-width: 0;
   border-radius: 16px;
@@ -2568,6 +2587,10 @@ body {
   .ask-query-btn {
     width: 100%;
     justify-content: center;
+  }
+
+  .back-home-btn {
+    width: 100%;
   }
 }
 

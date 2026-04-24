@@ -9,5 +9,5 @@ export default function RootApp() {
     return <LandingPage onStart={() => setEnteredLab(true)} />;
   }
 
-  return <App />;
+  return <App onBackToHome={() => setEnteredLab(false)} />;
 }
