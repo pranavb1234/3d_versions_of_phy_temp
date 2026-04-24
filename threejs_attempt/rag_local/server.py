@@ -192,21 +192,158 @@ def maybe_generate_with_ollama(question, chunks):
     return None
 
 
-def build_fallback_answer(chunks):
+def extract_question_signals(question):
+  text = question.lower().strip()
+  direction = None
+  if re.search(r"\b(increase|increasing|raise|higher|more|up|bigger)\b", text):
+    direction = "increase"
+  elif re.search(r"\b(decrease|decreasing|lower|less|down|reduce|smaller)\b", text):
+    direction = "decrease"
+
+  param = None
+  param_patterns = {
+    "mass": r"\b(mass|m)\b",
+    "springConstant": r"\b(spring constant|stiffness|k)\b",
+    "amplitude": r"\b(amplitude|a|max angle|theta0|initial angle)\b",
+    "length": r"\b(length|l)\b",
+    "tension": r"\b(tension|t)\b",
+    "mode": r"\b(mode|harmonic|n)\b",
+    "frequency": r"\b(frequency|f)\b",
+    "refractiveIndex": r"\b(refractive index|index|n1|n2)\b"
+  }
+  for key, pattern in param_patterns.items():
+    if re.search(pattern, text):
+      param = key
+      break
+
+  return direction, param
+
+
+def build_rule_based_answer(question, chapter_id, template_id):
+  direction, param = extract_question_signals(question)
+  if direction is None or param is None:
+    return None
+
+  def choose(inc_text, dec_text):
+    return inc_text if direction == "increase" else dec_text
+
+  if chapter_id == "oscillations" and template_id in {"single", "double"}:
+    if param == "mass":
+      return choose(
+        "If mass increases, the motion becomes slower: angular frequency decreases and period increases. For the same amplitude, maximum speed and acceleration also decrease.",
+        "If mass decreases, the motion becomes faster: angular frequency increases and period decreases. For the same amplitude, maximum speed and acceleration increase."
+      )
+    if param == "springConstant":
+      return choose(
+        "If spring constant increases, the restoring force is stronger, so oscillations get faster: angular frequency increases and period decreases.",
+        "If spring constant decreases, restoring force weakens, so oscillations get slower: angular frequency decreases and period increases."
+      )
+    if param == "amplitude":
+      return choose(
+        "If amplitude increases, the block travels farther and gains larger max speed and acceleration. In ideal SHM, the period stays the same.",
+        "If amplitude decreases, max speed and acceleration reduce. In ideal SHM, the period still stays the same."
+      )
+
+  if chapter_id == "oscillations" and template_id == "pendulum":
+    if param == "mass":
+      return "For an ideal small-angle pendulum, changing mass does not change period. It mainly affects energy scale, not oscillation timing."
+    if param == "length":
+      return choose(
+        "If length increases, the pendulum swings more slowly: angular frequency decreases and period increases.",
+        "If length decreases, the pendulum swings faster: angular frequency increases and period decreases."
+      )
+    if param == "amplitude":
+      return choose(
+        "If initial angle increases, maximum speed and energy increase. For small angles the period changes very little; at larger angles it becomes slightly longer.",
+        "If initial angle decreases, maximum speed and energy reduce, and motion stays closer to the small-angle approximation."
+      )
+
+  if chapter_id == "waves" and template_id == "standing":
+    if param == "tension":
+      return choose(
+        "If string tension increases, wave speed increases, so harmonic frequencies increase.",
+        "If string tension decreases, wave speed decreases, so harmonic frequencies decrease."
+      )
+    if param == "length":
+      return choose(
+        "If string length increases, allowed wavelengths increase and harmonic frequencies decrease.",
+        "If string length decreases, allowed wavelengths decrease and harmonic frequencies increase."
+      )
+    if param == "mode":
+      return choose(
+        "If harmonic mode number increases, you get more nodes/antinodes and higher frequency.",
+        "If harmonic mode number decreases, there are fewer nodes/antinodes and lower frequency."
+      )
+
+  if chapter_id == "optics" and template_id == "refraction" and param == "refractiveIndex":
+    return choose(
+      "If the second medium's refractive index is increased, the refracted ray bends more toward the normal (for the same incident angle).",
+      "If the second medium's refractive index is decreased, the refracted ray bends farther away from the normal."
+    )
+
+  return None
+
+
+def rank_sentences_by_question(question, chunks, limit=2):
+  if not chunks:
+    return []
+
+  query_terms = {
+    token
+    for token in re.findall(r"[a-zA-Z]+", question.lower())
+    if len(token) >= 3 and token not in {"what", "when", "with", "that", "would", "happen"}
+  }
+
+  sentences = []
+  for chunk in chunks[:4]:
+    text = str(chunk.get("text", "")).replace("â€™", "'")
+    parts = re.split(r"(?<=[.!?])\s+", text)
+    for part in parts:
+      cleaned = part.strip()
+      if len(cleaned.split()) < 6:
+        continue
+      if not re.match(r"^[A-Za-z0-9(]", cleaned):
+        continue
+      lowered = cleaned.lower()
+      overlap = sum(1 for term in query_terms if term in lowered)
+      base_score = float(chunk.get("similarity", 0.0))
+      score = overlap * 2.0 + base_score
+      sentences.append((score, cleaned))
+
+  sentences.sort(key=lambda item: item[0], reverse=True)
+  selected = []
+  seen = set()
+  for _, sentence in sentences:
+    signature = sentence.lower()
+    if signature in seen:
+      continue
+    seen.add(signature)
+    if len(sentence) > 220:
+      sentence = sentence[:220].rstrip() + "..."
+    selected.append(sentence)
+    if len(selected) >= limit:
+      break
+  return selected
+
+
+def build_fallback_answer(question, chapter_id, template_id, chunks):
+  rule_answer = build_rule_based_answer(question, chapter_id, template_id)
+  if rule_answer:
+    return rule_answer
+
   if not chunks:
     return (
       "I could not find enough indexed notes for this simulation yet. "
       "Run local indexing first, then ask again."
     )
 
-  lines = ["I found these local notes for this simulation:"]
-  for index, chunk in enumerate(chunks[:3]):
-    text = chunk["text"]
-    if len(text) > 220:
-      text = f"{text[:220].rstrip()}..."
-    lines.append(f"{index + 1}. {text}")
-  lines.append("Ask a narrower question if you want a more specific answer.")
-  return "\n".join(lines)
+  top_sentences = rank_sentences_by_question(question, chunks, limit=2)
+  if top_sentences:
+    if len(top_sentences) == 1:
+      return top_sentences[0]
+    return f"{top_sentences[0]} {top_sentences[1]}"
+
+  return "I found related notes, but I need a more specific question to answer clearly."
 
 
 app = FastAPI(title="Local Physics RAG API", version="0.1.0")
@@ -247,7 +384,12 @@ def chat(request: ChatRequest):
 
   chunks = query_chunks(question, request.chapterId, request.templateId, request.topK)
   ollama_answer = maybe_generate_with_ollama(question, chunks)
-  answer = ollama_answer or build_fallback_answer(chunks)
+  answer = ollama_answer or build_fallback_answer(
+    question=question,
+    chapter_id=request.chapterId,
+    template_id=request.templateId,
+    chunks=chunks
+  )
 
   sources = []
   for chunk in chunks[:4]:
@@ -266,5 +408,5 @@ def chat(request: ChatRequest):
     "answer": answer,
     "sources": sources,
     "retrieved": len(chunks),
-    "generator": "ollama" if ollama_answer else "retrieval_only"
+    "generator": "ollama" if ollama_answer else "local_fallback"
   }
