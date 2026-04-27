@@ -252,12 +252,6 @@ export default function LandingPage({ onStart }) {
           <strong>Unfold : Physics</strong>
           <p>A physics learning/simulation lab.</p>
         </div>
-        <div className="landing-footer-links">
-          <button type="button">Privacy Policy</button>
-          <button type="button">Terms</button>
-          <button type="button">Contact</button>
-          <button type="button">Documentation</button>
-        </div>
       </footer>
     </div>
   );
