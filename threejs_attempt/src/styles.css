@@ -2952,20 +2952,6 @@ body {
     );
 }
 
-.landing-sim-card-image span {
-  position: absolute;
-  left: 0.58rem;
-  bottom: 0.52rem;
-  border-radius: 999px;
-  border: 1px solid rgba(226, 232, 240, 0.75);
-  background: rgba(15, 23, 42, 0.55);
-  color: #f8fafc;
-  font-size: 0.7rem;
-  font-weight: 700;
-  padding: 0.18rem 0.5rem;
-  z-index: 1;
-}
-
 .landing-sim-card-image.spring {
   background:
     radial-gradient(circle at 20% 20%, rgba(56, 189, 248, 0.32), rgba(0, 0, 0, 0)),

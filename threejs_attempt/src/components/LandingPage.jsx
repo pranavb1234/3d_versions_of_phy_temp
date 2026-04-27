@@ -14,22 +14,19 @@ const SIMULATION_CATALOG = {
       id: "single",
       title: "Single Spring-Mass",
       topic: "Oscillations",
-      imageTheme: "spring",
-      imageTag: "m-k"
+      imageTheme: "spring"
     },
     {
       id: "double",
       title: "Double Spring-Mass",
       topic: "Oscillations",
-      imageTheme: "double",
-      imageTag: "2m-k"
+      imageTheme: "double"
     },
     {
       id: "pendulum",
       title: "Simple Pendulum",
       topic: "Oscillations",
-      imageTheme: "pendulum",
-      imageTag: "theta"
+      imageTheme: "pendulum"
     }
   ],
   waves: [
@@ -37,22 +34,19 @@ const SIMULATION_CATALOG = {
       id: "static_markers",
       title: "Wave Markers (Static)",
       topic: "Waves",
-      imageTheme: "wave",
-      imageTag: "lambda"
+      imageTheme: "wave"
     },
     {
       id: "compare",
       title: "Transverse vs Longitudinal",
       topic: "Waves",
-      imageTheme: "compare",
-      imageTag: "TxL"
+      imageTheme: "compare"
     },
     {
       id: "standing",
       title: "Standing Waves",
       topic: "Waves",
-      imageTheme: "standing",
-      imageTag: "n=3"
+      imageTheme: "standing"
     }
   ],
   optics: [
@@ -60,15 +54,13 @@ const SIMULATION_CATALOG = {
       id: "refraction",
       title: "Refraction (Snell's Law)",
       topic: "Optics",
-      imageTheme: "refraction",
-      imageTag: "n1/n2"
+      imageTheme: "refraction"
     },
     {
       id: "mirror_formula",
       title: "Spherical Mirrors",
       topic: "Optics",
-      imageTheme: "mirror",
-      imageTag: "1/f"
+      imageTheme: "mirror"
     }
   ]
 };
@@ -169,9 +161,7 @@ export default function LandingPage({ onStart }) {
         <div className="landing-sim-card-grid">
           {chapterSimulations.map((simulation) => (
             <article key={simulation.id} className="landing-sim-card">
-              <div className={`landing-sim-card-image ${simulation.imageTheme}`} aria-hidden="true">
-                <span>{simulation.imageTag}</span>
-              </div>
+              <div className={`landing-sim-card-image ${simulation.imageTheme}`} aria-hidden="true" />
               <div className="landing-sim-card-copy">
                 <h3>{simulation.title}</h3>
                 <p>{simulation.topic}</p>
