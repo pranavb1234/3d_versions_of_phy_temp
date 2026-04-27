@@ -215,27 +215,6 @@ export default function LandingPage({ onStart }) {
         </div>
       </section>
 
-      <section className="landing-section landing-feature-grid reverse">
-        <div className="landing-media-card scene" aria-hidden="true">
-          <div className="scene-hud">
-            <button type="button">+</button>
-            <button type="button">-</button>
-          </div>
-        </div>
-        <article className="landing-feature-card">
-          <div className="landing-pill">Immersive Environments</div>
-          <h2>Interactive 3D Environments</h2>
-          <p>
-            Move through accurate simulated spaces where you can rotate, inspect, and experiment
-            with physical systems as if they were in your hands.
-          </p>
-          <div className="landing-pro-tip">
-            Pro Tip: Pause a simulation to inspect velocity vectors and energy states at key
-            moments.
-          </div>
-        </article>
-      </section>
-
       <section className="landing-final-cta">
         <h2>Ready to dive in?</h2>
         <p>
