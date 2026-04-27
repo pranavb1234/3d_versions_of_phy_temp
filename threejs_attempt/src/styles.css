@@ -2845,6 +2845,196 @@ body {
   align-items: center;
 }
 
+.landing-simulations-showcase {
+  width: min(1220px, 100%);
+  margin: 0 auto;
+  display: grid;
+  gap: 1rem;
+}
+
+.landing-sim-header {
+  display: grid;
+  gap: 0.45rem;
+  justify-items: start;
+}
+
+.landing-sim-header h2 {
+  margin: 0;
+  font-size: clamp(1.55rem, 3vw, 2.1rem);
+  color: #102746;
+}
+
+.landing-sim-header p {
+  margin: 0;
+  color: #475569;
+  line-height: 1.45;
+}
+
+.landing-chapter-menu-block {
+  display: flex;
+  justify-content: flex-start;
+}
+
+.landing-chapter-menu {
+  display: grid;
+  gap: 0.28rem;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: #1b3554;
+}
+
+.landing-chapter-menu select {
+  border-radius: 10px;
+  border: 1px solid #9fb7ce;
+  background: rgba(243, 248, 255, 0.95);
+  color: #102746;
+  font-size: 0.9rem;
+  font-weight: 700;
+  padding: 0.45rem 0.62rem;
+  min-width: 210px;
+}
+
+.landing-sim-card-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.landing-sim-card {
+  border-radius: 14px;
+  border: 1px solid #9fb7ce;
+  background: rgba(236, 243, 251, 0.92);
+  box-shadow: 0 12px 30px rgba(16, 39, 70, 0.1);
+  padding: 0.75rem;
+  display: grid;
+  gap: 0.7rem;
+}
+
+.landing-sim-card-image {
+  min-height: 128px;
+  border-radius: 12px;
+  border: 1px solid rgba(159, 183, 206, 0.8);
+  position: relative;
+  overflow: hidden;
+}
+
+.landing-sim-card-image::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(120deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0)),
+    repeating-linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.07) 0,
+      rgba(255, 255, 255, 0.07) 8px,
+      transparent 8px,
+      transparent 16px
+    );
+}
+
+.landing-sim-card-image span {
+  position: absolute;
+  left: 0.58rem;
+  bottom: 0.52rem;
+  border-radius: 999px;
+  border: 1px solid rgba(226, 232, 240, 0.75);
+  background: rgba(15, 23, 42, 0.55);
+  color: #f8fafc;
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 0.18rem 0.5rem;
+  z-index: 1;
+}
+
+.landing-sim-card-image.spring {
+  background:
+    radial-gradient(circle at 20% 20%, rgba(56, 189, 248, 0.32), rgba(0, 0, 0, 0)),
+    linear-gradient(135deg, #092040 0%, #1d4f88 100%);
+}
+
+.landing-sim-card-image.double {
+  background:
+    radial-gradient(circle at 75% 20%, rgba(52, 211, 153, 0.28), rgba(0, 0, 0, 0)),
+    linear-gradient(140deg, #0b2548 0%, #2563eb 100%);
+}
+
+.landing-sim-card-image.pendulum {
+  background:
+    radial-gradient(circle at 30% 30%, rgba(244, 114, 182, 0.32), rgba(0, 0, 0, 0)),
+    linear-gradient(140deg, #27113d 0%, #4c1d95 100%);
+}
+
+.landing-sim-card-image.wave {
+  background:
+    radial-gradient(circle at 80% 20%, rgba(34, 211, 238, 0.26), rgba(0, 0, 0, 0)),
+    linear-gradient(130deg, #082f49 0%, #0f766e 100%);
+}
+
+.landing-sim-card-image.compare {
+  background:
+    radial-gradient(circle at 20% 18%, rgba(16, 185, 129, 0.3), rgba(0, 0, 0, 0)),
+    linear-gradient(135deg, #0f172a 0%, #1d4ed8 100%);
+}
+
+.landing-sim-card-image.standing {
+  background:
+    radial-gradient(circle at 80% 28%, rgba(251, 191, 36, 0.25), rgba(0, 0, 0, 0)),
+    linear-gradient(135deg, #3f2305 0%, #9a3412 100%);
+}
+
+.landing-sim-card-image.refraction {
+  background:
+    radial-gradient(circle at 20% 25%, rgba(96, 165, 250, 0.32), rgba(0, 0, 0, 0)),
+    linear-gradient(140deg, #111827 0%, #0369a1 100%);
+}
+
+.landing-sim-card-image.mirror {
+  background:
+    radial-gradient(circle at 78% 22%, rgba(129, 140, 248, 0.32), rgba(0, 0, 0, 0)),
+    linear-gradient(140deg, #1f2937 0%, #4338ca 100%);
+}
+
+.landing-sim-card-copy h3 {
+  margin: 0;
+  font-size: 1.02rem;
+  color: #102746;
+}
+
+.landing-sim-card-copy p {
+  margin: 0.28rem 0 0;
+  font-size: 0.84rem;
+  color: #4b5f76;
+  font-weight: 600;
+}
+
+.landing-sim-card-go {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 1px solid #9fb7ce;
+  background: #f4f8ff;
+  color: #18427d;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 120ms ease, filter 120ms ease, background-color 120ms ease;
+}
+
+.landing-sim-card-go:hover {
+  transform: translateY(-1px);
+  filter: brightness(0.98);
+  background: #e2ecf9;
+}
+
+.landing-sim-card-go svg {
+  width: 20px;
+  height: 20px;
+}
+
 .landing-feature-card {
   animation: landing-rise 500ms ease;
 }
@@ -3033,6 +3223,10 @@ body {
     grid-template-columns: 1fr;
   }
 
+  .landing-sim-card-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
   .landing-hero {
     min-height: 56vh;
   }
@@ -3043,6 +3237,21 @@ body {
 
   .landing-feature-grid.reverse .landing-media-card {
     order: 2;
+  }
+}
+
+@media (max-width: 680px) {
+  .landing-chapter-menu {
+    width: 100%;
+  }
+
+  .landing-chapter-menu select {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .landing-sim-card-grid {
+    grid-template-columns: 1fr;
   }
 }
 

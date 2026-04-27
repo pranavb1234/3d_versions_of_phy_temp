@@ -1,3 +1,4 @@
+import { useMemo, useState } from "react";
 import heroBackgroundVideo from "../../5373-183629075 (1).mp4";
 
 const HOW_IT_WORKS_STEPS = [
@@ -15,11 +16,98 @@ const HOW_IT_WORKS_STEPS = [
   }
 ];
 
+const CHAPTER_OPTIONS = [
+  { id: "oscillations", label: "Oscillations" },
+  { id: "waves", label: "Waves" },
+  { id: "optics", label: "Optics" }
+];
+
+const SIMULATION_CATALOG = {
+  oscillations: [
+    {
+      id: "single",
+      title: "Single Spring-Mass",
+      topic: "Oscillations",
+      imageTheme: "spring",
+      imageTag: "m-k"
+    },
+    {
+      id: "double",
+      title: "Double Spring-Mass",
+      topic: "Oscillations",
+      imageTheme: "double",
+      imageTag: "2m-k"
+    },
+    {
+      id: "pendulum",
+      title: "Simple Pendulum",
+      topic: "Oscillations",
+      imageTheme: "pendulum",
+      imageTag: "theta"
+    }
+  ],
+  waves: [
+    {
+      id: "static_markers",
+      title: "Wave Markers (Static)",
+      topic: "Waves",
+      imageTheme: "wave",
+      imageTag: "lambda"
+    },
+    {
+      id: "compare",
+      title: "Transverse vs Longitudinal",
+      topic: "Waves",
+      imageTheme: "compare",
+      imageTag: "TxL"
+    },
+    {
+      id: "standing",
+      title: "Standing Waves",
+      topic: "Waves",
+      imageTheme: "standing",
+      imageTag: "n=3"
+    }
+  ],
+  optics: [
+    {
+      id: "refraction",
+      title: "Refraction (Snell's Law)",
+      topic: "Optics",
+      imageTheme: "refraction",
+      imageTag: "n1/n2"
+    },
+    {
+      id: "mirror_formula",
+      title: "Spherical Mirrors",
+      topic: "Optics",
+      imageTheme: "mirror",
+      imageTag: "1/f"
+    }
+  ]
+};
+
 export default function LandingPage({ onStart }) {
+  const [selectedChapterId, setSelectedChapterId] = useState("oscillations");
+
   const scrollToSection = (id) => {
     const target = document.getElementById(id);
     if (target) {
       target.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  };
+  const chapterSimulations = useMemo(
+    () => SIMULATION_CATALOG[selectedChapterId] ?? [],
+    [selectedChapterId]
+  );
+  const handleStartDefault = () => {
+    if (typeof onStart === "function") {
+      onStart();
+    }
+  };
+  const handleLaunchSimulation = (simulationId) => {
+    if (typeof onStart === "function") {
+      onStart({ chapterId: selectedChapterId, simulationId });
     }
   };
 
@@ -37,7 +125,7 @@ export default function LandingPage({ onStart }) {
             About
           </button>
         </nav>
-        <button type="button" className="landing-nav-cta" onClick={onStart}>
+        <button type="button" className="landing-nav-cta" onClick={handleStartDefault}>
           Start Exploring
         </button>
       </header>
@@ -64,7 +152,7 @@ export default function LandingPage({ onStart }) {
             simulations, and learn by doing instead of only reading.
           </p>
           <div className="landing-hero-actions">
-            <button type="button" className="landing-primary-btn" onClick={onStart}>
+            <button type="button" className="landing-primary-btn" onClick={handleStartDefault}>
               Start Exploring
             </button>
             <button
@@ -94,25 +182,57 @@ export default function LandingPage({ onStart }) {
         </div>
       </section>
 
-      <section className="landing-section landing-feature-grid" id="simulations">
-        <article className="landing-feature-card">
-          <div className="landing-pill">Live Sync</div>
-          <h2>Live Formula Sync</h2>
-          <p>
-            As you adjust sliders and controls, mathematical formulas update instantly beside 3D
-            motion so the connection is always visible.
-          </p>
-          <ul>
-            <li>Instant visual feedback</li>
-            <li>Side-by-side equation rendering</li>
-          </ul>
-        </article>
-        <div className="landing-media-card formula" aria-hidden="true">
-          <div className="formula-overlay">
-            <span>LIVE</span>
-            <p>F = ma</p>
-            <p>x(t) = A sin(omega t)</p>
-          </div>
+      <section className="landing-section landing-simulations-showcase" id="simulations">
+        <div className="landing-sim-header">
+          <div className="landing-pill">Simulations</div>
+          <h2>Choose chapter and open a simulation</h2>
+          <p>Select a chapter from the top-left menu, then pick any card below.</p>
+        </div>
+        <div className="landing-chapter-menu-block">
+          <label className="landing-chapter-menu" htmlFor="landing-chapter-select">
+            <span>Chapter</span>
+            <select
+              id="landing-chapter-select"
+              value={selectedChapterId}
+              onChange={(event) => setSelectedChapterId(event.target.value)}
+            >
+              {CHAPTER_OPTIONS.map((chapter) => (
+                <option key={chapter.id} value={chapter.id}>
+                  {chapter.label}
+                </option>
+              ))}
+            </select>
+          </label>
+        </div>
+        <div className="landing-sim-card-grid">
+          {chapterSimulations.map((simulation) => (
+            <article key={simulation.id} className="landing-sim-card">
+              <div className={`landing-sim-card-image ${simulation.imageTheme}`} aria-hidden="true">
+                <span>{simulation.imageTag}</span>
+              </div>
+              <div className="landing-sim-card-copy">
+                <h3>{simulation.title}</h3>
+                <p>{simulation.topic}</p>
+              </div>
+              <button
+                type="button"
+                className="landing-sim-card-go"
+                onClick={() => handleLaunchSimulation(simulation.id)}
+                aria-label={`Open ${simulation.title}`}
+              >
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path
+                    d="M5 12h12m-5-5 5 5-5 5"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2.2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              </button>
+            </article>
+          ))}
         </div>
       </section>
 
@@ -143,7 +263,7 @@ export default function LandingPage({ onStart }) {
           Start your journey into interactive physics today. No installation required, everything
           runs directly in your browser.
         </p>
-        <button type="button" className="landing-primary-btn" onClick={onStart}>
+        <button type="button" className="landing-primary-btn" onClick={handleStartDefault}>
           Launch Lab
         </button>
       </section>

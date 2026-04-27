@@ -12,15 +12,51 @@ import RefractionScene from "./components/RefractionScene";
 import MirrorFormulaScene from "./components/MirrorFormulaScene";
 import TemplateRagChat from "./components/TemplateRagChat";
 
-export default function App({ onBackToHome }) {
+export default function App({
+  onBackToHome,
+  initialChapterId = "oscillations",
+  initialSimulationId = "single"
+}) {
+  const validChapters = ["oscillations", "waves", "optics"];
+  const validOscillationSimulations = ["single", "double", "pendulum"];
+  const validWaveSimulations = ["static_markers", "compare", "standing"];
+  const validOpticsSimulations = ["refraction", "mirror_formula"];
+  const normalizedInitialChapterId = validChapters.includes(initialChapterId)
+    ? initialChapterId
+    : "oscillations";
+
   const [mass, setMass] = useState(1.0);
   const [springConstant, setSpringConstant] = useState(15.0);
   const [amplitude, setAmplitude] = useState(3.0);
   const [isPlaying, setIsPlaying] = useState(true);
-  const [templateId, setTemplateId] = useState("single");
-  const [chapterId, setChapterId] = useState("oscillations");
-  const [waveSimId, setWaveSimId] = useState("static_markers");
-  const [opticsSimId, setOpticsSimId] = useState("refraction");
+  const [templateId, setTemplateId] = useState(() => {
+    if (
+      normalizedInitialChapterId === "oscillations" &&
+      validOscillationSimulations.includes(initialSimulationId)
+    ) {
+      return initialSimulationId;
+    }
+    return "single";
+  });
+  const [chapterId, setChapterId] = useState(normalizedInitialChapterId);
+  const [waveSimId, setWaveSimId] = useState(() => {
+    if (
+      normalizedInitialChapterId === "waves" &&
+      validWaveSimulations.includes(initialSimulationId)
+    ) {
+      return initialSimulationId;
+    }
+    return "static_markers";
+  });
+  const [opticsSimId, setOpticsSimId] = useState(() => {
+    if (
+      normalizedInitialChapterId === "optics" &&
+      validOpticsSimulations.includes(initialSimulationId)
+    ) {
+      return initialSimulationId;
+    }
+    return "refraction";
+  });
   const [activeParamInfo, setActiveParamInfo] = useState(null);
   const [activeCalc, setActiveCalc] = useState(null);
   const [activeEffectKey, setActiveEffectKey] = useState(null);
