@@ -99,23 +99,6 @@ export default function LandingPage({ onStart }) {
 
   return (
     <div className="landing-page">
-      <header className="landing-nav">
-        <nav className="landing-links" aria-label="Primary">
-          <button type="button" onClick={() => scrollToSection("simulations")}>
-            Simulations
-          </button>
-          <button type="button" onClick={() => scrollToSection("how-it-works")}>
-            How It Works
-          </button>
-          <button type="button" onClick={() => scrollToSection("about")}>
-            About
-          </button>
-        </nav>
-        <button type="button" className="landing-nav-cta" onClick={handleStartDefault}>
-          Start Exploring
-        </button>
-      </header>
-
       <section className="landing-hero" id="about">
         <div className="landing-hero-bg" aria-hidden="true">
           <video
