@@ -2800,6 +2800,23 @@ body {
   color: var(--landing-muted);
 }
 
+.landing-how-flow-wrap {
+  width: min(1220px, 100%);
+  margin: 1.6rem auto 0;
+  border-radius: 16px;
+  border: 1px solid var(--landing-line);
+  background: rgba(236, 243, 251, 0.92);
+  box-shadow: 0 16px 34px rgba(16, 39, 70, 0.12);
+  padding: clamp(0.5rem, 1.2vw, 0.95rem);
+}
+
+.landing-how-flow-image {
+  width: 100%;
+  height: auto;
+  display: block;
+  border-radius: 10px;
+}
+
 .landing-step-grid {
   width: min(1220px, 100%);
   margin: 1.8rem auto 0;

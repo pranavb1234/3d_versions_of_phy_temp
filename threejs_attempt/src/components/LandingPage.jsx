@@ -1,20 +1,6 @@
 import { useMemo, useState } from "react";
 import heroBackgroundVideo from "../../5373-183629075 (1).mp4";
-
-const HOW_IT_WORKS_STEPS = [
-  {
-    title: "1. Select a Module",
-    text: "Choose from interactive topics in oscillations, waves, and optics."
-  },
-  {
-    title: "2. Adjust Parameters",
-    text: "Tune variables like mass, gravity, angle, and refractive index in real time."
-  },
-  {
-    title: "3. Visualize Results",
-    text: "Watch live motion, equations, and insights update as you experiment."
-  }
-];
+import flowImage from "../../flow.png";
 
 const CHAPTER_OPTIONS = [
   { id: "oscillations", label: "Oscillations" },
@@ -169,16 +155,9 @@ export default function LandingPage({ onStart }) {
       <section className="landing-section landing-steps" id="how-it-works">
         <div className="landing-section-head">
           <h2>How It Works</h2>
-          <p>Three simple steps to interactive learning.</p>
         </div>
-        <div className="landing-step-grid">
-          {HOW_IT_WORKS_STEPS.map((step) => (
-            <article key={step.title} className="landing-step-card">
-              <div className="landing-step-icon" aria-hidden="true" />
-              <h3>{step.title}</h3>
-              <p>{step.text}</p>
-            </article>
-          ))}
+        <div className="landing-how-flow-wrap">
+          <img src={flowImage} alt="How it works process flow diagram" className="landing-how-flow-image" />
         </div>
       </section>
 
