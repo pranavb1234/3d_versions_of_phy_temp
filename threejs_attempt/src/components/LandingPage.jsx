@@ -138,8 +138,7 @@ export default function LandingPage({ onStart }) {
 
       <section className="landing-section landing-simulations-showcase" id="simulations">
         <div className="landing-sim-header">
-          <div className="landing-pill">Simulations</div>
-          <h2>Choose chapter and open a simulation</h2>
+          <h2>Simulations</h2>
           <p>Select a chapter from the top-left menu, then pick any card below.</p>
         </div>
         <div className="landing-chapter-menu-block">
