@@ -10,7 +10,7 @@ import WaveCompareScene from "./components/WaveCompareScene";
 import WaveStandingScene from "./components/WaveStandingScene";
 import RefractionScene from "./components/RefractionScene";
 import MirrorFormulaScene from "./components/MirrorFormulaScene";
-import TemplateRagChat from "./components/TemplateRagChat";
+import TemplateResourcesPanel from "./components/TemplateResourcesPanel";
 
 export default function App({
   onBackToHome,
@@ -61,7 +61,7 @@ export default function App({
   const [activeCalc, setActiveCalc] = useState(null);
   const [activeEffectKey, setActiveEffectKey] = useState(null);
   const [canvasNotice, setCanvasNotice] = useState(null);
-  const [isQueryPanelOpen, setIsQueryPanelOpen] = useState(false);
+  const [isResourcesPanelOpen, setIsResourcesPanelOpen] = useState(false);
   const [showTourIntro, setShowTourIntro] = useState(false);
   const [tourStepIndex, setTourStepIndex] = useState(null);
   const [tourSpotlight, setTourSpotlight] = useState(null);
@@ -1019,12 +1019,12 @@ export default function App({
           ) : null}
           <button
             type="button"
-            className={`ask-query-btn ${isQueryPanelOpen ? "active" : ""}`}
-            onClick={() => setIsQueryPanelOpen((prev) => !prev)}
-            aria-expanded={isQueryPanelOpen}
-            aria-controls="template-query-panel"
+            className={`ask-query-btn ${isResourcesPanelOpen ? "active" : ""}`}
+            onClick={() => setIsResourcesPanelOpen((prev) => !prev)}
+            aria-expanded={isResourcesPanelOpen}
+            aria-controls="template-resources-panel"
           >
-            Ask Query
+            Resources
           </button>
           {typeof onBackToHome === "function" ? (
             <button type="button" className="back-home-btn" onClick={onBackToHome}>
@@ -1388,12 +1388,13 @@ export default function App({
         </div>
       ) : null}
 
-      <TemplateRagChat
+      <TemplateResourcesPanel
         chapterId={chapterId}
-        templateId={activeSimulationId}
-        templateLabel={activeSimulationLabel}
-        isOpen={isQueryPanelOpen}
-        onClose={() => setIsQueryPanelOpen(false)}
+        simulationId={activeSimulationId}
+        chapterLabel={selectedChapterLabel}
+        simulationLabel={activeSimulationLabel}
+        isOpen={isResourcesPanelOpen}
+        onClose={() => setIsResourcesPanelOpen(false)}
       />
     </main>
   );
