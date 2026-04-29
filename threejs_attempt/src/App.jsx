@@ -204,6 +204,56 @@ export default function App({
           "x: displacement from equilibrium",
           "A: amplitude"
         ],
+        symbolGuide: [
+          {
+            symbol: "m",
+            label: "Mass",
+            description:
+              "Inertia of the moving block. Higher mass lowers angular frequency and increases period."
+          },
+          {
+            symbol: "k",
+            label: "Spring Constant",
+            description:
+              "Stiffness of the spring. Higher k increases angular frequency and shortens period."
+          },
+          {
+            symbol: "x",
+            label: "Displacement",
+            description:
+              "Instantaneous position from equilibrium. Positive x is to the right, negative x is to the left."
+          },
+          {
+            symbol: "A",
+            label: "Amplitude",
+            description:
+              "Maximum displacement from equilibrium. It sets the motion range and total energy."
+          },
+          {
+            symbol: "\\omega",
+            label: "Angular Frequency",
+            description:
+              "Rate of oscillation in rad/s."
+          },
+          {
+            symbol: "T",
+            label: "Time Period",
+            description:
+              "Time for one full oscillation cycle."
+          },
+          {
+            symbol: "v",
+            label: "Velocity",
+            description:
+              "Blue arrow in the scene. The instantaneous rate of change of displacement."
+          },
+          {
+            symbol: "F",
+            label: "Restoring Force",
+            description:
+              "Red arrow in the scene. The force exerted by the system that always acts to bring the object back toward the equilibrium position."
+          }
+        ],
         Scene: SpringMassScene
       },
       double: {
@@ -295,6 +345,10 @@ export default function App({
       return { key: label, label, tone };
     });
   }, [activeTemplate.legend]);
+  const symbolGuideItems = useMemo(
+    () => activeTemplate.symbolGuide ?? [],
+    [activeTemplate.symbolGuide]
+  );
   const calculations = useMemo(() => {
     const safeMass = Math.max(mass, 0.001);
     const safeK = Math.max(springConstant, 0.001);
@@ -1065,14 +1119,36 @@ export default function App({
 
           <div className="shm-section-divider" />
 
-          <div className="shm-left-subtitle">Legend</div>
-          <div className="shm-legend-items shm-legend-list">
-            {legendItems.map((item) => (
-              <div key={item.key} className={`shm-legend-item ${item.tone}`}>
-                {item.label}
+          {templateId === "single" ? (
+            <div className="wave-symbols">
+              <div className="wave-symbols-title">Symbol Guide</div>
+              <div className="wave-symbols-list">
+                {symbolGuideItems.map((item) => (
+                  <details key={`${item.symbol}-${item.label}`} className="wave-symbol-item">
+                    <summary className="wave-symbol-summary">
+                      <span
+                        className="wave-symbol-name"
+                        dangerouslySetInnerHTML={renderFormula(item.symbol)}
+                      />
+                      <span className="wave-symbol-label">{item.label}</span>
+                    </summary>
+                    <div className="wave-symbol-desc">{item.description}</div>
+                  </details>
+                ))}
               </div>
-            ))}
-          </div>
+            </div>
+          ) : (
+            <>
+              <div className="shm-left-subtitle">Legend</div>
+              <div className="shm-legend-items shm-legend-list">
+                {legendItems.map((item) => (
+                  <div key={item.key} className={`shm-legend-item ${item.tone}`}>
+                    {item.label}
+                  </div>
+                ))}
+              </div>
+            </>
+          )}
         </aside>
 
         <section className="shm-center">

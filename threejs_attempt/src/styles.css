@@ -1615,6 +1615,22 @@ body {
   color: #15803d;
 }
 
+.shm-left .wave-symbols-title {
+  font-size: 0.86rem;
+}
+
+.shm-left .wave-symbol-name {
+  width: 3.1rem;
+  text-align: left;
+  font-style: normal;
+  font-family: "Cascadia Code", Consolas, monospace;
+}
+
+.shm-left .wave-symbol-name .katex {
+  font-size: 1rem;
+  line-height: 1;
+}
+
 .shm-right-title {
   font-weight: 900;
   font-size: 0.86rem;
