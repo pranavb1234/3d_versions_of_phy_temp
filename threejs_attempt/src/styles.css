@@ -61,7 +61,7 @@ body {
 
 .shm-topbar-controls {
   display: flex;
-  align-items: center;
+  align-items: flex-end;
   gap: 0.75rem;
   flex-wrap: wrap;
 }
@@ -86,14 +86,16 @@ body {
   background: rgba(246, 250, 255, 0.92);
   color: #1d2a3d;
   font-weight: 600;
-  padding: 0.35rem 0.6rem;
+  height: 2.2rem;
+  padding: 0 0.65rem;
   min-width: 180px;
 }
 
 .ask-query-btn {
   border: 0;
   border-radius: 999px;
-  padding: 0.55rem 1rem;
+  height: 2.2rem;
+  padding: 0 1rem;
   background: linear-gradient(135deg, #0f4ea0 0%, #1f5eb1 100%);
   color: #ffffff;
   font-weight: 800;
@@ -102,6 +104,10 @@ body {
   cursor: pointer;
   box-shadow: 0 8px 18px rgba(31, 94, 177, 0.3);
   transition: transform 140ms ease, filter 140ms ease, box-shadow 140ms ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  align-self: flex-end;
 }
 
 .ask-query-btn:hover {
@@ -117,7 +123,8 @@ body {
 .back-home-btn {
   border: 1px solid rgba(31, 94, 177, 0.42);
   border-radius: 999px;
-  padding: 0.52rem 1rem;
+  height: 2.2rem;
+  padding: 0 1rem;
   background: rgba(219, 234, 254, 0.72);
   color: #1f5eb1;
   font-weight: 800;
@@ -125,6 +132,10 @@ body {
   letter-spacing: 0.01em;
   cursor: pointer;
   transition: transform 140ms ease, filter 140ms ease, box-shadow 140ms ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  align-self: flex-end;
 }
 
 .back-home-btn:hover {
