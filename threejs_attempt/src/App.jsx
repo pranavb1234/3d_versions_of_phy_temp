@@ -272,6 +272,68 @@ export default function App({
           "A: amplitude",
           "x: displacement from equilibrium"
         ],
+        symbolGuide: [
+          {
+            symbol: "m",
+            label: "Mass",
+            description:
+              "Inertia of the block. Increasing mass reduces angular frequency and increases period."
+          },
+          {
+            symbol: "k",
+            label: "Spring Constant",
+            description:
+              "Stiffness of each spring in the setup."
+          },
+          {
+            symbol: "k_{eff}",
+            label: "Effective Spring Constant",
+            description:
+              "Net stiffness of the two-spring system. For this setup, k_eff = 2k."
+          },
+          {
+            symbol: "x",
+            label: "Displacement",
+            description:
+              "Position from equilibrium. Both springs act to restore the block toward the center."
+          },
+          {
+            symbol: "A",
+            label: "Amplitude",
+            description:
+              "Maximum displacement from equilibrium."
+          },
+          {
+            symbol: "\\omega",
+            label: "Angular Frequency",
+            description:
+              "Rate of oscillation in rad/s."
+          },
+          {
+            symbol: "T",
+            label: "Time Period",
+            description:
+              "Duration of one full oscillation cycle."
+          },
+          {
+            symbol: "v",
+            label: "Velocity",
+            description:
+              "Blue arrow in the scene. Instantaneous speed and direction of the block."
+          },
+          {
+            symbol: "F_L",
+            label: "Left Spring Force",
+            description:
+              "Red arrow in the scene. Restoring force contribution from the left spring."
+          },
+          {
+            symbol: "F_R",
+            label: "Right Spring Force",
+            description:
+              "Green arrow in the scene. Restoring force contribution from the right spring."
+          }
+        ],
         Scene: DoubleSpringMassScene
       },
       pendulum: {
@@ -1119,7 +1181,7 @@ export default function App({
 
           <div className="shm-section-divider" />
 
-          {templateId === "single" ? (
+          {symbolGuideItems.length > 0 ? (
             <div className="wave-symbols">
               <div className="wave-symbols-title">Symbol Guide</div>
               <div className="wave-symbols-list">
