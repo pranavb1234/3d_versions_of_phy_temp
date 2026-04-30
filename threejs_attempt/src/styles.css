@@ -721,6 +721,7 @@ body {
 .shm-frame {
   width: 100%;
   height: 100%;
+  min-height: 0;
   display: grid;
   grid-template-columns: 25% minmax(0, 1fr) 280px;
   border-radius: 14px;
@@ -1433,6 +1434,7 @@ body {
   border-right: 1px solid #c3d1e2;
   padding: 0.95rem 0.95rem 0.9rem;
   overflow: auto;
+  min-height: 0;
   display: flex;
   flex-direction: column;
   gap: 0.85rem;
@@ -1446,6 +1448,7 @@ body {
 .shm-center {
   padding: 0.95rem 0.95rem 0.9rem;
   min-width: 0;
+  min-height: 0;
   display: flex;
   flex-direction: column;
   gap: 0.85rem;
@@ -1477,6 +1480,7 @@ body {
   border-left: 1px solid #c3d1e2;
   padding: 0.95rem 0.95rem 0.9rem;
   overflow: auto;
+  min-height: 0;
   display: flex;
   flex-direction: column;
   gap: 0.85rem;
@@ -1674,6 +1678,46 @@ body {
   inset: 0 0 auto 0;
   height: 4px;
   background: linear-gradient(90deg, rgba(37, 99, 235, 0.85), rgba(99, 179, 237, 0.1));
+}
+
+.shm-right-highlight.shm-right-highlight-clean {
+  padding: 0.68rem 0.72rem;
+  border-radius: 11px;
+  border: 1px solid rgba(236, 72, 153, 0.34);
+  background: linear-gradient(180deg, rgba(253, 242, 248, 0.95) 0%, rgba(252, 231, 243, 0.92) 100%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.82);
+}
+
+.shm-right-highlight.shm-right-highlight-clean::before {
+  display: none;
+}
+
+.shm-right-highlight-clean .shm-right-title {
+  letter-spacing: 0;
+  color: #831843;
+  font-size: 0.88rem;
+}
+
+.shm-right-highlight-clean .shm-effects-list {
+  gap: 0.42rem;
+}
+
+.shm-effects-item.shm-effects-item-clean {
+  padding: 0.44rem 0.58rem;
+  border-radius: 9px;
+  border: 1px solid rgba(190, 24, 93, 0.24);
+  background: rgba(255, 250, 253, 0.92);
+  color: #4a044e;
+  line-height: 1.3;
+  box-shadow: none;
+  transform: none;
+}
+
+.shm-effects-item.shm-effects-item-clean.is-highlighted {
+  border-color: rgba(190, 24, 93, 0.55);
+  background: rgba(252, 231, 243, 0.96);
+  box-shadow: inset 3px 0 0 rgba(236, 72, 153, 0.9);
+  transform: none;
 }
 
 .shm-simBox {

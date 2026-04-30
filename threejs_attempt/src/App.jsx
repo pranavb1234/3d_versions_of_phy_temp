@@ -465,6 +465,7 @@ export default function App({
     };
   const ActiveChapterScene = activeChapterSim.Scene;
   const activeTemplate = templateConfig[templateId] ?? templateConfig.single;
+  const isDoubleTemplate = templateId === "double";
   const ActiveScene = activeTemplate.Scene;
   const legendItems = useMemo(() => {
     const items = activeTemplate.legend ?? [];
@@ -1553,13 +1554,18 @@ export default function App({
 
           <div className="shm-section-divider" />
 
-          <div className="shm-right-section shm-right-highlight" data-tour="insights">
+          <div
+            className={`shm-right-section shm-right-highlight ${
+              isDoubleTemplate ? "shm-right-highlight-clean" : ""
+            }`}
+            data-tour="insights"
+          >
             <div className="shm-right-title">What To Notice</div>
             <div className="shm-effects-list">
               {effects.map((item) => (
                 <div
                   key={item.key}
-                  className={`shm-effects-item ${
+                  className={`shm-effects-item ${isDoubleTemplate ? "shm-effects-item-clean" : ""} ${
                     item.key === activeEffectKey ? "is-highlighted" : ""
                   }`}
                 >
