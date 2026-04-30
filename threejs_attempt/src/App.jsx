@@ -440,6 +440,7 @@ export default function App({
             title: "Effective Spring Constant",
             latex: "k_{eff} = 2k",
             value: `${kEffVal} N/m`,
+            valueLatex: `${kEffVal}\\,\\text{N/m}`,
             detail:
               "Two springs act together, so their stiffness adds. We use k_eff in omega, T, and energy.",
             steps: [
@@ -452,6 +453,7 @@ export default function App({
             title: "Angular Frequency",
             latex: "\\omega = \\sqrt{\\frac{k_{eff}}{m}}",
             value: `${omegaVal} rad/s`,
+            valueLatex: `${omegaVal}\\,\\text{rad/s}`,
             detail:
               "Omega sets how fast the oscillation happens. Larger k_eff increases omega; larger m decreases it.",
             steps: [
@@ -464,6 +466,7 @@ export default function App({
             title: "Period",
             latex: "T = 2\\pi\\sqrt{\\frac{m}{k_{eff}}}",
             value: `${periodVal} s`,
+            valueLatex: `${periodVal}\\,\\text{s}`,
             detail: "Time for one full oscillation. T = 2*pi/omega.",
             steps: [
               "T = 2\\pi\\sqrt{\\frac{m}{k_{eff}}}",
@@ -485,6 +488,7 @@ export default function App({
             title: "Maximum Speed",
             latex: "v_{max} = \\omega A",
             value: `${vMaxVal} m/s`,
+            valueLatex: `${vMaxVal}\\,\\text{m/s}`,
             detail: "Maximum speed occurs at the center (equilibrium).",
             steps: [
               "v_{max} = \\omega A",
@@ -496,6 +500,7 @@ export default function App({
             title: "Maximum Acceleration",
             latex: "a_{max} = \\omega^2 A",
             value: `${aMaxVal} m/s^2`,
+            valueLatex: `${aMaxVal}\\,\\text{m/s}^2`,
             detail: "Maximum acceleration occurs at the extremes (x = +/-A).",
             steps: [
               "a_{max} = \\omega^2 A",
@@ -507,6 +512,7 @@ export default function App({
             title: "Total Energy",
             latex: "E = \\frac{1}{2}k_{eff}A^2",
             value: `${energyVal} J`,
+            valueLatex: `${energyVal}\\,\\text{J}`,
             detail: "Total mechanical energy for the ideal system is constant.",
             steps: [
               "E = \\frac{1}{2}k_{eff}A^2",
@@ -637,6 +643,7 @@ export default function App({
           title: "Angular Frequency",
           latex: "\\omega = \\sqrt{\\frac{k}{m}}",
           value: `${omegaVal} rad/s`,
+          valueLatex: `${omegaVal}\\,\\text{rad/s}`,
           detail:
             "Omega sets how fast the oscillation happens. Larger k increases omega; larger m decreases it.",
           steps: [
@@ -649,6 +656,7 @@ export default function App({
           title: "Period",
           latex: "T = 2\\pi\\sqrt{\\frac{m}{k}}",
           value: `${periodVal} s`,
+          valueLatex: `${periodVal}\\,\\text{s}`,
           detail: "Time for one full oscillation. T = 2*pi/omega.",
           steps: [
             "T = 2\\pi\\sqrt{\\frac{m}{k}}",
@@ -688,6 +696,7 @@ export default function App({
           title: "Maximum Speed",
           latex: "v_{max} = \\omega A",
           value: `${vMaxVal} m/s`,
+          valueLatex: `${vMaxVal}\\,\\text{m/s}`,
           detail: "Maximum speed occurs at the center (equilibrium).",
           steps: [
             "v_{max} = \\omega A",
@@ -699,6 +708,7 @@ export default function App({
           title: "Maximum Acceleration",
           latex: "a_{max} = \\omega^2 A",
           value: `${aMaxVal} m/s^2`,
+          valueLatex: `${aMaxVal}\\,\\text{m/s}^2`,
           detail: "Maximum acceleration occurs at the extremes (x = +/-A).",
           steps: [
             "a_{max} = \\omega^2 A",
@@ -710,6 +720,7 @@ export default function App({
           title: "Total Energy",
           latex: "E = \\frac{1}{2}kA^2",
           value: `${energyVal} J`,
+          valueLatex: `${energyVal}\\,\\text{J}`,
           detail: "Total mechanical energy for the ideal system is constant.",
           steps: [
             "E = \\frac{1}{2}kA^2",
@@ -1174,7 +1185,16 @@ export default function App({
                     ▶
                   </button>
                   <div className="calc-formula" dangerouslySetInnerHTML={renderFormula(row.latex)} />
-                  {row.value ? <div className="calc-value">= {row.value}</div> : null}
+                  {row.value ? (
+                    <div className="calc-value">
+                      ={" "}
+                      {row.valueLatex ? (
+                        <span dangerouslySetInnerHTML={renderFormula(row.valueLatex)} />
+                      ) : (
+                        row.value
+                      )}
+                    </div>
+                  ) : null}
                 </div>
               ))}
             </div>
@@ -1456,7 +1476,14 @@ export default function App({
               dangerouslySetInnerHTML={renderFormula(activeCalc.latex)}
             />
             {activeCalc.value ? (
-              <div className="calc-modal-value">= {activeCalc.value}</div>
+              <div className="calc-modal-value">
+                ={" "}
+                {activeCalc.valueLatex ? (
+                  <span dangerouslySetInnerHTML={renderFormula(activeCalc.valueLatex)} />
+                ) : (
+                  activeCalc.value
+                )}
+              </div>
             ) : null}
             {Array.isArray(activeCalc.steps) && activeCalc.steps.length > 0 ? (
               <div className="calc-modal-steps">
