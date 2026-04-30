@@ -97,7 +97,7 @@ export default function App({
       amplitude:
         "Amplitude (A) is the starting displacement from equilibrium. Larger A increases max speed and energy.",
       amplitudePendulum:
-        "Max angle (theta0) is the starting angular displacement. Larger theta0 increases speed and energy; period changes only slightly for small angles."
+        "Max angle (theta_0) is the starting angular displacement. Larger theta_0 increases speed and energy; period changes only slightly for small angles."
     }),
     []
   );
@@ -974,32 +974,53 @@ export default function App({
         springConstant: "Spring constant",
         amplitude: templateId === "pendulum" ? "Max angle" : "Amplitude"
       };
-      const valueText = (() => {
+      const valuePayload = (() => {
         if (changedKey === "mass") {
-          return `m = ${formatValue(mass, 1)} kg`;
+          const value = formatValue(mass, 1);
+          return {
+            text: `m = ${value} kg`,
+            latex: `m = ${value}\\,\\text{kg}`
+          };
         }
         if (changedKey === "springConstant") {
-          return `k = ${formatValue(springConstant, 0)} N/m`;
+          const value = formatValue(springConstant, 0);
+          return {
+            text: `k = ${value} N/m`,
+            latex: `k = ${value}\\,\\text{N/m}`
+          };
         }
         if (changedKey === "amplitude") {
           if (templateId === "pendulum" && pendulumTheta0Deg !== null) {
-            return `theta0 = ${formatNumber(pendulumTheta0Deg, 1)} deg`;
+            const value = formatNumber(pendulumTheta0Deg, 1);
+            return {
+              text: `theta0 = ${value} deg`,
+              latex: `\\theta_0 = ${value}^{\\circ}`
+            };
           }
-          return `A = ${formatValue(amplitude, 1)} m`;
+          const value = formatValue(amplitude, 1);
+          return {
+            text: `A = ${value} m`,
+            latex: `A = ${value}\\,\\text{m}`
+          };
         }
-        return "";
+        return { text: "", latex: "" };
       })();
       const title = `${labelMap[changedKey] ?? "Parameter"} ${
         direction === "up" ? "increased" : "decreased"
       }`;
       const parts = [];
-      if (valueText) {
-        parts.push(`Now ${valueText}.`);
+      if (valuePayload.text) {
+        parts.push(`Now ${valuePayload.text}.`);
       }
       if (effectText) {
         parts.push(`Effect: ${effectText}`);
       }
-      setCanvasNotice({ title, text: parts.join(" ") });
+      setCanvasNotice({
+        title,
+        text: parts.join(" "),
+        valueLatex: valuePayload.latex,
+        effectText: effectText ?? ""
+      });
       if (noticeTimeoutRef.current) {
         clearTimeout(noticeTimeoutRef.current);
       }
@@ -1348,7 +1369,21 @@ export default function App({
                 {canvasNotice ? (
                   <div className="scene-toast" role="status" aria-live="polite">
                     <div className="scene-toast-title">{canvasNotice.title}</div>
-                    <div className="scene-toast-text">{canvasNotice.text}</div>
+                    <div className="scene-toast-text">
+                      {canvasNotice.valueLatex ? (
+                        <>
+                          Now{" "}
+                          <span
+                            className="scene-toast-formula"
+                            dangerouslySetInnerHTML={renderFormula(canvasNotice.valueLatex)}
+                          />
+                          .{" "}
+                          {canvasNotice.effectText ? `Effect: ${canvasNotice.effectText}` : ""}
+                        </>
+                      ) : (
+                        canvasNotice.text
+                      )}
+                    </div>
                   </div>
                 ) : null}
               </div>
@@ -1472,7 +1507,13 @@ export default function App({
                   aria-expanded={activeParamInfo === "amplitude"}
                   aria-controls="param-info-amplitude"
                 >
-                  {templateId === "pendulum" ? "Max Angle (theta0)" : "Amplitude (A)"}
+                  {templateId === "pendulum" ? (
+                    <span
+                      dangerouslySetInnerHTML={renderFormula("\\text{Max Angle }(\\theta_0)")}
+                    />
+                  ) : (
+                    "Amplitude (A)"
+                  )}
                 </button>
                 <div className="param-stepper">
                   <button

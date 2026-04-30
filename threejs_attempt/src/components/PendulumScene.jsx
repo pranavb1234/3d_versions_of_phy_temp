@@ -827,7 +827,7 @@ export default function PendulumScene({ mass, amplitude, isPlaying }) {
     );
     lengthExplainLabel.center.set(0.5, 0.5);
     lengthExplainLabel.position.set(0, 0, -sideOverlayDepth);
-    camera.add(lengthExplainLabel);
+
 
     const thetaExplainLabel = createWrappedTextLabelSprite(
       "\u03B8: angular displacement",
@@ -835,7 +835,7 @@ export default function PendulumScene({ mass, amplitude, isPlaying }) {
     );
     thetaExplainLabel.center.set(0.5, 0.5);
     thetaExplainLabel.position.set(0, 0, -sideOverlayDepth);
-    camera.add(thetaExplainLabel);
+
 
     const theta0ExplainLabel = createWrappedTextLabelSprite(
       "\u03B8\u2080: maximum angle",
@@ -843,7 +843,7 @@ export default function PendulumScene({ mass, amplitude, isPlaying }) {
     );
     theta0ExplainLabel.center.set(0.5, 0.5);
     theta0ExplainLabel.position.set(0, 0, -sideOverlayDepth);
-    camera.add(theta0ExplainLabel);
+
 
     const omegaExplainLabel = createWrappedTextLabelSprite(
       "\u03C9: angular frequency",
@@ -851,7 +851,7 @@ export default function PendulumScene({ mass, amplitude, isPlaying }) {
     );
     omegaExplainLabel.center.set(0.5, 0.5);
     omegaExplainLabel.position.set(0, 0, -sideOverlayDepth);
-    camera.add(omegaExplainLabel);
+
 
     const periodExplainLabel = createWrappedTextLabelSprite(
       "T: time period",
@@ -859,7 +859,7 @@ export default function PendulumScene({ mass, amplitude, isPlaying }) {
     );
     periodExplainLabel.center.set(0.5, 0.5);
     periodExplainLabel.position.set(0, 0, -sideOverlayDepth);
-    camera.add(periodExplainLabel);
+
 
     const velocityExplainLabel = createWrappedTextLabelSprite(
       "v: bob velocity (tangent to arc)",
@@ -867,7 +867,7 @@ export default function PendulumScene({ mass, amplitude, isPlaying }) {
     );
     velocityExplainLabel.center.set(0.5, 0.5);
     velocityExplainLabel.position.set(0, 0, -sideOverlayDepth);
-    camera.add(velocityExplainLabel);
+
 
     const forceExplainLabel = createWrappedTextLabelSprite(
       "F_t: tangential restoring force",
@@ -875,7 +875,7 @@ export default function PendulumScene({ mass, amplitude, isPlaying }) {
     );
     forceExplainLabel.center.set(0.5, 0.5);
     forceExplainLabel.position.set(0, 0, -sideOverlayDepth);
-    camera.add(forceExplainLabel);
+
 
     const updateSideExplainLabelPositions = () => {
       const halfViewHeight =
