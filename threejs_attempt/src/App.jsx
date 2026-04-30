@@ -367,6 +367,64 @@ export default function App({
           "Blue arrow: v - bob velocity (tangent to arc)",
           "Red arrow: F_t - tangential restoring force"
         ],
+        symbolGuide: [
+          {
+            symbol: "m",
+            label: "Mass",
+            description:
+              "Mass of the bob. In the small-angle model, it does not affect period.",
+            descriptionLatex: ""
+          },
+          {
+            symbol: "L",
+            label: "Length",
+            description:
+              "Distance from pivot to bob. A longer pendulum oscillates more slowly.",
+            descriptionLatex: ""
+          },
+          {
+            symbol: "\\theta",
+            label: "Angular Displacement",
+            description:
+              "Instantaneous angular position from the equilibrium direction.",
+            descriptionLatex: "\\theta(t) = \\theta_0\\cos(\\omega t)"
+          },
+          {
+            symbol: "\\theta_0",
+            label: "Maximum Angle",
+            description:
+              "Peak angular displacement (amplitude of angular oscillation).",
+            descriptionLatex: "|\\theta|_{\\max} = \\theta_0"
+          },
+          {
+            symbol: "\\omega",
+            label: "Angular Frequency",
+            description:
+              "Rate of oscillation in rad/s for small angles.",
+            descriptionLatex: "\\omega = \\sqrt{\\frac{g}{L}}"
+          },
+          {
+            symbol: "T",
+            label: "Time Period",
+            description:
+              "Time for one complete oscillation.",
+            descriptionLatex: "T = 2\\pi\\sqrt{\\frac{L}{g}}"
+          },
+          {
+            symbol: "v",
+            label: "Bob Velocity",
+            description:
+              "Blue arrow in the scene. Tangential velocity of the bob along the arc.",
+            descriptionLatex: "v = L\\frac{d\\theta}{dt}"
+          },
+          {
+            symbol: "F_t",
+            label: "Tangential Restoring Force",
+            description:
+              "Red arrow in the scene. Tangential component of gravity that drives oscillation.",
+            descriptionLatex: "F_t = -mg\\sin\\theta\\;\\approx\\;-mg\\theta"
+          }
+        ],
         Scene: PendulumScene
       }
     }),
@@ -567,7 +625,9 @@ export default function App({
             title: "Angular Frequency",
             latex: "\\omega = \\sqrt{\\frac{g}{L}}",
             value: `${omegaVal} rad/s`,
-            detail: "Small-angle approximation: omega depends only on gravity and length.",
+            valueLatex: `${omegaVal}\\,\\text{rad/s}`,
+            detail: "Small-angle approximation: angular frequency depends on gravity and length.",
+            detailLatex: "\\omega = \\sqrt{\\frac{g}{L}}",
             steps: [
               "\\omega = \\sqrt{\\frac{g}{L}}",
               `\\omega = \\sqrt{\\frac{${gVal}}{${lengthVal}}}`,
@@ -578,7 +638,9 @@ export default function App({
             title: "Period",
             latex: "T = 2\\pi\\sqrt{\\frac{L}{g}}",
             value: `${periodVal} s`,
+            valueLatex: `${periodVal}\\,\\text{s}`,
             detail: "Time for one swing cycle. Mass does not affect T (small-angle).",
+            detailLatex: "T = 2\\pi\\sqrt{\\frac{L}{g}}",
             steps: [
               "T = 2\\pi\\sqrt{\\frac{L}{g}}",
               `T = 2\\pi\\sqrt{\\frac{${lengthVal}}{${gVal}}}`,
@@ -589,8 +651,10 @@ export default function App({
             title: "Maximum Angle",
             latex: "\\theta_0",
             value: `${theta0Val} rad (${theta0DegVal} deg)`,
+            valueLatex: `${theta0Val}\\,\\text{rad}\\;(${theta0DegVal}^{\\circ})`,
             detail:
               "Peak angular displacement derived from the amplitude control and clamped for small angles.",
+            detailLatex: "|\\theta|_{\\max} = \\theta_0",
             steps: [
               `\\theta_0 = ${theta0DegVal}^{\\circ}`,
               `\\theta_0 = ${theta0Val}\\,\\text{rad}`
@@ -600,6 +664,7 @@ export default function App({
             title: "Angular Position",
             latex: "\\theta(t) = \\theta_0\\cos(\\omega t)",
             detail: "Angle as a function of time for small-angle SHM.",
+            detailLatex: "\\theta(t) = \\theta_0\\cos(\\omega t)",
             steps: [
               "\\theta(t) = \\theta_0\\cos(\\omega t)",
               `\\theta(t) = ${theta0Val}\\cos(${omegaVal} t)`
@@ -609,7 +674,9 @@ export default function App({
             title: "Maximum Speed",
             latex: "v_{max} = \\omega L\\theta_0",
             value: `${vMaxVal} m/s`,
+            valueLatex: `${vMaxVal}\\,\\text{m/s}`,
             detail: "Maximum speed occurs at the bottom of the swing.",
+            detailLatex: "v_{max} = \\omega L\\theta_0",
             steps: [
               "v_{max} = \\omega L\\theta_0",
               `v_{max} = ${omegaVal} \\times ${lengthVal} \\times ${theta0Val}`,
@@ -620,7 +687,9 @@ export default function App({
             title: "Total Energy",
             latex: "E = \\frac{1}{2}mL^2\\omega^2\\theta_0^2",
             value: `${energyVal} J`,
+            valueLatex: `${energyVal}\\,\\text{J}`,
             detail: "Total energy for the small-angle pendulum model.",
+            detailLatex: "E = \\frac{1}{2}mL^2\\omega^2\\theta_0^2",
             steps: [
               "E = \\frac{1}{2}mL^2\\omega^2\\theta_0^2",
               `E = \\frac{1}{2} \\times ${massVal} \\times (${lengthVal})^2 \\times (${omegaVal})^2 \\times (${theta0Val})^2`,
