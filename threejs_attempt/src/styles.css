@@ -14,6 +14,7 @@ body,
   width: 100%;
   height: 100%;
   margin: 0;
+  overflow: hidden;
 }
 
 body {
@@ -22,13 +23,15 @@ body {
 
 .app-shell {
   width: 100%;
-  height: 100%;
+  height: 100vh;
+  height: 100dvh;
+  max-height: 100dvh;
+  min-height: 100dvh;
   padding: 0.85rem;
-  display: grid;
+  display: flex;
+  flex-direction: column;
   gap: 0.85rem;
-  grid-template-columns: minmax(0, 1fr);
-  grid-template-rows: auto minmax(0, 1fr);
-  align-content: start;
+  overflow: hidden;
 }
 
 .shm-topbar {
@@ -720,8 +723,10 @@ body {
 
 .shm-frame {
   width: 100%;
-  height: 100%;
+  flex: 1 1 0;
+  height: auto;
   min-height: 0;
+  align-self: stretch;
   display: grid;
   grid-template-columns: 25% minmax(0, 1fr) 280px;
   border-radius: 14px;
@@ -732,7 +737,8 @@ body {
 
 .waves-frame {
   width: 100%;
-  height: 100%;
+  flex: 1 1 0;
+  height: auto;
   min-height: 420px;
   border-radius: 14px;
   border: 2px solid #9cb2c8;
