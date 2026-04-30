@@ -518,6 +518,14 @@ body {
   color: #334155;
 }
 
+.calc-modal-detail-latex {
+  color: #1e2a3b;
+}
+
+.calc-modal-detail-latex .katex {
+  font-size: 1rem;
+}
+
 .controls-panel {
   border-radius: 16px;
   padding: 1rem;

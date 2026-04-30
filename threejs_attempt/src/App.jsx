@@ -209,13 +209,15 @@ export default function App({
             symbol: "m",
             label: "Mass",
             description:
-              "Inertia of the moving block. Higher mass lowers angular frequency and increases period."
+              "Inertia of the moving block. Higher mass lowers angular frequency and increases period.",
+            descriptionLatex: "\\omega = \\sqrt{\\frac{k}{m}}"
           },
           {
             symbol: "k",
             label: "Spring Constant",
             description:
-              "Stiffness of the spring. Higher k increases angular frequency and shortens period."
+              "Stiffness of the spring. Higher k increases angular frequency and shortens period.",
+            descriptionLatex: "\\omega = \\sqrt{\\frac{k}{m}}"
           },
           {
             symbol: "x",
@@ -227,31 +229,36 @@ export default function App({
             symbol: "A",
             label: "Amplitude",
             description:
-              "Maximum displacement from equilibrium. It sets the motion range and total energy."
+              "Maximum displacement from equilibrium. It sets the motion range and total energy.",
+            descriptionLatex: "|x|_{\\max} = A"
           },
           {
             symbol: "\\omega",
             label: "Angular Frequency",
             description:
-              "Rate of oscillation in rad/s."
+              "Rate of oscillation in rad/s.",
+            descriptionLatex: "\\omega = \\sqrt{\\frac{k}{m}}"
           },
           {
             symbol: "T",
             label: "Time Period",
             description:
-              "Time for one full oscillation cycle."
+              "Time for one full oscillation cycle.",
+            descriptionLatex: "T = 2\\pi\\sqrt{\\frac{m}{k}}"
           },
           {
             symbol: "v",
             label: "Velocity",
             description:
-              "Blue arrow in the scene. The instantaneous rate of change of displacement."
+              "Blue arrow in the scene. The instantaneous rate of change of displacement.",
+            descriptionLatex: "v = \\frac{dx}{dt}"
           },
           {
             symbol: "F",
             label: "Restoring Force",
             description:
-              "Red arrow in the scene. The force exerted by the system that always acts to bring the object back toward the equilibrium position."
+              "Red arrow in the scene. The force exerted by the system that always acts to bring the object back toward the equilibrium position.",
+            descriptionLatex: "F = -kx"
           }
         ],
         Scene: SpringMassScene
@@ -277,13 +284,15 @@ export default function App({
             symbol: "m",
             label: "Mass",
             description:
-              "Inertia of the block. Increasing mass reduces angular frequency and increases period."
+              "Inertia of the block. Increasing mass reduces angular frequency and increases period.",
+            descriptionLatex: "\\omega = \\sqrt{\\frac{k_{eff}}{m}}"
           },
           {
             symbol: "k",
             label: "Spring Constant",
             description:
-              "Stiffness of each spring in the setup."
+              "Stiffness of each spring in the setup.",
+            descriptionLatex: "k_{eff} = 2k"
           },
           {
             symbol: "k_{eff}",
@@ -302,37 +311,43 @@ export default function App({
             symbol: "A",
             label: "Amplitude",
             description:
-              "Maximum displacement from equilibrium."
+              "Maximum displacement from equilibrium.",
+            descriptionLatex: "|x|_{\\max} = A"
           },
           {
             symbol: "\\omega",
             label: "Angular Frequency",
             description:
-              "Rate of oscillation in rad/s."
+              "Rate of oscillation in rad/s.",
+            descriptionLatex: "\\omega = \\sqrt{\\frac{k_{eff}}{m}}"
           },
           {
             symbol: "T",
             label: "Time Period",
             description:
-              "Duration of one full oscillation cycle."
+              "Duration of one full oscillation cycle.",
+            descriptionLatex: "T = 2\\pi\\sqrt{\\frac{m}{k_{eff}}}"
           },
           {
             symbol: "v",
             label: "Velocity",
             description:
-              "Blue arrow in the scene. Instantaneous speed and direction of the block."
+              "Blue arrow in the scene. Instantaneous speed and direction of the block.",
+            descriptionLatex: "v = \\frac{dx}{dt}"
           },
           {
             symbol: "F_L",
             label: "Left Spring Force",
             description:
-              "Red arrow in the scene. Restoring force contribution from the left spring."
+              "Red arrow in the scene. Restoring force contribution from the left spring.",
+            descriptionLatex: "F_{net} = F_L + F_R = -k_{eff}x"
           },
           {
             symbol: "F_R",
             label: "Right Spring Force",
             description:
-              "Green arrow in the scene. Restoring force contribution from the right spring."
+              "Green arrow in the scene. Restoring force contribution from the right spring.",
+            descriptionLatex: "F_{net} = F_L + F_R = -k_{eff}x"
           }
         ],
         Scene: DoubleSpringMassScene
@@ -442,7 +457,8 @@ export default function App({
             value: `${kEffVal} N/m`,
             valueLatex: `${kEffVal}\\,\\text{N/m}`,
             detail:
-              "Two springs act together, so their stiffness adds. We use k_eff in omega, T, and energy.",
+              "Two springs act together, so their stiffness adds. We use this in angular frequency, period, and energy.",
+            detailLatex: "k_{eff} = 2k",
             steps: [
               "k_{eff} = 2k",
               `k_{eff} = 2 \\times ${kVal}`,
@@ -455,7 +471,8 @@ export default function App({
             value: `${omegaVal} rad/s`,
             valueLatex: `${omegaVal}\\,\\text{rad/s}`,
             detail:
-              "Omega sets how fast the oscillation happens. Larger k_eff increases omega; larger m decreases it.",
+              "Angular frequency sets how fast the oscillation happens. Larger effective stiffness increases it; larger mass decreases it.",
+            detailLatex: "\\omega = \\sqrt{\\frac{k_{eff}}{m}}",
             steps: [
               "\\omega = \\sqrt{\\frac{k_{eff}}{m}}",
               `\\omega = \\sqrt{\\frac{${kEffVal}}{${massVal}}}`,
@@ -467,7 +484,8 @@ export default function App({
             latex: "T = 2\\pi\\sqrt{\\frac{m}{k_{eff}}}",
             value: `${periodVal} s`,
             valueLatex: `${periodVal}\\,\\text{s}`,
-            detail: "Time for one full oscillation. T = 2*pi/omega.",
+            detail: "Time for one full oscillation.",
+            detailLatex: "T = \\frac{2\\pi}{\\omega}",
             steps: [
               "T = 2\\pi\\sqrt{\\frac{m}{k_{eff}}}",
               `T = 2\\pi\\sqrt{\\frac{${massVal}}{${kEffVal}}}`,
@@ -645,7 +663,8 @@ export default function App({
           value: `${omegaVal} rad/s`,
           valueLatex: `${omegaVal}\\,\\text{rad/s}`,
           detail:
-            "Omega sets how fast the oscillation happens. Larger k increases omega; larger m decreases it.",
+            "Angular frequency sets how fast the oscillation happens. Larger stiffness increases it; larger mass decreases it.",
+          detailLatex: "\\omega = \\sqrt{\\frac{k}{m}}",
           steps: [
             "\\omega = \\sqrt{\\frac{k}{m}}",
             `\\omega = \\sqrt{\\frac{${kVal}}{${massVal}}}`,
@@ -657,7 +676,8 @@ export default function App({
           latex: "T = 2\\pi\\sqrt{\\frac{m}{k}}",
           value: `${periodVal} s`,
           valueLatex: `${periodVal}\\,\\text{s}`,
-          detail: "Time for one full oscillation. T = 2*pi/omega.",
+          detail: "Time for one full oscillation.",
+          detailLatex: "T = \\frac{2\\pi}{\\omega}",
           steps: [
             "T = 2\\pi\\sqrt{\\frac{m}{k}}",
             `T = 2\\pi\\sqrt{\\frac{${massVal}}{${kVal}}}`,
@@ -678,6 +698,7 @@ export default function App({
           title: "Velocity",
           latex: "v(t) = A\\omega\\cos(\\omega t)",
           detail: "Velocity is the time-derivative of displacement.",
+          detailLatex: "v(t) = \\frac{dx}{dt}",
           steps: [
             "v(t) = A\\omega\\cos(\\omega t)",
             `v(t) = ${aVal} \\times ${omegaVal}\\cos(${omegaVal} t)`
@@ -686,7 +707,8 @@ export default function App({
         {
           title: "Acceleration",
           latex: "a(t) = -A\\omega^2\\sin(\\omega t)",
-          detail: "Acceleration is the time-derivative of velocity and equals -omega^2 x(t).",
+          detail: "Acceleration is the time-derivative of velocity.",
+          detailLatex: "a(t) = \\frac{dv}{dt} = -\\omega^2 x(t)",
           steps: [
             "a(t) = -A\\omega^2\\sin(\\omega t)",
             `a(t) = -${aVal}(${omegaVal})^2\\sin(${omegaVal} t)`
@@ -1500,6 +1522,12 @@ export default function App({
               {activeCalc.detail ??
                 "This equation connects the current parameters to the simulation."}
             </div>
+            {activeCalc.detailLatex ? (
+              <div
+                className="calc-modal-detail-latex"
+                dangerouslySetInnerHTML={renderFormula(activeCalc.detailLatex)}
+              />
+            ) : null}
           </div>
         </div>
       ) : null}
