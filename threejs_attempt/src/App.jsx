@@ -289,7 +289,8 @@ export default function App({
             symbol: "k_{eff}",
             label: "Effective Spring Constant",
             description:
-              "Net stiffness of the two-spring system. For this setup, k_eff = 2k."
+              "Net stiffness of the two-spring system.",
+            descriptionLatex: "k_{eff} = 2k"
           },
           {
             symbol: "x",
@@ -1195,6 +1196,12 @@ export default function App({
                       <span className="wave-symbol-label">{item.label}</span>
                     </summary>
                     <div className="wave-symbol-desc">{item.description}</div>
+                    {item.descriptionLatex ? (
+                      <div
+                        className="wave-symbol-desc"
+                        dangerouslySetInnerHTML={renderFormula(item.descriptionLatex)}
+                      />
+                    ) : null}
                   </details>
                 ))}
               </div>
