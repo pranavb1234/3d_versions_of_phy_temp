@@ -12,6 +12,8 @@ const pendulumLength = 2.8;
 const rodRadius = 0.06;
 const bobRadius = 0.35;
 const gravity = 9.81;
+const defaultCameraPosition = new THREE.Vector3(0.6, 4.2, 12.4);
+const defaultCameraTarget = new THREE.Vector3(0, 1.55, 0);
 
 const smoothStep = (t) => t * t * (3 - 2 * t);
 const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
@@ -642,7 +644,7 @@ export default function PendulumScene({ mass, amplitude, isPlaying }) {
     scene.fog = new THREE.Fog("#f2f5f9", 10, 45);
 
     const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 140);
-    camera.position.set(9.5, 4.8, 11.5);
+    camera.position.copy(defaultCameraPosition);
     scene.add(camera);
 
     const renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -656,10 +658,11 @@ export default function PendulumScene({ mass, amplitude, isPlaying }) {
     controls.dampingFactor = 0.08;
     controls.minDistance = 3.5;
     controls.maxDistance = 40;
-    controls.target.set(0, 1.4, 0);
+    controls.target.copy(defaultCameraTarget);
     controls.rotateSpeed = 0.9;
     controls.panSpeed = 0.95;
     controls.zoomSpeed = 1.0;
+    controls.update();
 
     const hemiLight = new THREE.HemisphereLight("#ffffff", "#8ca2c2", 0.75);
     scene.add(hemiLight);
@@ -989,19 +992,25 @@ export default function PendulumScene({ mass, amplitude, isPlaying }) {
     const lineB = new THREE.Vector3();
     const lineC = new THREE.Vector3();
     const bobWorld = new THREE.Vector3();
+    const pivotWorld = new THREE.Vector3();
     const rodMidWorld = new THREE.Vector3();
+    const radialDirection = new THREE.Vector3();
+    const lengthNormal = new THREE.Vector3();
     const arrowDirection = new THREE.Vector3();
     const tangentDirection = new THREE.Vector3();
     const updateVisuals = () => {
       pendulumGroup.rotation.z = angle;
 
+      pendulumGroup.getWorldPosition(pivotWorld);
       bob.getWorldPosition(bobWorld);
-      rodMidWorld.set(pivotX, pivotY - pendulumLength * 0.5, pivotZ);
-      rodMidWorld.applyAxisAngle(new THREE.Vector3(0, 0, 1), angle);
+      rodMidWorld.copy(pivotWorld).lerp(bobWorld, 0.5);
+      radialDirection.subVectors(bobWorld, pivotWorld).normalize();
+      lengthNormal.set(-radialDirection.y, radialDirection.x, 0).normalize();
 
-      lineA.set(pivotX, pivotY + 0.25, 0.6);
-      lineB.set(rodMidWorld.x, rodMidWorld.y + 0.4, 0.9);
-      lineC.set(rodMidWorld.x + 1.2, rodMidWorld.y + 0.4, 0.9);
+      lineA.copy(rodMidWorld).addScaledVector(radialDirection, 0.06);
+      lineA.z = 0.58;
+      lineB.set(lineA.x + 0.38, lineA.y + 0.34, lineA.z + 0.18);
+      lineC.set(lineB.x + 0.72, lineB.y + 0.24, lineB.z + 0.06);
       lengthLabel.position.copy(lineC);
       updateLeaderLine(lengthLeader, lineA, lineB, lineC);
 
