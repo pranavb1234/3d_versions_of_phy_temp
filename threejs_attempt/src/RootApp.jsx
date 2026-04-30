@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import App from "./App";
 import LandingPage from "./components/LandingPage";
 
@@ -18,6 +18,15 @@ export default function RootApp() {
     }
     setEnteredLab(true);
   };
+
+  useEffect(() => {
+    document.body.classList.toggle("lab-active", enteredLab);
+    window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+
+    return () => {
+      document.body.classList.remove("lab-active");
+    };
+  }, [enteredLab]);
 
   if (!enteredLab) {
     return <LandingPage onStart={handleStart} />;
