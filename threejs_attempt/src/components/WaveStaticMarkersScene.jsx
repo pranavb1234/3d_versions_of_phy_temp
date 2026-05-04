@@ -17,6 +17,7 @@ const markerConfig = [
   {
     key: "amplitude",
     label: "Amplitude (a)",
+    labelLatex: "\\text{Amplitude }(a)",
     color: "#dc2626",
     bg: "rgba(220, 38, 38, 0.18)",
     description:
@@ -25,6 +26,7 @@ const markerConfig = [
   {
     key: "wavelength",
     label: "Wavelength (λ)",
+    labelLatex: "\\text{Wavelength }(\\lambda)",
     color: "#2563eb",
     bg: "rgba(37, 99, 235, 0.18)",
     description:
@@ -33,6 +35,7 @@ const markerConfig = [
   {
     key: "initial_phase",
     label: "Initial Phase (φ)",
+    labelLatex: "\\text{Initial Phase }(\\phi)",
     color: "#06b6d4",
     bg: "rgba(6, 182, 212, 0.18)",
     description:
@@ -41,6 +44,7 @@ const markerConfig = [
   {
     key: "period",
     label: "Time Period (T)",
+    labelLatex: "\\text{Time Period }(T)",
     color: "#f59e0b",
     bg: "rgba(245, 158, 11, 0.2)",
     description:
@@ -49,6 +53,8 @@ const markerConfig = [
   {
     key: "phase_point",
     label: "Phase Point (x₁)",
+    labelLatex: "\\text{Phase Point }(x_1)",
+    descriptionText: "A chosen particle at position x_1. Its phase sets where it is in its SHM cycle.",
     color: "#10b981",
     bg: "rgba(16, 185, 129, 0.18)",
     description:
@@ -82,36 +88,48 @@ export default function WaveStaticMarkersScene({ title, description }) {
     {
       symbol: "a",
       label: "Amplitude",
+      symbolLatex: "a",
       description: "Maximum displacement of a particle from the mean position."
     },
     {
       symbol: "λ",
       label: "Wavelength",
+      symbolLatex: "\\lambda",
       description: "Distance between two points in the same phase (crest to crest)."
     },
     {
       symbol: "T",
       label: "Time period",
+      symbolLatex: "T",
       description: "Time taken by a particle at a fixed x to complete one oscillation."
     },
     {
       symbol: "f",
       label: "Frequency",
-      description: "Number of oscillations per second. f = 1/T."
+      symbolLatex: "f",
+      description: "Number of oscillations per second.",
+      descriptionLatex: "f = \\frac{1}{T}"
     },
     {
       symbol: "ω",
       label: "Angular frequency",
+      symbolLatex: "\\omega",
+      descriptionLatex: "\\omega = \\frac{2\\pi}{T}",
+      descriptionText: "Rate of phase change in time.",
       description: "Rate of phase change in time. ω = 2π/T."
     },
     {
       symbol: "φ",
       label: "Initial phase",
+      symbolLatex: "\\phi",
       description: "Phase offset at x = 0 and t = 0; shifts the wave left or right."
     },
     {
       symbol: "v",
       label: "Wave speed",
+      symbolLatex: "v",
+      descriptionLatex: "v = \\frac{\\lambda}{T}",
+      descriptionText: "Speed of the wave pattern moving through space.",
       description: "Speed of the wave pattern moving through space. v = λ/T."
     }
   ];
@@ -123,15 +141,17 @@ export default function WaveStaticMarkersScene({ title, description }) {
 
   const blockSubtext = (marker) => {
     if (marker.key === "initial_phase") {
-      return `phi = ${formatNumber(phase, 2)} rad`;
+      return `\\phi = ${formatNumber(phase, 2)}\\,\\text{rad}`;
     }
     if (marker.key === "wavelength") {
-      return `lambda = ${formatNumber(lambdaDisplay, 1)}`;
+      return `\\lambda = ${formatNumber(lambdaDisplay, 1)}`;
     }
-    return "Click to highlight";
+    return "\\text{Click to highlight}";
   };
 
-  const infoTitle = activeMarker ? activeMarker.label : "Select a parameter";
+  const infoTitleLatex = activeMarker
+    ? activeMarker.labelLatex
+    : "\\text{Select a parameter}";
 
   const waveGeometry = useMemo(() => {
     const amplitude = 70;
@@ -218,10 +238,14 @@ export default function WaveStaticMarkersScene({ title, description }) {
       return "Click any parameter block to highlight it on the wave. The info panel will explain what the highlight means.";
     }
     if (activeMarker.key === "initial_phase") {
-      return `phi = ${formatNumber(phase, 2)} rad. Positive phi shifts the wave left. Watch the wave slide as you adjust it.`;
+      return `\\phi = ${formatNumber(
+        phase,
+        2
+      )}\\,\\text{rad}.\\ \\text{Positive }\\phi\\text{ shifts the wave left.}`;
     }
-    return `${activeMarker.description} Look for the matching color on the wave to locate it quickly.`;
+    return `${activeMarker.descriptionText ?? activeMarker.description} Look for the matching color on the wave to locate it quickly.`;
   }, [activeMarker, phase]);
+  const isActiveDescriptionLatex = activeMarker?.key === "initial_phase";
 
   return (
     <div className="wave-shell wave-static-shell">
@@ -242,12 +266,21 @@ export default function WaveStaticMarkersScene({ title, description }) {
           <div className="wave-symbols-title">Symbol Guide</div>
           <div className="wave-symbols-list">
             {symbolGuide.map((item) => (
-              <details key={item.symbol} className="wave-symbol-item">
+              <details key={item.symbolLatex ?? item.symbol} className="wave-symbol-item">
                 <summary className="wave-symbol-summary">
-                  <span className="wave-symbol-name">{item.symbol}</span>
+                  <span
+                    className="wave-symbol-name"
+                    dangerouslySetInnerHTML={renderFormula(item.symbolLatex ?? item.symbol)}
+                  />
                   <span className="wave-symbol-label">{item.label}</span>
                 </summary>
-                <div className="wave-symbol-desc">{item.description}</div>
+                <div className="wave-symbol-desc">{item.descriptionText ?? item.description}</div>
+                {item.descriptionLatex ? (
+                  <div
+                    className="wave-symbol-desc"
+                    dangerouslySetInnerHTML={renderFormula(item.descriptionLatex)}
+                  />
+                ) : null}
               </details>
             ))}
           </div>
@@ -580,8 +613,18 @@ export default function WaveStaticMarkersScene({ title, description }) {
         </div>
 
         <div className="wave-static-info">
-          <div className="wave-static-info-title">{infoTitle}</div>
-          <div className="wave-static-info-text">{activeDescription}</div>
+          <div
+            className="wave-static-info-title"
+            dangerouslySetInnerHTML={renderFormula(infoTitleLatex)}
+          />
+          {isActiveDescriptionLatex ? (
+            <div
+              className="wave-static-info-text"
+              dangerouslySetInnerHTML={renderFormula(activeDescription)}
+            />
+          ) : (
+            <div className="wave-static-info-text">{activeDescription}</div>
+          )}
         </div>
       </section>
 
@@ -590,8 +633,11 @@ export default function WaveStaticMarkersScene({ title, description }) {
           <div className="wave-control-title">Initial Phase</div>
           <div className="wave-slider-row">
             <label htmlFor="static-phase">
-              Phase (phi)
-              <span className="wave-value">{formatNumber(phase, 2)}</span>
+              <span dangerouslySetInnerHTML={renderFormula("\\text{Phase }(\\phi)")} />
+              <span
+                className="wave-value"
+                dangerouslySetInnerHTML={renderFormula(`${formatNumber(phase, 2)}\\,\\text{rad}`)}
+              />
             </label>
             <input
               id="static-phase"
@@ -618,9 +664,12 @@ export default function WaveStaticMarkersScene({ title, description }) {
                 }
               >
                 <span className="wave-static-block-label" style={{ color: marker.color }}>
-                  {marker.label}
+                  <span dangerouslySetInnerHTML={renderFormula(marker.labelLatex)} />
                 </span>
-                <span className="wave-static-block-subtext">{blockSubtext(marker)}</span>
+                <span
+                  className="wave-static-block-subtext"
+                  dangerouslySetInnerHTML={renderFormula(blockSubtext(marker))}
+                />
               </button>
             ))}
           </div>
