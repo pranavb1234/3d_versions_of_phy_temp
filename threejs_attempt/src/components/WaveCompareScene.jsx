@@ -741,7 +741,10 @@ export default function WaveCompareScene({ title, description }) {
                   aria-label="Angular frequency info"
                   onClick={() => setInfoParam("omega")}
                 />
-                <span dangerouslySetInnerHTML={renderFormula(parameterInfo.omega.titleLatex)} />
+                <span className="wave-label-stack">
+                  <span>Angular</span>
+                  <span dangerouslySetInnerHTML={renderFormula("\\text{Frequency }(\\omega)")} />
+                </span>
               </span>
               <span
                 className="wave-value"

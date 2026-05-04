@@ -1098,6 +1098,12 @@ body.lab-active #root {
   gap: 0.35rem;
 }
 
+.wave-label-stack {
+  display: inline-grid;
+  gap: 0.05rem;
+  line-height: 1.08;
+}
+
 .wave-arrow-btn {
   width: 18px;
   height: 18px;
@@ -1133,6 +1139,11 @@ body.lab-active #root {
 .wave-value {
   font-weight: 700;
   color: #1d2a3d;
+  white-space: nowrap;
+}
+
+.wave-value .katex {
+  white-space: nowrap;
 }
 
 .wave-readout {
@@ -1163,8 +1174,15 @@ body.lab-active #root {
 }
 
 .wave-right.compact .wave-params-block label {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) max-content;
+  align-items: center;
   font-size: 0.78rem;
   line-height: 1.1;
+}
+
+.wave-right.compact .wave-params-block .wave-label-main {
+  min-width: 0;
 }
 
 .wave-calc-list {
