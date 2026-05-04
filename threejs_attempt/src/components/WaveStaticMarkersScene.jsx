@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+﻿import { useMemo, useState } from "react";
 import katex from "katex";
 
 const TWO_PI = Math.PI * 2;
@@ -52,13 +52,13 @@ const markerConfig = [
   },
   {
     key: "phase_point",
-    label: "Phase Point (x₁)",
+    label: "Phase Point (xâ‚)",
     labelLatex: "\\text{Phase Point }(x_1)",
     descriptionText: "A chosen particle at position x_1. Its phase sets where it is in its SHM cycle.",
     color: "#10b981",
     bg: "rgba(16, 185, 129, 0.18)",
     description:
-      "A chosen particle at position x₁. Its phase sets where it is in its SHM cycle."
+      "A chosen particle at position xâ‚. Its phase sets where it is in its SHM cycle."
   }
 ];
 
@@ -111,15 +111,15 @@ export default function WaveStaticMarkersScene({ title, description }) {
       descriptionLatex: "f = \\frac{1}{T}"
     },
     {
-      symbol: "ω",
+      symbol: "Ï‰",
       label: "Angular frequency",
       symbolLatex: "\\omega",
       descriptionLatex: "\\omega = \\frac{2\\pi}{T}",
       descriptionText: "Rate of phase change in time.",
-      description: "Rate of phase change in time. ω = 2π/T."
+      description: "Rate of phase change in time. Ï‰ = 2Ï€/T."
     },
     {
-      symbol: "φ",
+      symbol: "f",
       label: "Initial phase",
       symbolLatex: "\\phi",
       description: "Phase offset at x = 0 and t = 0; shifts the wave left or right."
@@ -678,3 +678,5 @@ export default function WaveStaticMarkersScene({ title, description }) {
     </div>
   );
 }
+
+
