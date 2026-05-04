@@ -481,25 +481,67 @@ export default function WaveCompareScene({ title, description }) {
   const parameterInfo = {
     amplitude: {
       title: "Amplitude (A)",
+      titleLatex: "\\text{Amplitude }(A)",
+      detailParts: [
+        { text: "Increases the maximum displacement. Higher " },
+        { latex: "A" },
+        { text: " makes crests taller and compressions stronger." }
+      ],
       detail:
         "Increases the maximum displacement. Higher A makes crests taller and compressions stronger."
     },
     wavelength: {
       title: "Wavelength (lambda)",
+      titleLatex: "\\text{Wavelength }(\\lambda)",
+      detailParts: [
+        { text: "Controls spacing. Larger " },
+        { latex: "\\lambda" },
+        { text: " spreads crests/compressions apart; smaller " },
+        { latex: "\\lambda" },
+        { text: " packs them closer." }
+      ],
       detail:
         "Controls spacing. Larger wavelength spreads crests/compressions apart; smaller packs them closer."
     },
     omega: {
       title: "Angular Frequency (omega)",
+      titleLatex: "\\text{Angular Frequency }(\\omega)",
+      detailParts: [
+        { text: "Controls how fast the wave oscillates in time. Higher " },
+        { latex: "\\omega" },
+        { text: " means faster motion and shorter period " },
+        { latex: "T" },
+        { text: "." }
+      ],
       detail:
         "Controls how fast the wave oscillates in time. Higher omega means faster motion and shorter period."
     },
     phase: {
       title: "Initial Phase (phi)",
+      titleLatex: "\\text{Initial Phase }(\\phi)",
+      detailParts: [
+        { text: "Shifts the wave left/right at " },
+        { latex: "t = 0" },
+        { text: ". Changing " },
+        { latex: "\\phi" },
+        { text: " moves where crests/compressions start." }
+      ],
       detail:
         "Shifts the wave left/right at t = 0. Changing phase moves where crests/compressions start."
     }
   };
+
+  const renderDetailParts = (parts) =>
+    parts.map((part, index) =>
+      part.latex ? (
+        <span
+          key={`${part.latex}-${index}`}
+          dangerouslySetInnerHTML={renderFormula(part.latex)}
+        />
+      ) : (
+        <span key={`${part.text}-${index}`}>{part.text}</span>
+      )
+    );
 
   return (
     <div className="wave-shell">
@@ -647,9 +689,12 @@ export default function WaveCompareScene({ title, description }) {
                   aria-label="Amplitude info"
                   onClick={() => setInfoParam("amplitude")}
                 />
-                Amplitude (A)
+                <span dangerouslySetInnerHTML={renderFormula(parameterInfo.amplitude.titleLatex)} />
               </span>
-              <span className="wave-value">{formatNumber(amplitude, 2)}</span>
+              <span
+                className="wave-value"
+                dangerouslySetInnerHTML={renderFormula(`A = ${formatNumber(amplitude, 2)}`)}
+              />
             </label>
             <input
               id="compare-amplitude"
@@ -670,9 +715,12 @@ export default function WaveCompareScene({ title, description }) {
                   aria-label="Wavelength info"
                   onClick={() => setInfoParam("wavelength")}
                 />
-                Wavelength (lambda)
+                <span dangerouslySetInnerHTML={renderFormula(parameterInfo.wavelength.titleLatex)} />
               </span>
-              <span className="wave-value">{formatNumber(wavelength, 2)}</span>
+              <span
+                className="wave-value"
+                dangerouslySetInnerHTML={renderFormula(`\\lambda = ${formatNumber(wavelength, 2)}`)}
+              />
             </label>
             <input
               id="compare-wavelength"
@@ -693,9 +741,12 @@ export default function WaveCompareScene({ title, description }) {
                   aria-label="Angular frequency info"
                   onClick={() => setInfoParam("omega")}
                 />
-                Angular Frequency (omega)
+                <span dangerouslySetInnerHTML={renderFormula(parameterInfo.omega.titleLatex)} />
               </span>
-              <span className="wave-value">{formatNumber(omega, 2)}</span>
+              <span
+                className="wave-value"
+                dangerouslySetInnerHTML={renderFormula(`\\omega = ${formatNumber(omega, 2)}`)}
+              />
             </label>
             <input
               id="compare-omega"
@@ -716,9 +767,12 @@ export default function WaveCompareScene({ title, description }) {
                   aria-label="Phase info"
                   onClick={() => setInfoParam("phase")}
                 />
-                Initial Phase (phi)
+                <span dangerouslySetInnerHTML={renderFormula(parameterInfo.phase.titleLatex)} />
               </span>
-              <span className="wave-value">{formatNumber(phase, 2)}</span>
+              <span
+                className="wave-value"
+                dangerouslySetInnerHTML={renderFormula(`\\phi = ${formatNumber(phase, 2)}`)}
+              />
             </label>
             <input
               id="compare-phase"
@@ -796,7 +850,10 @@ export default function WaveCompareScene({ title, description }) {
         <div className="calc-modal-backdrop" onClick={() => setInfoParam(null)}>
           <div className="calc-modal" onClick={(event) => event.stopPropagation()}>
             <div className="calc-modal-header">
-              <div className="calc-modal-title">{parameterInfo[infoParam].title}</div>
+              <div
+                className="calc-modal-title"
+                dangerouslySetInnerHTML={renderFormula(parameterInfo[infoParam].titleLatex)}
+              />
               <button
                 type="button"
                 className="calc-modal-close"
@@ -805,7 +862,9 @@ export default function WaveCompareScene({ title, description }) {
                 Close
               </button>
             </div>
-            <div className="calc-modal-detail">{parameterInfo[infoParam].detail}</div>
+            <div className="calc-modal-detail">
+              {renderDetailParts(parameterInfo[infoParam].detailParts)}
+            </div>
           </div>
         </div>
       )}
