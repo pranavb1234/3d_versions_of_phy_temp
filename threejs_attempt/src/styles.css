@@ -880,7 +880,7 @@ body.lab-active #root {
 
 .wave-compare-item {
   display: grid;
-  grid-template-columns: 86px minmax(0, 1fr);
+  grid-template-columns: 104px minmax(0, 1fr);
   gap: 0.4rem;
   font-size: 0.82rem;
   color: #334155;

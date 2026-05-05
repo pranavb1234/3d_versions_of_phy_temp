@@ -552,30 +552,21 @@ export default function WaveCompareScene({ title, description }) {
           className="wave-formula"
           dangerouslySetInnerHTML={renderFormula("y(x,t) = A\\sin(kx - \\omega t + \\phi)")}
         />
-        <div className="wave-left-list">
-          <div className="wave-left-item">
-            Transverse: particles move up/down while the wave moves right.
-          </div>
-          <div className="wave-left-item">
-            Longitudinal: particles move left/right, creating compressions.
-          </div>
-          <div className="wave-left-item">
-            Both share the same wave parameters A, λ, ω, and speed v.
-          </div>
-        </div>
         <div className="wave-compare">
-          <div className="wave-compare-title">Key Differences</div>
           <div className="wave-compare-item">
-            <span className="wave-compare-label">Motion</span>
-            <span>Perpendicular in transverse, parallel in longitudinal.</span>
+            <span className="wave-compare-label">Transverse</span>
+            <span>Particles move up/down while the wave moves right.</span>
           </div>
           <div className="wave-compare-item">
-            <span className="wave-compare-label">Pattern</span>
-            <span>Crests/troughs vs compressions/rarefactions.</span>
+            <span className="wave-compare-label">Longitudinal</span>
+            <span>Particles move left/right, creating compressions.</span>
           </div>
           <div className="wave-compare-item">
-            <span className="wave-compare-label">Same</span>
-            <span>Both are traveling waves described by kx − ωt.</span>
+            <span className="wave-compare-label">Shared</span>
+            <span>
+              Both use the same wave parameters{" "}
+              <span dangerouslySetInnerHTML={renderFormula("A,\\ \\lambda,\\ \\omega,\\ v")} />.
+            </span>
           </div>
         </div>
         <div className="wave-symbols">
