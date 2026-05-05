@@ -1,0 +1,48 @@
+---
+config:
+  layout: dagre
+  look: neo
+  theme: redux
+---
+flowchart TB
+    A["User Opens Web App"] --> B["Selects Chapter"]
+    B --> C["Selects Simulation"]
+    C --> G["Render Simulation Scene"]
+    G --> H["User Interacts"]
+    H --> I{"Interaction Type?"} & R{"New Chapter ?"}
+    I -- Change params --> J["Update Params"]
+    I -- Play/Pause --> K["Toggle Motion"]
+    I -- Calculation --> L["Formula Details"]
+    I -- Symbol guide --> M["Concept Guide"]
+    I -- Resources --> N["Resource Panel"]
+    I -- Start tour --> O["Guided Walkthrough"]
+    J --> P["Recalculate Values"]
+    P --> Q["Update Scene, Calcs & Notices"]
+    Q --> H
+    K --> G
+    L --> H
+    M --> H
+    N --> H
+    O --> H
+    R -- Yes --> B
+    R -- No --> S{"Keep Exploring?"}
+    S -- Yes --> H
+    S -- No --> T["User Leaves / Returns Home"]
+
+    style A fill:#C8E6C9
+    style B fill:#BBDEFB
+    style C fill:#BBDEFB
+    style G fill:#BBDEFB
+    style H fill:#BBDEFB
+    style I stroke:#000000,stroke-width:2px,stroke-dasharray: 0,fill:#C8E6C9
+    style R fill:#C8E6C9
+    style J fill:#FFCDD2
+    style K fill:#FFCDD2
+    style L fill:#FFCDD2
+    style M fill:#FFCDD2
+    style N fill:#FFCDD2
+    style O fill:#FFCDD2
+    style P fill:#FFCDD2
+    style Q fill:#FFF9C4
+    style S fill:#C8E6C9
+    style T fill:#FFCDD2

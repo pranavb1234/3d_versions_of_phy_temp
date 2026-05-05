@@ -1,0 +1,29 @@
+---
+config:
+  layout: dagre
+  look: neo
+  theme: redux
+---
+flowchart TB
+    A["Opens App"] --> B["Homepage"]
+    B --> C["Selects Chapter or Simulation"] & D["Clicks Start Exploring"]
+    C --> E["Simulation Screen"]
+    D --> E
+    E --> F{"Take Guided Tour?"}
+    F -- Yes --> G["Guided Tour"]
+    F -- No --> H["Explores Simulation"]
+    G --> H
+    H --> I{"Next Action?"}
+    I -- Change Chapter or Simulation --> C
+    I -- Go to Homepage --> B
+    I -- Stay & Explore --> H
+
+    style A fill:#FFCDD2
+    style B fill:#FFCDD2
+    style C fill:#C8E6C9
+    style D fill:#C8E6C9
+    style E fill:#FFCDD2
+    style F fill:#FFF9C4
+    style G fill:#C8E6C9
+    style H fill:#C8E6C9
+    style I fill:#FFF9C4

@@ -1,0 +1,37 @@
+---
+config:
+  layout: dagre
+  look: neo
+  theme: redux
+---
+flowchart TB
+    A["Scene Component Receives Props"] --> B["Create Three.js Scene"] & M["Props Changed?"]
+    B --> C["Create Camera, Lights, Floor, Labels, Arrows, Meshes"]
+    C --> D["Calculate Physics Constants"]
+    D --> E{"Is Playing?"}
+    E -- Yes --> F["Advance Phase by Delta Time"]
+    E -- No --> G["Keep Current Phase"]
+    F --> H["Update Mesh Positions"]
+    G --> H
+    H --> I["Update Spring Scale and Anchors"]
+    I --> J["Update Velocity and Force Arrows"]
+    J --> K["Update Labels and Checkpoint Text"]
+    K --> L["Render Scene"]
+    L --> E
+    M -- mass, k, amplitude, or play state changed --> N["Cleanup Old Scene Resources"]
+    N --> B
+
+    style A fill:#FFCDD2
+    style B fill:#C8E6C9
+    style M fill:#FFF9C4
+    style C fill:#FFCDD2
+    style D fill:#FFF9C4
+    style E fill:#BBDEFB
+    style F fill:#FFF9C4
+    style G fill:#FFF9C4
+    style H fill:#FFCDD2
+    style I fill:#FFCDD2
+    style J fill:#FFCDD2
+    style K fill:#FFCDD2
+    style L fill:#BBDEFB
+    style N fill:#FFF9C4

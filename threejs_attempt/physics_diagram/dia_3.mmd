@@ -1,0 +1,48 @@
+---
+config:
+  layout: dagre
+  look: neo
+  theme: redux
+---
+flowchart TB
+    A["Open Simulation Lab"] --> B["Choose Chapter"]
+    B --> C["Choose Simulation"]
+    C --> D["Load Interactive Scene"]
+    D --> E["Show Supporting Panels"]
+    E --> F["Calculations Panel"] & G["Simulation Viewer"] & H["Parameter Controls"] & I["What To Notice"] & J["Resources Panel"]
+    H --> K["User Adjusts Values"]
+    K --> L["Physics Formulas Recompute"]
+    L --> M["Visual Scene Updates"] & N["Calculated Results Update"] & O["Effect Highlight Appears"]
+    F --> P["User Opens Calculation Modal"]
+    P --> Q["View Formula, Substitution Steps, and Explanation"]
+    Q --> F
+    J --> R["User Reads Related Content"]
+    R --> D
+    M --> S{"Continue Learning?"}
+    N --> S
+    O --> S
+    S -- Try More Changes --> H
+    S -- Select Another Simulation --> C
+    S -- Select Another Chapter --> B
+    S -- Finish --> T["Exit or Back to Main Page"]
+
+    style A fill:#FFCDD2
+    style B fill:#FFCDD2
+    style C fill:#FFCDD2
+    style D fill:#C8E6C9
+    style E fill:#BBDEFB
+    style F fill:#FFF9C4
+    style G fill:#FFF9C4
+    style H fill:#FFF9C4
+    style I fill:#FFF9C4
+    style J fill:#FFF9C4
+    style K fill:#C8E6C9
+    style L fill:#FFCDD2
+    style M fill:#BBDEFB
+    style N fill:#BBDEFB
+    style O fill:#BBDEFB
+    style P fill:#C8E6C9
+    style Q fill:#FFCDD2
+    style R fill:#C8E6C9
+    style S fill:#FFCDD2
+    style T fill:#C8E6C9

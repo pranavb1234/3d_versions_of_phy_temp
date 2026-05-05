@@ -1,0 +1,28 @@
+---
+config:
+  layout: fixed
+  look: neo
+  theme: redux
+---
+flowchart TB
+    A["App.jsx"] --> B["Top Bar"] & C["Chapter and Simulation Selection"] & D["Oscillation Layout"] & E["Waves or Optics Layout"] & F["TemplateResourcesPanel"] & G["Tour Overlay"]
+    D --> H["Calculations Panel"] & I["Active Oscillation Scene"] & J["Parameter Controls"] & K["What To Notice Panel"] & L["Calculation Modal"]
+    I --> M["SpringMassScene"] & N["DoubleSpringMassScene"] & O["PendulumScene"]
+    E --> P["WaveStaticMarkersScene"] & Q["WaveCompareScene"] & R["WaveStandingScene"] & S["RefractionScene"] & T["MirrorFormulaScene"]
+    F --> U["Study Resources Drawer"]
+    G --> V["Guided Step Highlighting"]
+
+    style A fill:#FFCDD2
+    style B fill:#C8E6C9
+    style C fill:#C8E6C9
+    style D fill:#FFF9C4
+    style E fill:#FFF9C4
+    style F fill:#C8E6C9
+    style G fill:#C8E6C9
+    style H fill:#BBDEFB
+    style I fill:#BBDEFB
+    style J fill:#BBDEFB
+    style K fill:#BBDEFB
+    style L fill:#C8E6C9
+    style M fill:transparent
+    style N fill:transparent

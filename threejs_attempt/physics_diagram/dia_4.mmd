@@ -1,0 +1,26 @@
+---
+config:
+  layout: fixed
+  look: neo
+  theme: redux
+---
+sequenceDiagram
+    autonumber
+    actor User
+    participant Controls as Parameter Controls
+    participant App as App.jsx State
+    participant Memo as useMemo Calculations
+    participant Effect as useEffect Change Detector
+    participant Scene as Active Scene Component
+    participant UI as Panels and Toasts
+
+    User->>Controls: Click + or - button
+    Controls->>App: setMass / setSpringConstant / setAmplitude
+    App->>Memo: Recompute formulas and derived values
+    App->>Effect: Compare previous params with current params
+    Effect->>App: Set activeEffectKey and canvasNotice
+    App->>Scene: Pass updated props
+    Scene->>Scene: Recalculate omega, position, velocity, force
+    Scene->>UI: Render updated canvas objects
+    Memo->>UI: Render updated calculation rows
+    App->>UI: Show highlighted effect and toast
