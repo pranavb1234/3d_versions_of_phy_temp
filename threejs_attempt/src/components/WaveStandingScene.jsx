@@ -352,6 +352,41 @@ export default function WaveStandingScene({ title, description }) {
     setMode((prev) => clamp(Math.round(prev + delta), 1, 5));
   };
 
+  const equationsPanel = (
+    <div className="wave-equations">
+      <div
+        className={`wave-equation ${calcHighlight.lambda ? "is-highlighted" : ""}`}
+        dangerouslySetInnerHTML={renderFormula(
+          `\\lambda = \\frac{2L}{n} = \\frac{2\\times ${formatNumber(
+            lengthL,
+            2
+          )}}{${derived.n}} = ${formatNumber(derived.lambda, 2)}`
+        )}
+      />
+      <div
+        className={`wave-equation ${calcHighlight.v ? "is-highlighted" : ""}`}
+        dangerouslySetInnerHTML={renderFormula(
+          `v = \\sqrt{\\frac{T}{\\mu}} = \\sqrt{\\frac{${formatNumber(
+            tension,
+            1
+          )}}{${formatNumber(mu, 2)}}} = ${formatNumber(derived.v, 2)}`
+        )}
+      />
+      <div
+        className={`wave-equation ${calcHighlight.harmonic ? "is-highlighted" : ""}`}
+        dangerouslySetInnerHTML={renderFormula(
+          `f_n = \\frac{n v}{2L} = \\frac{${derived.n}\\times ${formatNumber(
+            derived.v,
+            2
+          )}}{2\\times ${formatNumber(lengthL, 2)}} = ${formatNumber(
+            derived.harmonicF,
+            2
+          )}`
+        )}
+      />
+    </div>
+  );
+
   return (
     <div className="wave-shell">
       <aside className="wave-left">
@@ -369,38 +404,6 @@ export default function WaveStandingScene({ title, description }) {
             Antinodes (<span className="wave-antinode-text">orange</span>) reach maximum displacement.
           </div>
           <div className="wave-left-item">Higher modes add more nodes and antinodes.</div>
-        </div>
-        <div className="wave-equations">
-          <div
-            className={`wave-equation ${calcHighlight.lambda ? "is-highlighted" : ""}`}
-            dangerouslySetInnerHTML={renderFormula(
-              `\\lambda = \\frac{2L}{n} = \\frac{2\\times ${formatNumber(
-                lengthL,
-                2
-              )}}{${derived.n}} = ${formatNumber(derived.lambda, 2)}`
-            )}
-          />
-          <div
-            className={`wave-equation ${calcHighlight.v ? "is-highlighted" : ""}`}
-            dangerouslySetInnerHTML={renderFormula(
-              `v = \\sqrt{\\frac{T}{\\mu}} = \\sqrt{\\frac{${formatNumber(
-                tension,
-                1
-              )}}{${formatNumber(mu, 2)}}} = ${formatNumber(derived.v, 2)}`
-            )}
-          />
-          <div
-            className={`wave-equation ${calcHighlight.harmonic ? "is-highlighted" : ""}`}
-            dangerouslySetInnerHTML={renderFormula(
-              `f_n = \\frac{n v}{2L} = \\frac{${derived.n}\\times ${formatNumber(
-                derived.v,
-                2
-              )}}{2\\times ${formatNumber(lengthL, 2)}} = ${formatNumber(
-                derived.harmonicF,
-                2
-              )}`
-            )}
-          />
         </div>
         <div className="wave-symbols">
           <div className="wave-symbols-title">Symbol Guide</div>
@@ -592,6 +595,7 @@ export default function WaveStandingScene({ title, description }) {
               onChange={(event) => setMu(parseFloat(event.target.value))}
             />
           </div>
+          {equationsPanel}
         </div>
 
       </aside>

@@ -1352,6 +1352,30 @@ body.lab-active #root {
   box-shadow: 0 6px 16px rgba(37, 99, 235, 0.22);
 }
 
+.wave-standing-controls .wave-equations {
+  margin-top: 0.2rem;
+  padding: 0.55rem 0.6rem;
+  gap: 0.42rem;
+  border-radius: 9px;
+  background: rgba(248, 251, 255, 0.72);
+}
+
+.wave-standing-controls .wave-equation {
+  min-width: 0;
+  overflow-x: auto;
+  padding: 0.06rem 0;
+  font-size: 0.88rem;
+}
+
+.wave-standing-controls .wave-equation .katex {
+  font-size: 0.92rem;
+}
+
+.wave-standing-controls .wave-equation.is-highlighted {
+  padding: 0.18rem 0.28rem;
+  box-shadow: 0 5px 12px rgba(37, 99, 235, 0.18);
+}
+
 .wave-symbols {
   display: grid;
   gap: 0.55rem;
