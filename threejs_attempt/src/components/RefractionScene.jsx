@@ -188,7 +188,7 @@ const drawAngleArc = (ctx, center, radius, fromVec, toVec, color, label) => {
     y: center.y + Math.sin(mid) * (radius + 13)
   };
   ctx.fillStyle = color;
-  ctx.font = '700 13px "Segoe UI", Tahoma, sans-serif';
+  ctx.font = '800 16px "Segoe UI", Tahoma, sans-serif';
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
   ctx.fillText(label, labelPos.x, labelPos.y);
@@ -196,10 +196,10 @@ const drawAngleArc = (ctx, center, radius, fromVec, toVec, color, label) => {
 
 const drawCanvasInfoBox = (ctx, x, y, width, title, lines) => {
   const safeLines = Array.isArray(lines) ? lines : [];
-  const lineHeight = 14;
+  const lineHeight = 17;
   const paddingX = 10;
   const paddingY = 8;
-  const titleHeight = 14;
+  const titleHeight = 16;
   const boxHeight = paddingY * 2 + titleHeight + safeLines.length * lineHeight + 4;
 
   ctx.fillStyle = "rgba(15, 23, 42, 0.6)";
@@ -209,13 +209,13 @@ const drawCanvasInfoBox = (ctx, x, y, width, title, lines) => {
   ctx.strokeRect(x, y, width, boxHeight);
 
   ctx.fillStyle = "#e2e8f0";
-  ctx.font = '700 12px "Segoe UI", Tahoma, sans-serif';
+  ctx.font = '800 14px "Segoe UI", Tahoma, sans-serif';
   ctx.textAlign = "left";
   ctx.textBaseline = "top";
   ctx.fillText(title, x + paddingX, y + paddingY);
 
   ctx.fillStyle = "#cbd5e1";
-  ctx.font = '600 11px "Segoe UI", Tahoma, sans-serif';
+  ctx.font = '650 13px "Segoe UI", Tahoma, sans-serif';
   safeLines.forEach((line, index) => {
     ctx.fillText(line, x + paddingX, y + paddingY + titleHeight + 4 + index * lineHeight);
   });
@@ -405,24 +405,24 @@ export default function RefractionScene({ title }) {
         ctx.fill();
 
         ctx.fillStyle = "rgba(248, 250, 252, 0.9)";
-        ctx.font = '600 12px "Segoe UI", Tahoma, sans-serif';
+        ctx.font = '700 14px "Segoe UI", Tahoma, sans-serif';
         ctx.textAlign = "left";
         ctx.textBaseline = "middle";
         if (snapshot.showBoundary) {
-          ctx.fillText(`Medium 1 (n1 = ${formatNumber(refraction.n1, 2)})`, 14, 22);
-          ctx.fillText(`Medium 2 (n2 = ${formatNumber(refraction.n2, 2)})`, 14, point.y + 22);
+          ctx.fillText(`Medium 1 (n₁ = ${formatNumber(refraction.n1, 2)})`, 14, 24);
+          ctx.fillText(`Medium 2 (n₂ = ${formatNumber(refraction.n2, 2)})`, 14, point.y + 24);
         } else {
-          ctx.fillText(`Single Medium (n = ${formatNumber(refraction.n1, 2)})`, 14, 22);
+          ctx.fillText(`Single Medium (n = ${formatNumber(refraction.n1, 2)})`, 14, 24);
         }
 
-        const boxWidth = Math.min(320, width * 0.42);
+        const boxWidth = Math.min(350, width * 0.46);
         const leftBoxX = 12;
         const rightBoxX = width - boxWidth - 12;
         const boxY = 46;
-        drawCanvasInfoBox(ctx, leftBoxX, boxY, boxWidth, "Incoming Ray ", [
+        drawCanvasInfoBox(ctx, leftBoxX, boxY, boxWidth, "Incoming Ray", [
           "Light enters boundary from Medium 1.",
           "Incident angle i is measured from normal.",
-          
+          `Snell: n₁ sin i = n₂ sin r`,
         ]);
 
         let rightTitle = "Refraction Outcome";
@@ -430,25 +430,25 @@ export default function RefractionScene({ title }) {
         if (refraction.tir) {
           rightTitle = "Total Internal Reflection";
           rightLines = [
-            "n1 > n2 and i > critical angle.",
+            "n₁ > n₂ and i > θc.",
             "No refracted ray appears in Medium 2.",
             "Ray reflects back inside Medium 1."
           ];
         } else if (refraction.n2 > refraction.n1) {
           rightLines = [
-            "Going to denser medium (n2 > n1).",
+            "Going to denser medium (n₂ > n₁).",
             "Light slows down and bends towards normal.",
             "So r < i (for example: air to glass)."
           ];
         } else if (refraction.n2 < refraction.n1) {
           rightLines = [
-            "Going to rarer medium (n2 < n1).",
+            "Going to rarer medium (n₂ < n₁).",
             "Light speeds up and bends away from normal.",
-            
+            "So r > i.",
           ];
         } else {
           rightLines = [
-            "n1 and n2 are equal.",
+            "n₁ and n₂ are equal.",
             "No bending due to equal optical density.",
             "Ray continues straight through boundary."
           ];
@@ -462,7 +462,7 @@ export default function RefractionScene({ title }) {
         if (shouldShowArcs) {
           drawAngleArc(ctx, point, 32, normalUp, incidentFromPoint, "#facc15", "i");
           if (snapshot.showBoundary) {
-            drawAngleArc(ctx, point, 46, normalUp, reflectedDir, "#7dd3fc", "i'");
+            drawAngleArc(ctx, point, 46, normalUp, reflectedDir, "#7dd3fc", "i′");
           }
           if (!refraction.tir) {
             drawAngleArc(ctx, point, 34, normalDown, refractedDir, "#4ade80", "r");
