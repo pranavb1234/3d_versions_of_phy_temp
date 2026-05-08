@@ -2255,6 +2255,10 @@ body.lab-active #root {
   padding: 0.38rem 0.55rem;
 }
 
+.mirror-left .wave-formula .katex {
+  font-size: 1.18rem;
+}
+
 .mirror-left .wave-control-block {
   gap: 0.32rem;
   padding: 0.52rem 0.62rem;
@@ -2271,6 +2275,10 @@ body.lab-active #root {
   padding: 0.08rem 0;
 }
 
+.mirror-left .wave-readout .katex {
+  font-size: 0.98rem;
+}
+
 .mirror-left .wave-left-list {
   gap: 0.28rem;
 }
@@ -2280,6 +2288,10 @@ body.lab-active #root {
   font-weight: 700;
   line-height: 1.25;
   padding: 0.3rem 0.45rem;
+}
+
+.mirror-left .wave-left-item .katex {
+  font-size: 0.98rem;
 }
 
 .mirror-values-block {
@@ -2328,6 +2340,10 @@ body.lab-active #root {
   font-weight: 800;
 }
 
+.mirror-symbols .wave-symbol-name .katex {
+  font-size: 1.04rem;
+}
+
 .mirror-symbols .wave-symbol-label {
   font-weight: 700;
 }
@@ -2335,6 +2351,15 @@ body.lab-active #root {
 .mirror-symbols .wave-symbol-desc {
   font-size: 0.88rem;
   line-height: 1.3;
+}
+
+.mirror-symbols .wave-symbol-desc .katex {
+  font-size: 0.98rem;
+}
+
+.mirror-right .wave-value .katex,
+.mirror-right .wave-slider-row label .katex {
+  font-size: 1rem;
 }
 
 .refraction-canvas-hint {

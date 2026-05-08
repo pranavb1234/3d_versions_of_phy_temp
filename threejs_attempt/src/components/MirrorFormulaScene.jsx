@@ -21,6 +21,13 @@ const renderFormula = (latex) => ({
   __html: katex.renderToString(latex, { throwOnError: false })
 });
 
+const MathInline = ({ latex, className = "" }) => (
+  <span
+    className={`wave-math-inline ${className}`.trim()}
+    dangerouslySetInnerHTML={renderFormula(latex)}
+  />
+);
+
 const DEFAULT_OBJECT_BOUNDS = {
   min: 34,
   max: 320
@@ -567,20 +574,30 @@ const MirrorFormulaScene = ({ title, description }) => {
         <div className="wave-control-block mirror-values-block">
           <div className="wave-control-title">Values</div>
           <div className="wave-readout">
-            <span>u (signed)</span>
-            <span>{formatSigned(derived.u, 2)}</span>
+            <span>
+              <MathInline latex="u" /> (signed)
+            </span>
+            <MathInline latex={`u=${formatSigned(derived.u, 2)}`} />
           </div>
           <div className="wave-readout">
-            <span>v (signed)</span>
-            <span>{derived.isInfinity ? "infinity" : formatSigned(derived.v, 2)}</span>
+            <span>
+              <MathInline latex="v" /> (signed)
+            </span>
+            <MathInline
+              latex={derived.isInfinity ? "v=\\infty" : `v=${formatSigned(derived.v, 2)}`}
+            />
           </div>
           <div className="wave-readout">
-            <span>f (signed)</span>
-            <span>{formatSigned(derived.f, 2)}</span>
+            <span>
+              <MathInline latex="f" /> (signed)
+            </span>
+            <MathInline latex={`f=${formatSigned(derived.f, 2)}`} />
           </div>
           <div className="wave-readout">
-            <span>m = v/u</span>
-            <span>{derived.isInfinity ? "infinity" : formatNumber(derived.mDisplay, 3)}</span>
+            <MathInline latex="m=\frac{v}{u}" />
+            <MathInline
+              latex={derived.isInfinity ? "m=\\infty" : `m=${formatNumber(derived.mDisplay, 3)}`}
+            />
           </div>
         </div>
         <div className="mirror-status-box">
@@ -599,9 +616,15 @@ const MirrorFormulaScene = ({ title, description }) => {
         </div>
         <div className="wave-left-hint mirror-intuition-note">{intuitionNote}</div>
         <div className="wave-left-list">
-          <div className="wave-left-item">Ray 1: parallel to axis reflects through/away from F.</div>
-          <div className="wave-left-item">Ray 2: directed through C retraces after reflection.</div>
-          <div className="wave-left-item">Ray 3: through/towards F reflects parallel to axis.</div>
+          <div className="wave-left-item">
+            Ray <MathInline latex="1" />: parallel to axis reflects through/away from <MathInline latex="F" />.
+          </div>
+          <div className="wave-left-item">
+            Ray <MathInline latex="2" />: directed through <MathInline latex="C" /> retraces after reflection.
+          </div>
+          <div className="wave-left-item">
+            Ray <MathInline latex="3" />: through/towards <MathInline latex="F" /> reflects parallel to axis.
+          </div>
           <div className="wave-left-item">Dashed rays show backward extensions for virtual images.</div>
         </div>
       </aside>
@@ -656,8 +679,10 @@ const MirrorFormulaScene = ({ title, description }) => {
           <div className="wave-control-title">Parameters</div>
           <div className="wave-slider-row">
             <label htmlFor="mirror-focal-length">
-              Focal length |f|
-              <span className="wave-value">{formatNumber(focalLength, 1)} units</span>
+              <span>
+                Focal length <MathInline latex="|f|" />
+              </span>
+              <MathInline className="wave-value" latex={`|f|=${formatNumber(focalLength, 1)}`} />
             </label>
             <input
               id="mirror-focal-length"
@@ -671,8 +696,10 @@ const MirrorFormulaScene = ({ title, description }) => {
           </div>
           <div className="wave-slider-row">
             <label htmlFor="mirror-object-distance">
-              Object distance |u|
-              <span className="wave-value">{formatNumber(objectDistance, 1)} units</span>
+              <span>
+                Object distance <MathInline latex="|u|" />
+              </span>
+              <MathInline className="wave-value" latex={`|u|=${formatNumber(objectDistance, 1)}`} />
             </label>
             <input
               id="mirror-object-distance"
@@ -698,52 +725,57 @@ const MirrorFormulaScene = ({ title, description }) => {
           <div className="wave-symbols-list">
             <details className="wave-symbol-item">
               <summary className="wave-symbol-summary">
-                <span className="wave-symbol-name">P</span>
+                <MathInline className="wave-symbol-name" latex="P" />
                 <span className="wave-symbol-label">Pole</span>
               </summary>
               <div className="wave-symbol-desc">Reference point on mirror where principal axis meets the surface.</div>
             </details>
             <details className="wave-symbol-item">
               <summary className="wave-symbol-summary">
-                <span className="wave-symbol-name">F</span>
+                <MathInline className="wave-symbol-name" latex="F" />
                 <span className="wave-symbol-label">Focus</span>
               </summary>
               <div className="wave-symbol-desc">Point related to parallel-ray reflection (real for concave, virtual for convex).</div>
             </details>
             <details className="wave-symbol-item">
               <summary className="wave-symbol-summary">
-                <span className="wave-symbol-name">C</span>
+                <MathInline className="wave-symbol-name" latex="C" />
                 <span className="wave-symbol-label">Center of Curvature</span>
               </summary>
-              <div className="wave-symbol-desc">Center of the sphere from which mirror is a part; C is at 2f from pole.</div>
+              <div className="wave-symbol-desc">
+                Center of the sphere from which mirror is a part; <MathInline latex="C" /> is at{" "}
+                <MathInline latex="2f" /> from pole.
+              </div>
             </details>
             <details className="wave-symbol-item">
               <summary className="wave-symbol-summary">
-                <span className="wave-symbol-name">u</span>
+                <MathInline className="wave-symbol-name" latex="u" />
                 <span className="wave-symbol-label">Object Distance</span>
               </summary>
               <div className="wave-symbol-desc">Signed distance from pole to object along principal axis.</div>
             </details>
             <details className="wave-symbol-item">
               <summary className="wave-symbol-summary">
-                <span className="wave-symbol-name">v</span>
+                <MathInline className="wave-symbol-name" latex="v" />
                 <span className="wave-symbol-label">Image Distance</span>
               </summary>
               <div className="wave-symbol-desc">Signed distance from pole to image position.</div>
             </details>
             <details className="wave-symbol-item">
               <summary className="wave-symbol-summary">
-                <span className="wave-symbol-name">f</span>
+                <MathInline className="wave-symbol-name" latex="f" />
                 <span className="wave-symbol-label">Focal Length</span>
               </summary>
               <div className="wave-symbol-desc">Signed distance from pole to focus, used in mirror formula.</div>
             </details>
             <details className="wave-symbol-item">
               <summary className="wave-symbol-summary">
-                <span className="wave-symbol-name">m</span>
+                <MathInline className="wave-symbol-name" latex="m" />
                 <span className="wave-symbol-label">Magnification</span>
               </summary>
-              <div className="wave-symbol-desc">m = v/u, indicates image size scaling and sign behavior.</div>
+              <div className="wave-symbol-desc">
+                <MathInline latex="m=\frac{v}{u}" /> indicates image size scaling and sign behavior.
+              </div>
             </details>
           </div>
         </div>
