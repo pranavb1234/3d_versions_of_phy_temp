@@ -1157,31 +1157,34 @@ body.lab-active #root {
 
 .wave-standing-controls {
   gap: 0.65rem;
-  background: linear-gradient(180deg, rgba(248, 251, 255, 0.58) 0%, rgba(232, 239, 248, 0.7) 100%);
+  background: rgba(235, 242, 250, 0.72);
 }
 
 .wave-standing-controls .wave-control-block {
-  border-radius: 10px;
-  border-color: rgba(148, 163, 184, 0.58);
-  background: rgba(248, 251, 255, 0.74);
-  padding: 0.75rem;
-  gap: 0.7rem;
-  box-shadow: 0 8px 20px rgba(36, 52, 79, 0.08);
+  border-radius: 11px;
+  border-color: #b8cae0;
+  background: rgba(246, 250, 255, 0.86);
+  padding: 0.65rem 0.7rem;
+  gap: 0.62rem;
+  box-shadow: none;
 }
 
 .wave-standing-controls .wave-control-title {
-  padding-bottom: 0.35rem;
-  border-bottom: 1px solid rgba(148, 163, 184, 0.34);
-  font-size: 0.76rem;
-  letter-spacing: 0.06em;
+  padding-bottom: 0;
+  border-bottom: 0;
+  font-size: 0.78rem;
+  letter-spacing: 0.07em;
+  color: #001c3d;
 }
 
 .wave-standing-controls .sim-toggle-btn {
   width: 100%;
-  min-height: 2.35rem;
-  border-radius: 8px;
-  font-size: 0.86rem;
-  box-shadow: 0 8px 16px rgba(166, 27, 82, 0.18);
+  min-height: 1.08rem;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  line-height: 1;
+  padding: 0.12rem 0.7rem;
+  box-shadow: none;
   transition: transform 120ms ease, filter 120ms ease, box-shadow 120ms ease;
 }
 
@@ -1190,7 +1193,7 @@ body.lab-active #root {
 }
 
 .wave-standing-controls .sim-toggle-btn.paused {
-  box-shadow: 0 8px 16px rgba(31, 94, 177, 0.18);
+  box-shadow: none;
 }
 
 .wave-standing-controls .wave-slider-row {
@@ -1259,9 +1262,10 @@ body.lab-active #root {
 }
 
 .wave-standing-controls input[type="range"] {
-  height: 24px;
+  width: 100%;
+  height: 15px;
   margin: 0;
-  accent-color: #c72c82;
+  accent-color: #d43f24;
   cursor: pointer;
 }
 
@@ -1269,6 +1273,60 @@ body.lab-active #root {
   outline: 2px solid rgba(31, 94, 177, 0.55);
   outline-offset: 3px;
   border-radius: 999px;
+}
+
+.wave-standing-params {
+  gap: 0.5rem;
+}
+
+.wave-param-row {
+  display: grid;
+  gap: 0.26rem;
+}
+
+.wave-param-head {
+  display: grid;
+  grid-template-columns: 18px minmax(0, 1fr) max-content;
+  align-items: center;
+  gap: 0.4rem;
+  min-width: 0;
+}
+
+.wave-param-icon {
+  width: 18px;
+  height: 18px;
+  border-radius: 999px;
+  border: 1px solid #86a9d8;
+  background: #dcecff;
+  color: #1f5eb1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 0.74rem;
+  font-style: italic;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.wave-param-head label {
+  min-width: 0;
+  color: #0f2440;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 0.96rem;
+  line-height: 1.05;
+}
+
+.wave-param-value {
+  color: #0f2440;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 0.92rem;
+  font-style: italic;
+  white-space: nowrap;
+}
+
+.wave-standing-calculations {
+  align-content: start;
 }
 
 .wave-right.compact {
@@ -1353,26 +1411,29 @@ body.lab-active #root {
 }
 
 .wave-standing-controls .wave-equations {
-  margin-top: 0.2rem;
-  padding: 0.55rem 0.6rem;
-  gap: 0.42rem;
-  border-radius: 9px;
-  background: rgba(248, 251, 255, 0.72);
+  margin-top: 0;
+  padding: 0.2rem 0.25rem 0.1rem;
+  gap: 0.72rem;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
 }
 
 .wave-standing-controls .wave-equation {
   min-width: 0;
   overflow-x: auto;
-  padding: 0.06rem 0;
-  font-size: 0.88rem;
+  padding: 0.02rem 0.12rem;
+  font-size: 0.92rem;
+  scrollbar-width: thin;
 }
 
 .wave-standing-controls .wave-equation .katex {
-  font-size: 0.92rem;
+  font-size: 0.98rem;
 }
 
 .wave-standing-controls .wave-equation.is-highlighted {
   padding: 0.18rem 0.28rem;
+  border-radius: 7px;
   box-shadow: 0 5px 12px rgba(37, 99, 235, 0.18);
 }
 

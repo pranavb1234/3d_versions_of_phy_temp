@@ -348,10 +348,6 @@ export default function WaveStandingScene({ title, description }) {
     setMode(next);
   };
 
-  const handleModeStep = (delta) => {
-    setMode((prev) => clamp(Math.round(prev + delta), 1, 5));
-  };
-
   const equationsPanel = (
     <div className="wave-equations">
       <div
@@ -491,55 +487,31 @@ export default function WaveStandingScene({ title, description }) {
           </button>
         </div>
 
-        <div className="wave-control-block">
-          <div className="wave-control-title">Harmonics</div>
-          <div className="wave-slider-row">
-            <label htmlFor="standing-mode">
-              Harmonic (n)
-              <span className="wave-value">n = {formatNumber(mode, 0)}</span>
-            </label>
-            <div className="wave-harmonic-stepper">
-              <button
-                type="button"
-                className="wave-stepper-btn"
-                onClick={() => handleModeStep(-1)}
-                disabled={mode <= 1}
-                aria-label="Decrease harmonic"
-              >
-                -
-              </button>
-              <input
-                id="standing-mode"
-                type="range"
-                min="1"
-                max="5"
-                step="1"
-                value={mode}
-                onChange={(event) => handleModeSelect(parseFloat(event.target.value))}
-              />
-              <button
-                type="button"
-                className="wave-stepper-btn"
-                onClick={() => handleModeStep(1)}
-                disabled={mode >= 5}
-                aria-label="Increase harmonic"
-              >
-                +
-              </button>
+        <div className="wave-control-block wave-standing-params">
+          <div className="wave-control-title">Parameters</div>
+          <div className="wave-param-row">
+            <div className="wave-param-head">
+              <span className="wave-param-icon">n</span>
+              <label htmlFor="standing-mode">Harmonic (n)</label>
+              <span className="wave-param-value">n = {formatNumber(mode, 0)}</span>
             </div>
-            <div className="wave-harmonic-display">
-              Mode {formatNumber(mode, 0)} of 5
-            </div>
+            <input
+              id="standing-mode"
+              type="range"
+              min="1"
+              max="5"
+              step="1"
+              value={mode}
+              onChange={(event) => handleModeSelect(parseFloat(event.target.value))}
+            />
           </div>
-        </div>
 
-        <div className="wave-control-block">
-          <div className="wave-control-title">Controls</div>
-          <div className="wave-slider-row">
-            <label htmlFor="standing-length">
-              Length (L)
-              <span className="wave-value">{formatNumber(lengthL, 2)}</span>
-            </label>
+          <div className="wave-param-row">
+            <div className="wave-param-head">
+              <span className="wave-param-icon">L</span>
+              <label htmlFor="standing-length">Length (L)</label>
+              <span className="wave-param-value">L = {formatNumber(lengthL, 2)}</span>
+            </div>
             <input
               id="standing-length"
               type="range"
@@ -550,11 +522,12 @@ export default function WaveStandingScene({ title, description }) {
               onChange={(event) => setLengthL(parseFloat(event.target.value))}
             />
           </div>
-          <div className="wave-slider-row">
-            <label htmlFor="standing-tension">
-              Tension
-              <span className="wave-value">{formatNumber(tension, 1)}</span>
-            </label>
+          <div className="wave-param-row">
+            <div className="wave-param-head">
+              <span className="wave-param-icon">T</span>
+              <label htmlFor="standing-tension">Tension</label>
+              <span className="wave-param-value">T = {formatNumber(tension, 1)}</span>
+            </div>
             <input
               id="standing-tension"
               type="range"
@@ -565,11 +538,12 @@ export default function WaveStandingScene({ title, description }) {
               onChange={(event) => setTension(parseFloat(event.target.value))}
             />
           </div>
-          <div className="wave-slider-row">
-            <label htmlFor="standing-frequency">
-              Frequency (f)
-              <span className="wave-value">{formatNumber(frequency, 2)}</span>
-            </label>
+          <div className="wave-param-row">
+            <div className="wave-param-head">
+              <span className="wave-param-icon">f</span>
+              <label htmlFor="standing-frequency">Frequency (f)</label>
+              <span className="wave-param-value">f = {formatNumber(frequency, 2)}</span>
+            </div>
             <input
               id="standing-frequency"
               type="range"
@@ -580,11 +554,12 @@ export default function WaveStandingScene({ title, description }) {
               onChange={(event) => setFrequency(parseFloat(event.target.value))}
             />
           </div>
-          <div className="wave-slider-row">
-            <label htmlFor="standing-mu">
-              Mass/length (μ)
-              <span className="wave-value">{formatNumber(mu, 2)}</span>
-            </label>
+          <div className="wave-param-row">
+            <div className="wave-param-head">
+              <span className="wave-param-icon">μ</span>
+              <label htmlFor="standing-mu">Mass/length (μ)</label>
+              <span className="wave-param-value">μ = {formatNumber(mu, 2)}</span>
+            </div>
             <input
               id="standing-mu"
               type="range"
@@ -595,6 +570,10 @@ export default function WaveStandingScene({ title, description }) {
               onChange={(event) => setMu(parseFloat(event.target.value))}
             />
           </div>
+        </div>
+
+        <div className="wave-control-block wave-standing-calculations">
+          <div className="wave-control-title">Calculations</div>
           {equationsPanel}
         </div>
 
