@@ -1155,6 +1155,18 @@ body.lab-active #root {
   padding: 0.2rem 0;
 }
 
+.wave-math-inline {
+  display: inline-flex;
+  align-items: baseline;
+  line-height: 1;
+  vertical-align: -0.08em;
+}
+
+.wave-math-inline .katex {
+  font-size: 1em;
+  line-height: 1;
+}
+
 .wave-standing-controls {
   gap: 0.65rem;
   background: rgba(235, 242, 250, 0.72);
@@ -1309,6 +1321,10 @@ body.lab-active #root {
   line-height: 1;
 }
 
+.wave-param-icon .katex {
+  font-size: 0.84rem;
+}
+
 .wave-param-head label {
   min-width: 0;
   color: #0f2440;
@@ -1321,8 +1337,11 @@ body.lab-active #root {
   color: #0f2440;
   font-family: Georgia, "Times New Roman", serif;
   font-size: 0.92rem;
-  font-style: italic;
   white-space: nowrap;
+}
+
+.wave-param-value .katex {
+  font-size: 0.94rem;
 }
 
 .wave-standing-calculations {

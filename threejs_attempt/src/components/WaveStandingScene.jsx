@@ -15,6 +15,13 @@ const renderFormula = (latex) => ({
   __html: katex.renderToString(latex, { throwOnError: false })
 });
 
+const MathInline = ({ latex, className = "" }) => (
+  <span
+    className={`wave-math-inline ${className}`.trim()}
+    dangerouslySetInnerHTML={renderFormula(latex)}
+  />
+);
+
 const setupCanvas = (canvas, wrapper, metricsRef) => {
   if (!canvas || !wrapper) {
     return;
@@ -399,59 +406,75 @@ export default function WaveStandingScene({ title, description }) {
           <div className="wave-left-item">
             Antinodes (<span className="wave-antinode-text">orange</span>) reach maximum displacement.
           </div>
-          <div className="wave-left-item">Higher modes add more nodes and antinodes.</div>
+          <div className="wave-left-item">
+            Higher modes (<MathInline latex={"n=2,3,\\ldots"} />) add more nodes and antinodes.
+          </div>
         </div>
         <div className="wave-symbols">
           <div className="wave-symbols-title">Symbol Guide</div>
           <div className="wave-symbols-list">
             <details className="wave-symbol-item">
               <summary className="wave-symbol-summary">
-                <span className="wave-symbol-name">L</span>
+                <MathInline className="wave-symbol-name" latex="L" />
                 <span className="wave-symbol-label">String length</span>
               </summary>
-              <div className="wave-symbol-desc">Distance between fixed ends.</div>
+              <div className="wave-symbol-desc">
+                Distance between fixed ends, measured as <MathInline latex="L" />.
+              </div>
             </details>
             <details className="wave-symbol-item">
               <summary className="wave-symbol-summary">
-                <span className="wave-symbol-name">n</span>
+                <MathInline className="wave-symbol-name" latex="n" />
                 <span className="wave-symbol-label">Harmonic number</span>
               </summary>
-              <div className="wave-symbol-desc">Mode index (1, 2, 3, ...).</div>
+              <div className="wave-symbol-desc">
+                Mode index <MathInline latex={"n=1,2,3,\\ldots"} />.
+              </div>
             </details>
             <details className="wave-symbol-item">
               <summary className="wave-symbol-summary">
-                <span className="wave-symbol-name">T</span>
+                <MathInline className="wave-symbol-name" latex="T" />
                 <span className="wave-symbol-label">Tension</span>
               </summary>
-              <div className="wave-symbol-desc">Pulling force along the string.</div>
+              <div className="wave-symbol-desc">
+                Pulling force along the string, written as <MathInline latex="T" />.
+              </div>
             </details>
             <details className="wave-symbol-item">
               <summary className="wave-symbol-summary">
-                <span className="wave-symbol-name">μ</span>
+                <MathInline className="wave-symbol-name" latex={"\\mu"} />
                 <span className="wave-symbol-label">Mass per length</span>
               </summary>
-              <div className="wave-symbol-desc">Linear density of the string.</div>
+              <div className="wave-symbol-desc">
+                Linear density of the string, written as <MathInline latex={"\\mu"} />.
+              </div>
             </details>
             <details className="wave-symbol-item">
               <summary className="wave-symbol-summary">
-                <span className="wave-symbol-name">λ</span>
+                <MathInline className="wave-symbol-name" latex={"\\lambda"} />
                 <span className="wave-symbol-label">Wavelength</span>
               </summary>
-              <div className="wave-symbol-desc">Distance between adjacent antinodes.</div>
+              <div className="wave-symbol-desc">
+                Distance between adjacent antinodes, written as <MathInline latex={"\\lambda"} />.
+              </div>
             </details>
             <details className="wave-symbol-item">
               <summary className="wave-symbol-summary">
-                <span className="wave-symbol-name">f</span>
+                <MathInline className="wave-symbol-name" latex="f" />
                 <span className="wave-symbol-label">Frequency</span>
               </summary>
-              <div className="wave-symbol-desc">Oscillations per second.</div>
+              <div className="wave-symbol-desc">
+                Oscillations per second, written as <MathInline latex="f" />.
+              </div>
             </details>
             <details className="wave-symbol-item">
               <summary className="wave-symbol-summary">
-                <span className="wave-symbol-name">v</span>
+                <MathInline className="wave-symbol-name" latex="v" />
                 <span className="wave-symbol-label">Wave speed</span>
               </summary>
-              <div className="wave-symbol-desc">Speed of wave propagation on the string.</div>
+              <div className="wave-symbol-desc">
+                Speed of wave propagation on the string, written as <MathInline latex="v" />.
+              </div>
             </details>
           </div>
         </div>
@@ -491,9 +514,11 @@ export default function WaveStandingScene({ title, description }) {
           <div className="wave-control-title">Parameters</div>
           <div className="wave-param-row">
             <div className="wave-param-head">
-              <span className="wave-param-icon">n</span>
-              <label htmlFor="standing-mode">Harmonic (n)</label>
-              <span className="wave-param-value">n = {formatNumber(mode, 0)}</span>
+              <MathInline className="wave-param-icon" latex="n" />
+              <label htmlFor="standing-mode">
+                Harmonic <MathInline latex="(n)" />
+              </label>
+              <MathInline className="wave-param-value" latex={`n=${formatNumber(mode, 0)}`} />
             </div>
             <input
               id="standing-mode"
@@ -508,9 +533,11 @@ export default function WaveStandingScene({ title, description }) {
 
           <div className="wave-param-row">
             <div className="wave-param-head">
-              <span className="wave-param-icon">L</span>
-              <label htmlFor="standing-length">Length (L)</label>
-              <span className="wave-param-value">L = {formatNumber(lengthL, 2)}</span>
+              <MathInline className="wave-param-icon" latex="L" />
+              <label htmlFor="standing-length">
+                Length <MathInline latex="(L)" />
+              </label>
+              <MathInline className="wave-param-value" latex={`L=${formatNumber(lengthL, 2)}`} />
             </div>
             <input
               id="standing-length"
@@ -524,9 +551,9 @@ export default function WaveStandingScene({ title, description }) {
           </div>
           <div className="wave-param-row">
             <div className="wave-param-head">
-              <span className="wave-param-icon">T</span>
+              <MathInline className="wave-param-icon" latex="T" />
               <label htmlFor="standing-tension">Tension</label>
-              <span className="wave-param-value">T = {formatNumber(tension, 1)}</span>
+              <MathInline className="wave-param-value" latex={`T=${formatNumber(tension, 1)}`} />
             </div>
             <input
               id="standing-tension"
@@ -540,9 +567,11 @@ export default function WaveStandingScene({ title, description }) {
           </div>
           <div className="wave-param-row">
             <div className="wave-param-head">
-              <span className="wave-param-icon">f</span>
-              <label htmlFor="standing-frequency">Frequency (f)</label>
-              <span className="wave-param-value">f = {formatNumber(frequency, 2)}</span>
+              <MathInline className="wave-param-icon" latex="f" />
+              <label htmlFor="standing-frequency">
+                Frequency <MathInline latex="(f)" />
+              </label>
+              <MathInline className="wave-param-value" latex={`f=${formatNumber(frequency, 2)}`} />
             </div>
             <input
               id="standing-frequency"
@@ -556,9 +585,11 @@ export default function WaveStandingScene({ title, description }) {
           </div>
           <div className="wave-param-row">
             <div className="wave-param-head">
-              <span className="wave-param-icon">μ</span>
-              <label htmlFor="standing-mu">Mass/length (μ)</label>
-              <span className="wave-param-value">μ = {formatNumber(mu, 2)}</span>
+              <MathInline className="wave-param-icon" latex={"\\mu"} />
+              <label htmlFor="standing-mu">
+                Mass/length <MathInline latex={"(\\mu)"} />
+              </label>
+              <MathInline className="wave-param-value" latex={`\\mu=${formatNumber(mu, 2)}`} />
             </div>
             <input
               id="standing-mu"
