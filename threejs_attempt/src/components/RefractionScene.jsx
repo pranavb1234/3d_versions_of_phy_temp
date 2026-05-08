@@ -569,32 +569,33 @@ export default function RefractionScene({ title }) {
   return (
     <>
     <div className="wave-shell">
-      <aside className="wave-left">
+      <aside className="wave-left refraction-left">
         <div className="wave-left-title">{titleText}</div>
-        <div className="wave-left-hint">
+        <div className="wave-left-hint refraction-note-card">
           This experiment shows how light changes direction at a boundary because of different optical
           densities.
         </div>
-        <div
-          className="wave-formula"
-          dangerouslySetInnerHTML={renderFormula("n_1\\sin i = n_2\\sin r")}
-        />
-        <div
-          className="wave-formula refraction-critical-formula"
-          dangerouslySetInnerHTML={renderFormula(
-            "\\theta_c = \\sin^{-1}\\!\\left(\\frac{n_2}{n_1}\\right),\\;\\text{valid only when }n_1>n_2"
-          )}
-        />
-        
-        <div
-          className="wave-formula refraction-critical-formula"
-          dangerouslySetInnerHTML={renderFormula(criticalCalcLatex)}
-        />
+        <div className="refraction-formula-stack">
+          <div
+            className="wave-formula refraction-primary-formula"
+            dangerouslySetInnerHTML={renderFormula("n_1\\sin i = n_2\\sin r")}
+          />
+          <div
+            className="wave-formula refraction-critical-formula"
+            dangerouslySetInnerHTML={renderFormula(
+              "\\theta_c = \\sin^{-1}\\!\\left(\\frac{n_2}{n_1}\\right),\\;\\text{valid only when }n_1>n_2"
+            )}
+          />
+          <div
+            className="wave-formula refraction-critical-formula"
+            dangerouslySetInnerHTML={renderFormula(criticalCalcLatex)}
+          />
+        </div>
         <div className="wave-readout refraction-check-box">
           <span>Refraction check</span>
           <span>{refractionDecisionText}</span>
         </div>
-        <div className="wave-left-hint">
+        <div className="wave-left-hint refraction-note-card">
           If incidence angle i is greater than{" "}
           <span
             className="refraction-inline-symbol"
@@ -602,13 +603,27 @@ export default function RefractionScene({ title }) {
           />
           , the ray does not refract into medium 2. It undergoes Total Internal Reflection in medium 1.
         </div>
-        <div className="wave-left-list">
-          <div className="wave-left-item refraction-legend-text">Incident ray: yellow</div>
-          <div className="wave-left-item refraction-legend-text">Refracted ray: green</div>
+        <div className="wave-left-list refraction-legend-list">
           <div className="wave-left-item refraction-legend-text">
-            Reflected ray: light blue (TIR only)
+            <span className="refraction-legend-swatch incident" />
+            <span>Incident ray</span>
+            <strong>Yellow</strong>
           </div>
-          <div className="wave-left-item refraction-legend-text">Normal: dashed white line</div>
+          <div className="wave-left-item refraction-legend-text">
+            <span className="refraction-legend-swatch refracted" />
+            <span>Refracted ray</span>
+            <strong>Green</strong>
+          </div>
+          <div className="wave-left-item refraction-legend-text">
+            <span className="refraction-legend-swatch reflected" />
+            <span>Reflected ray</span>
+            <strong>TIR only</strong>
+          </div>
+          <div className="wave-left-item refraction-legend-text">
+            <span className="refraction-legend-swatch normal" />
+            <span>Normal</span>
+            <strong>Dashed white</strong>
+          </div>
         </div>
       </aside>
 

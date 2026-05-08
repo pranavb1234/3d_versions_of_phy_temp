@@ -2354,10 +2354,57 @@ body.lab-active #root {
   grid-auto-rows: max-content;
 }
 
+.refraction-left {
+  gap: 0.68rem;
+}
+
+.refraction-left .wave-left-title {
+  font-size: 1.16rem;
+  line-height: 1.18;
+  color: #0f172a;
+}
+
+.refraction-note-card {
+  border-radius: 10px;
+  border: 1px solid rgba(96, 165, 250, 0.36);
+  background: rgba(219, 234, 254, 0.66);
+  color: #0f3b78;
+  font-size: 0.93rem;
+  font-weight: 650;
+  line-height: 1.36;
+  padding: 0.58rem 0.68rem;
+}
+
+.refraction-formula-stack {
+  display: grid;
+  gap: 0.55rem;
+}
+
+.refraction-left .wave-formula {
+  border-radius: 10px;
+  border-color: rgba(148, 163, 184, 0.48);
+  background: rgba(248, 251, 255, 0.82);
+  padding: 0.58rem 0.65rem;
+  min-height: 42px;
+  display: flex;
+  align-items: center;
+  overflow-x: auto;
+  scrollbar-width: thin;
+}
+
+.refraction-left .wave-formula .katex {
+  font-size: 1.12rem;
+  line-height: 1.2;
+}
+
+.refraction-left .refraction-primary-formula .katex {
+  font-size: 1.22rem;
+}
+
 .refraction-legend-text {
   color: #111827;
-  font-size: 0.95rem;
-  font-weight: 900;
+  font-size: 0.94rem;
+  font-weight: 800;
 }
 
 .refraction-critical-formula {
@@ -2421,15 +2468,72 @@ body.lab-active #root {
 }
 
 .refraction-check-box {
-  margin-top: 0.3rem;
-  padding: 0.48rem 0.58rem;
+  margin-top: 0;
+  padding: 0.52rem 0.6rem;
   border-radius: 10px;
   border: 2px solid rgba(37, 99, 235, 0.62);
   background: rgba(219, 234, 254, 0.95);
-  box-shadow: 0 10px 20px rgba(37, 99, 235, 0.18);
+  box-shadow: none;
   color: #1e3a8a;
   font-weight: 800;
   gap: 0.65rem;
+  font-size: 0.9rem;
+  line-height: 1.25;
+}
+
+.refraction-check-box span:last-child {
+  text-align: right;
+}
+
+.refraction-legend-list {
+  gap: 0.4rem;
+}
+
+.refraction-legend-list .wave-left-item {
+  display: grid;
+  grid-template-columns: 18px minmax(0, 1fr) max-content;
+  align-items: center;
+  gap: 0.52rem;
+  border-radius: 10px;
+  border-color: rgba(148, 163, 184, 0.42);
+  background: rgba(248, 251, 255, 0.72);
+  padding: 0.48rem 0.58rem;
+  line-height: 1.15;
+}
+
+.refraction-legend-list strong {
+  font-size: 0.82rem;
+  color: #334155;
+  white-space: nowrap;
+}
+
+.refraction-legend-swatch {
+  width: 18px;
+  height: 4px;
+  border-radius: 999px;
+  display: inline-block;
+}
+
+.refraction-legend-swatch.incident {
+  background: #facc15;
+}
+
+.refraction-legend-swatch.refracted {
+  background: #4ade80;
+}
+
+.refraction-legend-swatch.reflected {
+  background: #7dd3fc;
+}
+
+.refraction-legend-swatch.normal {
+  height: 12px;
+  border-radius: 0;
+  background: repeating-linear-gradient(
+    to bottom,
+    rgba(15, 23, 42, 0.82) 0 3px,
+    transparent 3px 6px
+  );
 }
 
 .refraction-modal-backdrop {
