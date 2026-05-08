@@ -6,6 +6,7 @@ import wavesPdf from "../../resources/waves.pdf";
 
 export default function TemplateResourcesPanel({
   chapterId,
+  simulationId,
   chapterLabel,
   simulationLabel,
   isOpen,
@@ -33,6 +34,20 @@ export default function TemplateResourcesPanel({
 
     return resourcesByChapter[chapterId] ?? resourcesByChapter.oscillations;
   }, [chapterId]);
+  const pdfPage = useMemo(() => {
+    const pagesBySimulation = {
+      single: 3,
+      double: 10,
+      pendulum: 12,
+      static_markers: 5,
+      standing: 14,
+      compare: 3,
+      refraction: 8,
+      mirror_formula: 4
+    };
+
+    return pagesBySimulation[simulationId] ?? 1;
+  }, [simulationId]);
 
   useEffect(() => {
     if (!isOpen) {
@@ -60,7 +75,7 @@ export default function TemplateResourcesPanel({
   const openNcertPdf = () => {
     setActivePdf({
       title: `NCERT ${resource.topic}`,
-      url: resource.pdfUrl
+      url: `${resource.pdfUrl}#page=${pdfPage}`
     });
   };
 
