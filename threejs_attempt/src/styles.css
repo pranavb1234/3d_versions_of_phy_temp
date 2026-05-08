@@ -2484,6 +2484,13 @@ body.lab-active #root {
   gap: 0.45rem;
 }
 
+.refraction-modal-actions .wave-toggle-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.28rem;
+}
+
 @media (max-width: 760px) {
   .refraction-modal-grid {
     grid-template-columns: 1fr;

@@ -17,6 +17,13 @@ const renderFormula = (latex) => ({
   __html: katex.renderToString(latex, { throwOnError: false })
 });
 
+const MathInline = ({ latex, className = "" }) => (
+  <span
+    className={`wave-math-inline ${className}`.trim()}
+    dangerouslySetInnerHTML={renderFormula(latex)}
+  />
+);
+
 const normalizeAngleDelta = (delta) => {
   let next = delta;
   while (next <= -Math.PI) {
@@ -667,8 +674,13 @@ export default function RefractionScene({ title }) {
           <div className="wave-control-title">Parameters</div>
           <div className="wave-slider-row">
             <label htmlFor="refraction-angle">
-              Angle of incidence (i)
-              <span className="wave-value">{formatNumber(derived.incidenceDeg, 1)} deg</span>
+              <span>
+                Angle of incidence <MathInline latex="(i)" />
+              </span>
+              <MathInline
+                className="wave-value"
+                latex={`i=${formatNumber(derived.incidenceDeg, 1)}^{\\circ}`}
+              />
             </label>
             <input
               id="refraction-angle"
@@ -682,8 +694,10 @@ export default function RefractionScene({ title }) {
           </div>
           <div className="wave-slider-row">
             <label htmlFor="refraction-n1">
-              Refractive index n1
-              <span className="wave-value">{formatNumber(derived.n1, 2)}</span>
+              <span>
+                Refractive index <MathInline latex="n_1" />
+              </span>
+              <MathInline className="wave-value" latex={`n_1=${formatNumber(derived.n1, 2)}`} />
             </label>
             <input
               id="refraction-n1"
@@ -697,8 +711,10 @@ export default function RefractionScene({ title }) {
           </div>
           <div className="wave-slider-row">
             <label htmlFor="refraction-n2">
-              Refractive index n2
-              <span className="wave-value">{formatNumber(derived.n2, 2)}</span>
+              <span>
+                Refractive index <MathInline latex="n_2" />
+              </span>
+              <MathInline className="wave-value" latex={`n_2=${formatNumber(derived.n2, 2)}`} />
             </label>
             <input
               id="refraction-n2"
@@ -717,41 +733,41 @@ export default function RefractionScene({ title }) {
           <div className="wave-symbols-list">
             <details className="wave-symbol-item">
               <summary className="wave-symbol-summary">
-                <span className="wave-symbol-name">i</span>
+                <MathInline className="wave-symbol-name" latex="i" />
                 <span className="wave-symbol-label">Angle of incidence</span>
               </summary>
               <div className="wave-symbol-desc">
-                Angle between incident ray and normal in medium 1.
+                Angle between incident ray and normal in medium <MathInline latex="1" />.
               </div>
             </details>
             <details className="wave-symbol-item">
               <summary className="wave-symbol-summary">
-                <span className="wave-symbol-name">r</span>
+                <MathInline className="wave-symbol-name" latex="r" />
                 <span className="wave-symbol-label">Angle of refraction</span>
               </summary>
               <div className="wave-symbol-desc">
-                Angle between refracted ray and normal in medium 2.
+                Angle between refracted ray and normal in medium <MathInline latex="2" />.
               </div>
             </details>
             <details className="wave-symbol-item">
               <summary className="wave-symbol-summary">
-                <span className="wave-symbol-name">i'</span>
+                <MathInline className="wave-symbol-name" latex="i'" />
                 <span className="wave-symbol-label">Reflected angle</span>
               </summary>
               <div className="wave-symbol-desc">
-                Reflection angle in medium 1 (equal to incidence angle).
+                Reflection angle in medium <MathInline latex="1" />; equal to <MathInline latex="i" />.
               </div>
             </details>
             <details className="wave-symbol-item">
               <summary className="wave-symbol-summary">
-                <span className="wave-symbol-name">n1</span>
+                <MathInline className="wave-symbol-name" latex="n_1" />
                 <span className="wave-symbol-label">Refractive index 1</span>
               </summary>
               <div className="wave-symbol-desc">Refractive index of the top medium.</div>
             </details>
             <details className="wave-symbol-item">
               <summary className="wave-symbol-summary">
-                <span className="wave-symbol-name">n2</span>
+                <MathInline className="wave-symbol-name" latex="n_2" />
                 <span className="wave-symbol-label">Refractive index 2</span>
               </summary>
               <div className="wave-symbol-desc">Refractive index of the bottom medium.</div>
@@ -765,7 +781,7 @@ export default function RefractionScene({ title }) {
                 <span className="wave-symbol-label">Critical angle</span>
               </summary>
               <div className="wave-symbol-desc">
-                Maximum incidence angle for refraction when n1 {'>'} n2.
+                Maximum incidence angle for refraction when <MathInline latex="n_1>n_2" />.
               </div>
             </details>
           </div>
@@ -793,35 +809,39 @@ export default function RefractionScene({ title }) {
             </button>
           </div>
           <div className="refraction-modal-subtitle">
-            <strong>n1</strong> is Medium 1 (upper medium) and <strong>n2</strong> is Medium 2 (lower
-            medium).
+            <MathInline latex="n_1" /> is Medium <MathInline latex="1" /> (upper medium) and{" "}
+            <MathInline latex="n_2" /> is Medium <MathInline latex="2" /> (lower medium).
           </div>
           <div className="refraction-modal-grid">
             <div className="refraction-modal-section">
-              <div className="refraction-modal-section-title">Set n1 (Medium 1)</div>
+              <div className="refraction-modal-section-title">
+                Set <MathInline latex="n_1" /> (Medium <MathInline latex="1" />)
+              </div>
               <div className="refraction-modal-actions">
                 <button type="button" className="wave-toggle-btn" onClick={() => applyPreset(setN1, 1.0)}>
-                  Air (1.0)
+                  Air <MathInline latex="(n=1.00)" />
                 </button>
                 <button type="button" className="wave-toggle-btn" onClick={() => applyPreset(setN1, 1.33)}>
-                  Water (1.33)
+                  Water <MathInline latex="(n=1.33)" />
                 </button>
                 <button type="button" className="wave-toggle-btn" onClick={() => applyPreset(setN1, 1.5)}>
-                  Glass (1.5)
+                  Glass <MathInline latex="(n=1.50)" />
                 </button>
               </div>
             </div>
             <div className="refraction-modal-section">
-              <div className="refraction-modal-section-title">Set n2 (Medium 2)</div>
+              <div className="refraction-modal-section-title">
+                Set <MathInline latex="n_2" /> (Medium <MathInline latex="2" />)
+              </div>
               <div className="refraction-modal-actions">
                 <button type="button" className="wave-toggle-btn" onClick={() => applyPreset(setN2, 1.0)}>
-                  Air (1.0)
+                  Air <MathInline latex="(n=1.00)" />
                 </button>
                 <button type="button" className="wave-toggle-btn" onClick={() => applyPreset(setN2, 1.33)}>
-                  Water (1.33)
+                  Water <MathInline latex="(n=1.33)" />
                 </button>
                 <button type="button" className="wave-toggle-btn" onClick={() => applyPreset(setN2, 1.5)}>
-                  Glass (1.5)
+                  Glass <MathInline latex="(n=1.50)" />
                 </button>
               </div>
             </div>
