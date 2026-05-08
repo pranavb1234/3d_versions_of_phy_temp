@@ -109,7 +109,7 @@ const drawDoubleArrow = (ctx, x1, y1, x2, y2, color) => {
 
 export default function WaveStandingScene({ title, description }) {
   const [isPlaying, setIsPlaying] = useState(true);
-  const [lengthL, setLengthL] = useState(6);
+  const [lengthL, setLengthL] = useState(LENGTH_MAX);
   const [tension, setTension] = useState(20);
   const [frequency, setFrequency] = useState(1.0);
   const [mu, setMu] = useState(0.5);
@@ -476,7 +476,7 @@ export default function WaveStandingScene({ title, description }) {
         </div>
       </section>
 
-      <aside className="wave-right">
+      <aside className="wave-right wave-standing-controls">
         <div className="wave-control-block">
           <div className="wave-control-title">Simulation</div>
           <button
@@ -491,14 +491,19 @@ export default function WaveStandingScene({ title, description }) {
         <div className="wave-control-block">
           <div className="wave-control-title">Harmonics</div>
           <div className="wave-slider-row">
-            <label htmlFor="standing-mode">Harmonic (n)</label>
-            <div className="wave-harmonic-row">
+            <label htmlFor="standing-mode">
+              Harmonic (n)
+              <span className="wave-value">n = {formatNumber(mode, 0)}</span>
+            </label>
+            <div className="wave-harmonic-stepper">
               <button
                 type="button"
-                className="wave-toggle-btn"
-                onClick={() => handleModeStep(1)}
+                className="wave-stepper-btn"
+                onClick={() => handleModeStep(-1)}
+                disabled={mode <= 1}
+                aria-label="Decrease harmonic"
               >
-                +
+                -
               </button>
               <input
                 id="standing-mode"
@@ -511,14 +516,16 @@ export default function WaveStandingScene({ title, description }) {
               />
               <button
                 type="button"
-                className="wave-toggle-btn"
-                onClick={() => handleModeStep(-1)}
+                className="wave-stepper-btn"
+                onClick={() => handleModeStep(1)}
+                disabled={mode >= 5}
+                aria-label="Increase harmonic"
               >
-                -
+                +
               </button>
             </div>
             <div className="wave-harmonic-display">
-              n = {formatNumber(mode, 0)}
+              Mode {formatNumber(mode, 0)} of 5
             </div>
           </div>
         </div>
