@@ -180,21 +180,78 @@ The system consists of two major parts:
 
 The frontend can run independently as a physics simulator. The RAG backend is optional and can be started separately when local question-answering is needed.
 
-## 9. User Workflow
+## 9. User Workflow and Application Experience
 
-The user workflow is:
+When the user opens the application, the first screen displayed is the home page of **Unfold : Physics**. This page acts as the entry point to the whole learning environment. From here, the user has two main options:
 
-1. The learner opens the web application.
-2. The landing page displays the project identity, flow diagram, and simulation cards.
-3. The learner selects a chapter: Oscillations, Waves, or Optics.
-4. The learner opens a simulation from that chapter.
-5. The simulation lab renders the selected scene.
-6. The learner adjusts parameters using controls.
-7. React state updates the current parameter values.
-8. Derived values and calculations are recomputed.
-9. The scene updates visually based on the new values.
-10. The calculation panel, notices, and symbol guide help explain the result.
-11. The learner may open textbook resources or switch to another simulation.
+1. The user can click **Start Exploring**, which directly opens the default simulation in the simulation lab.
+2. The user can scroll through the home page, browse the available chapters, choose a chapter, and then select a specific simulation from that chapter.
+
+The chapter-based selection flow is useful when the learner already knows which topic they want to study. For example, the user can open the Oscillations chapter and select the single spring-mass simulation, or open the Optics chapter and select the spherical mirror simulation. Once a simulation is selected, the application directly redirects the user to that exact simulation instead of requiring extra navigation.
+
+### 9.1 Opening a Simulation
+
+After the user enters a simulation, the simulation workspace is displayed. At this stage, the user is given the option to take a guided tour. If the user chooses the tour, the application explains the important parts of the screen step by step. The tour highlights the simulation viewer, calculation section, symbol guide, parameter controls, notices, and other relevant interface areas so that the learner understands how to use the lab.
+
+If the user skips the tour, the simulation opens directly and the learner can begin interacting with it immediately.
+
+### 9.2 Main Simulation Layout
+
+Each simulation is presented as a complete learning workspace rather than only a visual animation. The major sections are:
+
+- **Simulation canvas/viewer**: The main area where the physics simulation is displayed.
+- **Calculation panel**: Shows formulas and current calculated values related to the selected simulation.
+- **Symbol guide**: Explains the symbols used in the simulation, formulas, diagrams, and equations.
+- **Play/pause control**: Allows the user to pause or resume the motion of animated simulations.
+- **Parameter controls**: Allows the user to change values such as mass, spring constant, amplitude, wavelength, angle, refractive index, object distance, or other simulation-specific quantities.
+- **Additional learning content**: Includes notices, observations, theory hints, and simulation-specific explanation panels that help the user understand what is happening.
+
+The calculation panel is interactive. The user can click a calculation row to open a detailed explanation of that calculation. This expanded view shows how the result is obtained, which formula is used, and how the current parameter values are substituted into the formula.
+
+The symbol guide is also interactive. Symbols used in the simulation or equation are listed with short labels. When the user clicks a symbol entry, it expands to describe what the symbol represents and how it is used in that simulation.
+
+### 9.3 Real-Time Parameter Interaction
+
+A core feature of the project is that changing parameters changes the simulation in real time. When the user moves a slider, selects an option, or changes a numeric value, the physics model recalculates the dependent quantities and the visual representation updates immediately.
+
+For example:
+
+- Changing mass or spring constant changes the speed of oscillation in a spring-mass system.
+- Changing amplitude changes the range of motion.
+- Changing wavelength, frequency, or phase changes the wave diagram.
+- Changing refractive indices or angle of incidence changes the path of light in the refraction simulation.
+- Changing object distance or mirror type changes the image position and ray diagram in the mirror simulation.
+
+This helps the user connect cause and effect. Instead of only reading a formula, the learner can see how the formula affects the physical behavior.
+
+### 9.4 Interactivity in 3D and 2D Simulations
+
+The 3D simulations are fully interactive. The user can rotate the view, zoom in or out, inspect the scene from different angles, and observe objects such as blocks, springs, pendulums, arrows, labels, and reference markers. This is especially useful for oscillation simulations, where depth, camera movement, and object positioning make the concept easier to visualize.
+
+Some 2D simulations also include direct interaction. For example, the user can drag elements or adjust graphical controls in simulations such as refraction and mirror image formation. Other 2D scenes focus on parameter-based interaction through sliders and buttons.
+
+### 9.5 Study Resources
+
+Each simulation includes a resources section. When the user opens this section, the application displays study material related to the current chapter and simulation. At present, the available study resource is the NCERT-style textbook PDF.
+
+The resource system is simulation-aware. When the user clicks **Open**, the application opens the relevant PDF at the page connected to the selected simulation. It does not open a random page. This allows the user to move directly from the interactive simulation to the matching textbook explanation.
+
+### 9.6 Returning to the Home Page
+
+The simulation workspace includes a **Back to Main Page** option. This allows the user to leave the current simulation and return to the home page. From there, the learner can start exploring again, choose another chapter, or open a different simulation.
+
+Overall, the user workflow is:
+
+1. Open the application.
+2. Use **Start Exploring** or choose a chapter from the home page.
+3. Select a simulation.
+4. Take the guided tour or skip it.
+5. Interact with the simulation canvas.
+6. Change parameters and observe real-time physics changes.
+7. Open calculations to understand formulas and substitutions.
+8. Use the symbol guide to understand notation.
+9. Open the resources section for related NCERT material.
+10. Return to the main page when finished.
 
 This workflow is documented further in `docs/SYSTEM_WORKFLOW.md`.
 
@@ -1273,4 +1330,3 @@ The project is especially effective because it treats physics as a connected exp
 | `rag_local/build_index.py` | Index builder. |
 | `rag_local/knowledge/templates.json` | Local physics knowledge base. |
 | `docs/SYSTEM_WORKFLOW.md` | Workflow and architecture diagrams. |
-
