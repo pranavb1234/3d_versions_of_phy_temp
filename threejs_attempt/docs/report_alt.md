@@ -294,22 +294,7 @@ These simulations use Canvas because optics diagrams involve rays, axes, boundar
 
 `src/components/SpringMassScene.jsx`
 
-### Concept
-
-This simulation shows simple harmonic motion of a block attached to a spring fixed to a wall.
-
-### Used Formulae
-
-```text
-F = -kx
-omega = sqrt(k / m)
-T = 2 pi sqrt(m / k)
-v_max = omega A
-a_max = omega^2 A
-E = 1/2 k A^2
-```
-
-### Actually Used Features
+### Visible Features
 
 - 3D wall, spring, mass block, floor, and grid.
 - Spring stretching and compression.
@@ -322,32 +307,13 @@ E = 1/2 k A^2
 - Formula calculation panel.
 - Symbol guide.
 
-### Learning Outcome
-
-The learner sees how mass, spring constant, and amplitude affect simple harmonic motion.
-
 ## 12.2 Double Spring-Mass
 
 ### File
 
 `src/components/DoubleSpringMassScene.jsx`
 
-### Concept
-
-This simulation shows a mass attached between two springs. Both springs contribute to the restoring force.
-
-### Used Formulae
-
-```text
-k_eff = 2k
-omega = sqrt(k_eff / m)
-T = 2 pi sqrt(m / k_eff)
-v_max = omega A
-a_max = omega^2 A
-E = 1/2 k_eff A^2
-```
-
-### Actually Used Features
+### Visible Features
 
 - 3D left wall and right wall.
 - Two spring meshes.
@@ -359,30 +325,13 @@ E = 1/2 k_eff A^2
 - Mass, spring constant, and amplitude controls.
 - Calculation panel and modal explanation.
 
-### Learning Outcome
-
-The learner understands effective spring constant and sees why a double-spring system oscillates faster than a single spring system with the same individual spring constant.
-
 ## 12.3 Simple Pendulum
 
 ### File
 
 `src/components/PendulumScene.jsx`
 
-### Concept
-
-This simulation shows a pendulum bob oscillating about a pivot under gravity.
-
-### Used Formulae
-
-```text
-omega = sqrt(g / L)
-T = 2 pi sqrt(L / g)
-theta(t) = theta_0 cos(omega t)
-F_t = -mg sin(theta)
-```
-
-### Actually Used Features
+### Visible Features
 
 - 3D support beam.
 - Pivot.
@@ -396,10 +345,6 @@ F_t = -mg sin(theta)
 - Mass control.
 - Formula and symbol guide panels.
 
-### Learning Outcome
-
-The learner sees that pendulum motion depends mainly on length and gravity in the small-angle model, while mass does not change the period.
-
 ## 13. Wave Simulations
 
 ## 13.1 Wave Markers Static
@@ -408,20 +353,7 @@ The learner sees that pendulum motion depends mainly on length and gravity in th
 
 `src/components/WaveStaticMarkersScene.jsx`
 
-### Concept
-
-This simulation introduces important wave parameters using a static wave snapshot.
-
-### Used Formulae
-
-```text
-y(x,t) = a sin((2 pi / lambda)x - omega t + phi)
-omega = 2 pi / T
-f = 1 / T
-v = f lambda = lambda / T
-```
-
-### Actually Used Features
+### Visible Features
 
 - SVG wave curve.
 - Amplitude marker.
@@ -434,31 +366,13 @@ v = f lambda = lambda / T
 - Symbol guide.
 - Color-coded highlights.
 
-### Learning Outcome
-
-The learner identifies amplitude, wavelength, period, frequency, wave speed, and phase visually.
-
 ## 13.2 Transverse vs Longitudinal
 
 ### File
 
 `src/components/WaveCompareScene.jsx`
 
-### Concept
-
-This simulation compares transverse and longitudinal waves using the same mathematical parameters.
-
-### Used Formulae
-
-```text
-y(x,t) = A sin(kx - omega t + phi)
-k = 2 pi / lambda
-T = 2 pi / omega
-f = omega / 2 pi
-v = omega / k
-```
-
-### Actually Used Features
+### Visible Features
 
 - Canvas graph for transverse wave.
 - Canvas graph for longitudinal wave.
@@ -469,30 +383,13 @@ v = omega / k
 - Live calculation list.
 - Parameter explanation modal.
 
-### Learning Outcome
-
-The learner compares perpendicular particle motion in transverse waves with parallel particle motion in longitudinal waves.
-
 ## 13.3 Standing Waves on a String
 
 ### File
 
 `src/components/WaveStandingScene.jsx`
 
-### Concept
-
-This simulation shows standing waves formed on a string fixed at both ends.
-
-### Used Formulae
-
-```text
-y(x,t) = A sin(n pi x / L) sin(2 pi f t)
-lambda = 2L / n
-v = sqrt(T / mu)
-f_n = n v / 2L
-```
-
-### Actually Used Features
+### Visible Features
 
 - Canvas standing wave animation.
 - Fixed-end string.
@@ -505,10 +402,6 @@ f_n = n v / 2L
 - Linear density control.
 - Live formula calculations.
 
-### Learning Outcome
-
-The learner understands harmonic modes, nodes, antinodes, wavelength, wave speed, and frequency relationships for standing waves.
-
 ## 14. Optics Simulations
 
 ## 14.1 Refraction
@@ -517,18 +410,7 @@ The learner understands harmonic modes, nodes, antinodes, wavelength, wave speed
 
 `src/components/RefractionScene.jsx`
 
-### Concept
-
-This simulation shows how light bends when crossing a boundary between two media.
-
-### Used Formulae
-
-```text
-n1 sin(i) = n2 sin(r)
-theta_c = sin^-1(n2 / n1)
-```
-
-### Actually Used Features
+### Visible Features
 
 - Canvas ray diagram.
 - Medium 1 and Medium 2.
@@ -544,28 +426,13 @@ theta_c = sin^-1(n2 / n1)
 - Material preset modal for air, water, and glass.
 - Total internal reflection condition.
 
-### Learning Outcome
-
-The learner observes bending toward or away from the normal and understands total internal reflection.
-
 ## 14.2 Spherical Mirrors
 
 ### File
 
 `src/components/MirrorFormulaScene.jsx`
 
-### Concept
-
-This simulation visualizes image formation by concave and convex mirrors.
-
-### Used Formulae
-
-```text
-1/v + 1/u = 1/f
-m = v / u
-```
-
-### Actually Used Features
+### Visible Features
 
 - Canvas ray diagram.
 - Concave and convex mirror modes.
@@ -582,37 +449,19 @@ m = v / u
 - Object distance slider.
 - Image nature, orientation, and size readouts.
 
-### Learning Outcome
-
-The learner understands real and virtual images, upright and inverted images, magnification, and mirror sign convention.
-
 ## 15. Actually Used Learning Features
 
 ## 15.1 Calculation Panels
 
-The oscillation chapter uses calculation panels showing formulas and current numeric values. Users can open modal windows to see additional explanation and substitution steps.
+The simulation pages include calculation panels that show current values and allow users to open a short explanation when needed.
 
 ## 15.2 Symbol Guides
 
-Symbol guides explain important variables such as:
-
-- `m`: mass.
-- `k`: spring constant.
-- `A`: amplitude.
-- `omega`: angular frequency.
-- `T`: time period.
-- `lambda`: wavelength.
-- `f`: frequency.
-- `v`: velocity or wave speed depending on context.
-- `n`: refractive index or harmonic number depending on context.
+Symbol guides explain the notation used in the currently selected simulation without requiring the user to leave the page.
 
 ## 15.3 What To Notice Panel
 
-The oscillation chapter includes a panel that explains the effect of parameter changes. For example:
-
-- Increasing mass increases period.
-- Increasing spring constant increases angular frequency.
-- Increasing amplitude increases maximum speed and energy.
+The oscillation chapter includes a panel that explains the visible effect of parameter changes.
 
 ## 15.4 Guided Tour
 
