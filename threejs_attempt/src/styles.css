@@ -215,6 +215,12 @@ body.lab-active #root {
   position: relative;
 }
 
+.scene-canvas > canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
 .scene-controls {
   position: absolute;
   top: 0.8rem;

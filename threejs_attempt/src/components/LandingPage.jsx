@@ -109,7 +109,7 @@ export default function LandingPage({ onStart }) {
           <div className="landing-hero-kicker">A physics learning/simulation lab</div>
           <h1>Unfold : Physics</h1>
           <p>
-            Experience physics like never before. Transform static formulas into interactive 3D
+            Experience physics like never before. Transform static formulas into interactive 3D/2D
             simulations, and learn by doing instead of only reading.
           </p>
           <div className="landing-hero-actions">
