@@ -830,15 +830,21 @@ export default function App({
       return [
         {
           key: "mass",
-          text: "Mass does not change the period (small-angle); it changes energy."
+          formula: "m \\uparrow \\;\\Rightarrow\\; T_p \\text{ unchanged}",
+          text:
+            "For small angles, the period depends on length and gravity, not mass. A heavier bob mainly has more energy."
         },
         {
           key: "amplitude",
-          text: "Increasing max angle raises max speed and energy; period stays nearly the same."
+          formula: "\\theta_0 \\uparrow \\;\\Rightarrow\\; v_{max} \\uparrow,\\; E \\uparrow",
+          text:
+            "A bigger starting angle stores more energy, so the bob moves faster. The period changes very little for small angles."
         },
         {
           key: "system",
-          text: "Length and gravity set omega and the period in this model."
+          formula: "\\omega = \\sqrt{g/L},\\; T_p = 2\\pi\\sqrt{L/g}",
+          text:
+            "Length and gravity control the swing rate. Longer length slows it down;"
         }
       ];
     }
@@ -846,15 +852,21 @@ export default function App({
       return [
         {
           key: "mass",
-          text: "Increasing mass decreases omega, so the period increases."
+          formula: "m \\uparrow \\;\\Rightarrow\\; \\omega \\downarrow \\;\\Rightarrow\\; T_p \\uparrow",
+          text:
+            "More mass means more inertia. The two springs move it more slowly, so the time period becomes longer."
         },
         {
           key: "springConstant",
-          text: "Increasing k raises omega and shortens the period (effective stiffness is 2k)."
+          formula: "k_{eff}=2k,\\; k \\uparrow \\;\\Rightarrow\\; \\omega \\uparrow \\;\\Rightarrow\\; T_p \\downarrow",
+          text:
+            "Two springs act like a stronger spring. Increasing \\(k\\) makes the system faster and shortens the time period."
         },
         {
           key: "amplitude",
-          text: "Increasing amplitude increases max speed and total energy; period stays the same."
+          formula: "A \\uparrow \\;\\Rightarrow\\; v_{max} \\uparrow,\\; E \\uparrow,\\; T_p \\text{ same}",
+          text:
+            "A larger amplitude gives higher max speed and more energy. For an ideal spring system, the time period stays the same."
         }
       ];
     }
@@ -863,19 +875,19 @@ export default function App({
         key: "mass",
         formula: "m \\uparrow \\;\\Rightarrow\\; \\omega \\downarrow \\;\\Rightarrow\\; T_p \\uparrow",
         text:
-          "A larger mass has more inertia, so it is harder for the spring to speed up and slow down. Because angular frequency is \\(\\omega = \\sqrt{k/m}\\), increasing mass decreases \\(\\omega\\). The motion becomes slower, so the time period \\(T_p\\) becomes longer."
+          "More mass means more inertia. The spring moves it more slowly, so \\(\\omega\\) decreases and the time period \\(T_p\\) becomes longer."
       },
       {
         key: "springConstant",
         formula: "k \\uparrow \\;\\Rightarrow\\; \\omega \\uparrow \\;\\Rightarrow\\; T_p \\downarrow",
         text:
-          "A larger spring constant means a stiffer spring and a stronger restoring force for the same displacement. Since \\(\\omega = \\sqrt{k/m}\\), increasing \\(k\\) increases \\(\\omega\\). The mass oscillates faster, so the time period \\(T_p\\) becomes shorter."
+          "A stiffer spring gives a stronger restoring force. So \\(\\omega\\) increases and the mass oscillates faster, making time period \\(T_p\\) shorter."
       },
       {
         key: "amplitude",
-        formula: "A \\uparrow \\;\\Rightarrow\\; v_{max} \\uparrow,\\; E \\uparrow,\\; T_p \\text{ unchanged}",
+        formula: "A \\uparrow \\;\\Rightarrow\\; v_{max} \\uparrow,\\; E \\uparrow,\\; T_p \\text{ same}",
         text:
-          "Amplitude is the maximum displacement from equilibrium. In an ideal spring-mass system, changing amplitude does not change \\(\\omega\\) or \\(T_p\\), because \\(T_p = 2\\pi\\sqrt{m/k}\\). A larger amplitude only gives a larger maximum speed and more total energy."
+          "A bigger amplitude gives higher max speed and more energy. In an ideal spring-mass system, \\(\\omega\\) and time period \\(T_p\\) stay the same."
       }
     ];
   }, [templateId]);
@@ -884,21 +896,21 @@ export default function App({
     () => ({
       single: {
         mass: {
-          up: "Increasing mass decreases omega, so the period increases.",
-          down: "Decreasing mass increases omega, so the period decreases."
+          up: "Increasing mass decreases omega, so the time period increases.",
+          down: "Decreasing mass increases omega, so the time period decreases."
         },
         springConstant: {
-          up: "Increasing k raises omega and shortens the period.",
-          down: "Decreasing k lowers omega and lengthens the period."
+          up: "Increasing k raises omega and shortens the time period.",
+          down: "Decreasing k lowers omega and lengthens the time period."
         },
         amplitude: {
-          up: "Increasing amplitude increases max speed and total energy; period stays the same.",
-          down: "Decreasing amplitude lowers max speed and total energy; period stays the same."
+          up: "Increasing amplitude increases max speed and total energy; time period stays the same.",
+          down: "Decreasing amplitude lowers max speed and total energy; time period stays the same."
         }
       },
       double: {
         mass: {
-          up: "Increasing mass decreases omega, so the period increases.",
+          up: "Increasing mass decreases omega, so the time period increases.",
           down: "Decreasing mass increases omega, so the period decreases."
         },
         springConstant: {
@@ -947,6 +959,11 @@ export default function App({
     });
   const activeEffect =
     effects.length > 0 ? effects[Math.min(activeEffectIndex, effects.length - 1)] : null;
+  const showPreviousEffect = () => {
+    setActiveEffectIndex((prev) =>
+      effects.length > 0 ? (prev - 1 + effects.length) % effects.length : 0
+    );
+  };
   const showNextEffect = () => {
     setActiveEffectIndex((prev) => (effects.length > 0 ? (prev + 1) % effects.length : 0));
   };
@@ -1596,14 +1613,24 @@ export default function App({
           >
             <div className="shm-effects-head">
               <div className="shm-right-title">What To Notice</div>
-              <button
-                type="button"
-                className="shm-effects-next"
-                onClick={showNextEffect}
-                aria-label="Show next notice card"
-              >
-                →
-              </button>
+              <div className="shm-effects-actions">
+                <button
+                  type="button"
+                  className="shm-effects-next shm-effects-prev"
+                  onClick={showPreviousEffect}
+                  aria-label="Show previous notice card"
+                >
+                  ←
+                </button>
+                <button
+                  type="button"
+                  className="shm-effects-next"
+                  onClick={showNextEffect}
+                  aria-label="Show next notice card"
+                >
+                  →
+                </button>
+              </div>
             </div>
             <div className="shm-effects-carousel">
               {activeEffect ? (
@@ -1619,7 +1646,7 @@ export default function App({
                       dangerouslySetInnerHTML={renderFormula(activeEffect.formula)}
                     />
                   ) : null}
-                  <div>{renderInlineLatexText(activeEffect.text)}</div>
+                  <div className="shm-effects-text">{renderInlineLatexText(activeEffect.text)}</div>
                 </div>
               ) : null}
               <div className="shm-effects-dots" aria-hidden="true">
