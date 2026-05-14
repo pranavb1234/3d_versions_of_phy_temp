@@ -60,6 +60,7 @@ export default function App({
   const [activeParamInfo, setActiveParamInfo] = useState(null);
   const [activeCalc, setActiveCalc] = useState(null);
   const [activeEffectKey, setActiveEffectKey] = useState(null);
+  const [activeEffectIndex, setActiveEffectIndex] = useState(0);
   const [canvasNotice, setCanvasNotice] = useState(null);
   const [isResourcesPanelOpen, setIsResourcesPanelOpen] = useState(false);
   const [showTourIntro, setShowTourIntro] = useState(false);
@@ -240,11 +241,11 @@ export default function App({
             descriptionLatex: "\\omega = \\sqrt{\\frac{k}{m}}"
           },
           {
-            symbol: "T",
+            symbol: "T_p",
             label: "Time Period",
             description:
-              "Time for one full oscillation cycle.",
-            descriptionLatex: "T = 2\\pi\\sqrt{\\frac{m}{k}}"
+              "Time taken by the mass to complete one full to-and-fro oscillation and return to the same state.",
+            descriptionLatex: "T_p = 2\\pi\\sqrt{\\frac{m}{k}} = \\frac{2\\pi}{\\omega}"
           },
           {
             symbol: "v",
@@ -741,16 +742,17 @@ export default function App({
           ]
         },
         {
-          title: "Period",
-          latex: "T = 2\\pi\\sqrt{\\frac{m}{k}}",
+          title: "Time Period",
+          latex: "T_p = 2\\pi\\sqrt{\\frac{m}{k}}",
           value: `${periodVal} s`,
           valueLatex: `${periodVal}\\,\\text{s}`,
-          detail: "Time for one full oscillation.",
-          detailLatex: "T = \\frac{2\\pi}{\\omega}",
+          detail:
+            "Time period is the time taken for one complete oscillation: from a starting position, through both extremes, and back to the same position with the same direction of motion.",
+          detailLatex: "T_p = \\frac{2\\pi}{\\omega}",
           steps: [
-            "T = 2\\pi\\sqrt{\\frac{m}{k}}",
-            `T = 2\\pi\\sqrt{\\frac{${massVal}}{${kVal}}}`,
-            `T = ${periodVal}\\,\\text{s}`
+            "T_p = 2\\pi\\sqrt{\\frac{m}{k}}",
+            `T_p = 2\\pi\\sqrt{\\frac{${massVal}}{${kVal}}}`,
+            `T_p = ${periodVal}\\,\\text{s}`
           ]
         },
         {
@@ -859,15 +861,21 @@ export default function App({
     return [
       {
         key: "mass",
-        text: "Increasing mass decreases omega, so the period increases."
+        formula: "m \\uparrow \\;\\Rightarrow\\; \\omega \\downarrow \\;\\Rightarrow\\; T_p \\uparrow",
+        text:
+          "A larger mass has more inertia, so it is harder for the spring to speed up and slow down. Because angular frequency is \\(\\omega = \\sqrt{k/m}\\), increasing mass decreases \\(\\omega\\). The motion becomes slower, so the time period \\(T_p\\) becomes longer."
       },
       {
         key: "springConstant",
-        text: "Increasing k raises omega and shortens the period."
+        formula: "k \\uparrow \\;\\Rightarrow\\; \\omega \\uparrow \\;\\Rightarrow\\; T_p \\downarrow",
+        text:
+          "A larger spring constant means a stiffer spring and a stronger restoring force for the same displacement. Since \\(\\omega = \\sqrt{k/m}\\), increasing \\(k\\) increases \\(\\omega\\). The mass oscillates faster, so the time period \\(T_p\\) becomes shorter."
       },
       {
         key: "amplitude",
-        text: "Increasing amplitude increases max speed and total energy; period stays the same."
+        formula: "A \\uparrow \\;\\Rightarrow\\; v_{max} \\uparrow,\\; E \\uparrow,\\; T_p \\text{ unchanged}",
+        text:
+          "Amplitude is the maximum displacement from equilibrium. In an ideal spring-mass system, changing amplitude does not change \\(\\omega\\) or \\(T_p\\), because \\(T_p = 2\\pi\\sqrt{m/k}\\). A larger amplitude only gives a larger maximum speed and more total energy."
       }
     ];
   }, [templateId]);
@@ -923,6 +931,31 @@ export default function App({
   const renderFormula = (latex) => ({
     __html: katex.renderToString(latex, { throwOnError: false })
   });
+  const renderInlineLatexText = (text) =>
+    text.split(/(\\\(.*?\\\))/g).map((part, index) => {
+      const match = part.match(/^\\\((.*)\\\)$/);
+      if (!match) {
+        return part;
+      }
+      return (
+        <span
+          key={`${match[1]}-${index}`}
+          className="inline-formula"
+          dangerouslySetInnerHTML={renderFormula(match[1])}
+        />
+      );
+    });
+  const activeEffect =
+    effects.length > 0 ? effects[Math.min(activeEffectIndex, effects.length - 1)] : null;
+  const showNextEffect = () => {
+    setActiveEffectIndex((prev) => (effects.length > 0 ? (prev + 1) % effects.length : 0));
+  };
+
+  useEffect(() => {
+    if (activeEffectIndex >= effects.length) {
+      setActiveEffectIndex(0);
+    }
+  }, [activeEffectIndex, effects.length]);
 
   useEffect(() => {
     return () => {
@@ -956,6 +989,10 @@ export default function App({
     }
 
     if (changedKey && effects.some((item) => item.key === changedKey)) {
+      const nextEffectIndex = effects.findIndex((item) => item.key === changedKey);
+      if (nextEffectIndex >= 0) {
+        setActiveEffectIndex(nextEffectIndex);
+      }
       setActiveEffectKey(changedKey);
       if (highlightTimeoutRef.current) {
         clearTimeout(highlightTimeoutRef.current);
@@ -1557,18 +1594,42 @@ export default function App({
             className="shm-right-section shm-right-highlight shm-right-highlight-clean"
             data-tour="insights"
           >
-            <div className="shm-right-title">What To Notice</div>
-            <div className="shm-effects-list">
-              {effects.map((item) => (
+            <div className="shm-effects-head">
+              <div className="shm-right-title">What To Notice</div>
+              <button
+                type="button"
+                className="shm-effects-next"
+                onClick={showNextEffect}
+                aria-label="Show next notice card"
+              >
+                →
+              </button>
+            </div>
+            <div className="shm-effects-carousel">
+              {activeEffect ? (
                 <div
-                  key={item.key}
+                  key={activeEffect.key}
                   className={`shm-effects-item shm-effects-item-clean ${
-                    item.key === activeEffectKey ? "is-highlighted" : ""
+                    activeEffect.key === activeEffectKey ? "is-highlighted" : ""
                   }`}
                 >
-                  {item.text}
+                  {activeEffect.formula ? (
+                    <div
+                      className="shm-effects-formula"
+                      dangerouslySetInnerHTML={renderFormula(activeEffect.formula)}
+                    />
+                  ) : null}
+                  <div>{renderInlineLatexText(activeEffect.text)}</div>
                 </div>
-              ))}
+              ) : null}
+              <div className="shm-effects-dots" aria-hidden="true">
+                {effects.map((item, index) => (
+                  <span
+                    key={item.key}
+                    className={`shm-effects-dot ${index === activeEffectIndex ? "active" : ""}`}
+                  />
+                ))}
+              </div>
             </div>
           </div>
         </aside>

@@ -875,7 +875,7 @@ export default function SpringMassScene({ mass, springConstant, amplitude, isPla
       const width = container.clientWidth;
       const height = container.clientHeight;
 
-      renderer.setSize(width, height, false);
+      renderer.setSize(width, height);
       camera.aspect = width / Math.max(height, 1);
       camera.updateProjectionMatrix();
       updateSideExplainLabelPositions();
